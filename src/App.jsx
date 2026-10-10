@@ -81,6 +81,9 @@ export default class App extends Component {
           <Route path="/signup/estimated-annual-revenue" element={<EstimatedRevenue />} />
           <Route path="/signup/square-banking" element={<SquareBanking />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/dashboard/items/library" element={<Dashboard />} />
+          <Route path="/dashboard/items/library/new" element={<Dashboard />} />
+          <Route path="/dashboard/*" element={<Dashboard />} />
           <Route path="*" element={<HomePage />} />
         </Routes>
       </BrowserRouter>
