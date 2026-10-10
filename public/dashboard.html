@@ -1,0 +1,1610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Square Dashboard - POS & Business Management</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    /* ==========================================================================
+       RESET & BASE DESIGN TOKENS
+       ========================================================================== */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #FAFAFA;
+      color: #111111;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+    }
+
+    /* ==========================================================================
+       OVERALL LAYOUT (Ảnh 1)
+       Sidebar 17% (fixed), Content 83% (independent scroll)
+       ========================================================================== */
+    .dashboard-layout {
+      display: flex;
+      width: 100%;
+      min-height: 100vh;
+    }
+
+    /* ==========================================================================
+       SECTION: SIDEBAR (Ảnh 3, Ảnh 7, Ảnh 8)
+       ========================================================================== */
+    .sidebar {
+      width: 250px;
+      min-width: 240px;
+      max-width: 270px;
+      height: 100vh;
+      position: sticky;
+      top: 0;
+      background: #FFFFFF;
+      border-right: 1px solid #E5E5E5;
+      display: flex;
+      flex-direction: column;
+      padding: 16px 12px 14px 12px;
+      z-index: 40;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .sidebar-header {
+      flex-shrink: 0;
+    }
+
+    .sidebar-menu-scroll {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding-right: 4px;
+      margin-top: 4px;
+      margin-bottom: 6px;
+      scrollbar-width: thin;
+      scrollbar-color: #E5E5E5 transparent;
+    }
+
+    .sidebar-menu-scroll::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .sidebar-menu-scroll::-webkit-scrollbar-thumb {
+      background-color: #E5E5E5;
+      border-radius: 4px;
+    }
+
+    /* 1. Account Card */
+    .account-card {
+      border: 1px solid #E5E5E5;
+      border-radius: 14px;
+      padding: 12px 14px;
+      background: #FFFFFF;
+      margin-bottom: 14px;
+    }
+
+    .account-user-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .account-avatar {
+      color: #111111;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .account-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: #111111;
+      letter-spacing: -0.2px;
+    }
+
+    .account-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 8px;
+      padding: 3px 10px;
+      background-color: #EFF6FF;
+      border-radius: 999px;
+      font-size: 11.5px;
+      font-weight: 500;
+      color: #1E3A8A;
+      border: none;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .account-badge:hover {
+      background-color: #DBEAFE;
+    }
+
+    /* 2. Setup Progress Bar */
+    .progress-section {
+      margin-bottom: 14px;
+      padding: 0 2px;
+    }
+
+    .progress-bar-track {
+      width: 100%;
+      height: 5px;
+      background-color: #E5E5E5;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      width: 17%;
+      height: 100%;
+      background-color: #111111;
+      border-radius: 999px;
+    }
+
+    .progress-text-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 7px;
+      font-size: 13px;
+      color: #555555;
+    }
+
+    .progress-percent {
+      font-weight: 500;
+      color: #555555;
+    }
+
+    /* 3. Search Pill */
+    .search-wrapper {
+      position: relative;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      color: #71717A;
+      display: flex;
+      align-items: center;
+      pointer-events: none;
+    }
+
+    .search-input {
+      width: 100%;
+      height: 38px;
+      padding: 0 14px 0 36px;
+      background: #FFFFFF;
+      border: 1px solid #D4D4D8;
+      border-radius: 999px;
+      font-size: 14px;
+      color: #111111;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .search-input:focus {
+      border-color: #111111;
+    }
+
+    .search-input::placeholder {
+      color: #71717A;
+    }
+
+    /* 4. Menu Items */
+    .nav-list {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      list-style: none;
+    }
+
+    .nav-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 10px;
+      background: transparent;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #111111;
+      cursor: pointer;
+      text-align: left;
+      transition: background-color 0.15s;
+    }
+
+    .nav-btn:hover {
+      background-color: #F4F4F5;
+    }
+
+    .nav-btn.is-active {
+      background-color: #F0F0F0;
+    }
+
+    .nav-btn-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #111111;
+      flex-shrink: 0;
+    }
+
+    .nav-btn-label {
+      flex-grow: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .chevron-icon {
+      display: flex;
+      align-items: center;
+      color: #71717A;
+      transition: transform 0.2s ease;
+    }
+
+    .chevron-icon.is-rotated {
+      transform: rotate(180deg);
+    }
+
+    /* Submenus (Ảnh 7 & Ảnh 8) */
+    .submenu-level-1 {
+      display: none;
+      flex-direction: column;
+      gap: 1px;
+      padding-left: 28px;
+      margin-top: 2px;
+      margin-bottom: 4px;
+    }
+
+    .submenu-level-1.is-open {
+      display: flex;
+      animation: fadeInSubmenu 0.2s ease-out;
+    }
+
+    @keyframes fadeInSubmenu {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .submenu-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 7px 10px;
+      background: transparent;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #111111;
+      cursor: pointer;
+      text-align: left;
+      transition: background-color 0.15s;
+    }
+
+    .submenu-btn:hover {
+      background-color: #F4F4F5;
+    }
+
+    .submenu-btn.is-active {
+      background-color: #F0F0F0;
+    }
+
+    .star-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      background-color: #DBEAFE;
+      color: #2563EB;
+      border-radius: 999px;
+      flex-shrink: 0;
+      margin-left: 6px;
+    }
+
+    .submenu-level-2 {
+      display: none;
+      flex-direction: column;
+      gap: 1px;
+      padding-left: 12px;
+      margin-top: 2px;
+      margin-bottom: 4px;
+    }
+
+    .submenu-level-2.is-open {
+      display: flex;
+      animation: fadeInSubmenu 0.2s ease-out;
+    }
+
+    .subitem-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6.5px 10px;
+      background: transparent;
+      border: none;
+      border-radius: 8px;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #111111;
+      cursor: pointer;
+      text-align: left;
+      transition: background-color 0.15s;
+    }
+
+    .subitem-btn:hover {
+      background-color: #F4F4F5;
+    }
+
+    .subitem-btn.is-active {
+      background-color: #F0F0F0;
+    }
+
+    .sidebar-divider {
+      height: 1px;
+      background-color: #E5E5E5;
+      margin: 10px 0;
+      border: none;
+    }
+
+    /* Bottom: 4 Icons + Take payment */
+    .sidebar-bottom {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding-top: 10px;
+      border-top: 1px solid #F0F0F0;
+      background: #FFFFFF;
+    }
+
+    .sidebar-icons-row {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 4px 6px;
+    }
+
+    .icon-btn {
+      background: transparent;
+      border: none;
+      color: #111111;
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.15s;
+    }
+
+    .icon-btn:hover {
+      background-color: #F4F4F5;
+    }
+
+    .btn-take-payment {
+      width: 100%;
+      height: 40px;
+      background-color: #F0F0F0;
+      color: #111111;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: background-color 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-take-payment:hover {
+      background-color: #E5E5E5;
+    }
+
+    /* ==========================================================================
+       SECTION: MAIN CONTENT (Ảnh 1, 2, 4, 5, 6)
+       ========================================================================== */
+    .main-content {
+      flex-grow: 1;
+      min-width: 0;
+      background-color: #FAFAFA;
+      overflow-y: auto;
+      padding: 36px 44px 60px 44px;
+    }
+
+    /* Header (Ảnh 2) */
+    .dashboard-header {
+      margin-bottom: 24px;
+    }
+
+    .dashboard-title {
+      font-size: 30px;
+      font-weight: 400;
+      color: #111111;
+      letter-spacing: -0.6px;
+      line-height: 1.25;
+    }
+
+    .dashboard-subtitle {
+      font-size: 14px;
+      color: #6B7280;
+      margin-top: 6px;
+    }
+
+    /* Onboarding Grid (Ảnh 4) */
+    .onboarding-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .card-standard {
+      background: #FFFFFF;
+      border: 1px solid #E5E5E5;
+      border-radius: 20px;
+      padding: 22px 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 175px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .card-standard:hover {
+      border-color: #D4D4D8;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+    }
+
+    .card-icon-wrap {
+      color: #111111;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #111111;
+      margin-bottom: 6px;
+      letter-spacing: -0.2px;
+    }
+
+    .card-desc {
+      font-size: 13.5px;
+      color: #6B7280;
+      line-height: 1.4;
+    }
+
+    .card-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .btn-pill-gray {
+      height: 36px;
+      padding: 0 18px;
+      background-color: #F0F0F0;
+      color: #111111;
+      font-size: 13.5px;
+      font-weight: 600;
+      border: none;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: background-color 0.15s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-pill-gray:hover {
+      background-color: #E5E5E5;
+    }
+
+    .link-dismiss {
+      background: transparent;
+      border: none;
+      color: #111111;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    .link-dismiss:hover {
+      opacity: 0.7;
+    }
+
+    /* Promo Card */
+    .card-promo {
+      border-radius: 20px;
+      padding: 22px 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 175px;
+      color: #FFFFFF;
+      background: radial-gradient(circle at 80% 50%, rgba(45, 95, 52, 0.95) 0%, rgba(20, 52, 27, 0.98) 50%, #0d2012 100%),
+                  radial-gradient(circle at 20% 30%, rgba(68, 128, 75, 0.5) 0%, transparent 60%),
+                  #0F2214;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    }
+
+    .promo-expiry {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 12.5px;
+      color: rgba(255, 255, 255, 0.85);
+      letter-spacing: 0.4px;
+    }
+
+    .promo-text {
+      font-size: 17px;
+      font-weight: 500;
+      color: #FFFFFF;
+      line-height: 1.35;
+      letter-spacing: -0.2px;
+    }
+
+    .card-empty {
+      visibility: hidden;
+    }
+
+    /* 2-Column Section (Ảnh 5 & 6) */
+    .dashboard-columns {
+      display: grid;
+      grid-template-columns: 1fr 310px;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .col-left {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      min-width: 0;
+    }
+
+    .col-right {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      min-width: 0;
+    }
+
+    /* AI Input */
+    .ai-input-card {
+      background: #FFFFFF;
+      border: 1px solid #E5E5E5;
+      border-radius: 16px;
+      padding: 12px 16px 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      transition: border-color 0.15s;
+    }
+
+    .ai-input-card:focus-within {
+      border-color: #111111;
+    }
+
+    .ai-input-field {
+      width: 100%;
+      border: none;
+      background: transparent;
+      font-size: 14.5px;
+      color: #111111;
+      outline: none;
+    }
+
+    .ai-submit-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 999px;
+      background-color: #F0F0F0;
+      color: #71717A;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background-color 0.15s, color 0.15s;
+    }
+
+    .ai-submit-btn:hover {
+      background-color: #111111;
+      color: #FFFFFF;
+    }
+
+    /* Order Volume Card */
+    .order-volume-card {
+      background: #FFFFFF;
+      border: 1px solid #E5E5E5;
+      border-radius: 20px;
+      padding: 24px;
+    }
+
+    .ov-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+
+    .ov-title {
+      font-size: 19px;
+      font-weight: 700;
+      color: #111111;
+      letter-spacing: -0.3px;
+    }
+
+    .ov-legend-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-top: 10px;
+      font-size: 13.5px;
+    }
+
+    .ov-legend-label {
+      font-weight: 700;
+      color: #111111;
+    }
+
+    .ov-legend-today {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #555555;
+      font-weight: 500;
+    }
+
+    .box-solid-blue {
+      width: 12px;
+      height: 12px;
+      background-color: #2563EB;
+      border-radius: 2px;
+    }
+
+    .ov-legend-comparison {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #555555;
+      font-weight: 500;
+    }
+
+    .box-striped-blue {
+      width: 12px;
+      height: 12px;
+      background: repeating-linear-gradient(45deg, #2563EB, #2563EB 2px, #93C5FD 2px, #93C5FD 4px);
+      border-radius: 2px;
+    }
+
+    .ov-link-orders {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #111111;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    .chart-area {
+      position: relative;
+      height: 150px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .chart-gridlines {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      pointer-events: none;
+      border-bottom: 1px solid #E5E5E5;
+    }
+
+    .gridline {
+      width: 100%;
+      height: 1px;
+      background-color: #F4F4F5;
+    }
+
+    .chart-empty-badge {
+      position: relative;
+      margin: auto;
+      z-index: 2;
+      background-color: #F0F0F0;
+      color: #555555;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 4px 12px;
+      border-radius: 999px;
+    }
+
+    .chart-x-axis {
+      display: flex;
+      justify-content: space-between;
+      padding-top: 10px;
+      font-size: 12px;
+      color: #71717A;
+      user-select: none;
+    }
+
+    /* Performance Card */
+    .performance-card {
+      background: #FFFFFF;
+      border: 1px solid #E5E5E5;
+      border-radius: 20px;
+      padding: 24px;
+    }
+
+    .perf-title {
+      font-size: 19px;
+      font-weight: 700;
+      color: #111111;
+      margin-bottom: 16px;
+      letter-spacing: -0.3px;
+    }
+
+    .perf-filters {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    .filter-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 6px 14px;
+      background: #FFFFFF;
+      border: 1px solid #D4D4D8;
+      border-radius: 999px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: border-color 0.15s, background-color 0.15s;
+    }
+
+    .filter-chip:hover {
+      background-color: #FAFAFA;
+      border-color: #A1A1AA;
+    }
+
+    .chip-prefix {
+      color: #71717A;
+      font-weight: 400;
+    }
+
+    .chip-val {
+      color: #111111;
+      font-weight: 700;
+    }
+
+    .perf-main-row {
+      display: grid;
+      grid-template-columns: 180px 1fr;
+      gap: 24px;
+      margin-bottom: 28px;
+    }
+
+    .net-sales-block {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .net-sales-label {
+      font-size: 13.5px;
+      color: #6B7280;
+      font-weight: 500;
+    }
+
+    .net-sales-val {
+      font-size: 32px;
+      font-weight: 700;
+      color: #111111;
+      letter-spacing: -0.6px;
+      margin: 2px 0 6px 0;
+    }
+
+    .na-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background-color: #F0F0F0;
+      color: #555555;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 999px;
+      width: fit-content;
+    }
+
+    .perf-legend-col {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 24px;
+      font-size: 12.5px;
+      color: #555555;
+    }
+
+    .perf-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .box-light-blue {
+      width: 12px;
+      height: 12px;
+      background-color: #93C5FD;
+      border-radius: 2px;
+    }
+
+    .perf-chart-wrap {
+      position: relative;
+      height: 140px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .perf-divider {
+      height: 1px;
+      background-color: #F4F4F5;
+      border: none;
+      margin-bottom: 24px;
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 24px 32px;
+    }
+
+    .metric-item {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+    }
+
+    .metric-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .metric-label {
+      font-size: 13.5px;
+      color: #555555;
+      font-weight: 500;
+    }
+
+    .metric-val {
+      font-size: 20px;
+      font-weight: 700;
+      color: #111111;
+      letter-spacing: -0.3px;
+    }
+
+    /* Right Column: Banking & Quick Actions */
+    .banking-card {
+      background: #FFFFFF;
+      border: 1px solid #E5E5E5;
+      border-radius: 20px;
+      padding: 20px 22px;
+    }
+
+    .banking-title {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #6B7280;
+      margin-bottom: 14px;
+    }
+
+    .banking-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .banking-balance-label, .banking-balance-val {
+      font-size: 15px;
+      font-weight: 700;
+      color: #111111;
+    }
+
+    .quick-actions-card {
+      background: #FFFFFF;
+      border: 1px solid #E5E5E5;
+      border-radius: 20px;
+      padding: 20px 22px 10px 22px;
+    }
+
+    .qa-title {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #6B7280;
+      margin-bottom: 8px;
+    }
+
+    .qa-list {
+      display: flex;
+      flex-direction: column;
+      list-style: none;
+    }
+
+    .qa-item {
+      width: 100%;
+      border-top: 1px solid #F4F4F5;
+    }
+
+    .qa-btn {
+      width: 100%;
+      padding: 14px 6px;
+      background: transparent;
+      border: none;
+      font-size: 15px;
+      font-weight: 700;
+      color: #111111;
+      text-align: left;
+      cursor: pointer;
+      transition: color 0.15s;
+    }
+
+    .qa-btn:hover {
+      color: #2563EB;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .dashboard-layout {
+        flex-direction: column;
+      }
+      .sidebar {
+        width: 100%;
+        max-width: 100%;
+        height: auto;
+        position: relative;
+        border-right: none;
+        border-bottom: 1px solid #E5E5E5;
+      }
+      .main-content {
+        padding: 24px 20px;
+      }
+      .onboarding-grid {
+        grid-template-columns: 1fr;
+      }
+      .dashboard-columns {
+        grid-template-columns: 1fr;
+      }
+      .perf-main-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="dashboard-layout">
+    <!-- ====================================================================
+         1. SIDEBAR (Ảnh 3, Ảnh 7, Ảnh 8)
+         ==================================================================== -->
+    <aside class="sidebar">
+      <!-- Fixed Header: Account, Progress, Search -->
+      <div class="sidebar-header">
+        <!-- Card tài khoản -->
+        <div class="account-card">
+          <div class="account-user-row">
+            <span class="account-avatar">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
+              </svg>
+            </span>
+            <span class="account-name">Skipli</span>
+          </div>
+          <button type="button" class="account-badge">Square Free · See plans</button>
+        </div>
+
+        <!-- Thanh tiến độ -->
+        <div class="progress-section">
+          <div class="progress-bar-track">
+            <div class="progress-bar-fill"></div>
+          </div>
+          <div class="progress-text-row">
+            <span>Complete your setup</span>
+            <span class="progress-percent">17%</span>
+          </div>
+        </div>
+
+        <!-- Ô Search pill -->
+        <div class="search-wrapper">
+          <span class="search-icon">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" />
+            </svg>
+          </span>
+          <input type="text" class="search-input" placeholder="Search" />
+        </div>
+      </div>
+
+      <!-- Scrollable Navigation Menu -->
+      <div class="sidebar-menu-scroll">
+        <!-- Menu chính -->
+        <ul class="nav-list">
+          <li>
+            <button class="nav-btn is-active" data-nav="home">
+              <span class="nav-btn-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" />
+                </svg>
+              </span>
+              <span class="nav-btn-label">Home</span>
+            </button>
+          </li>
+
+          <!-- Items & menus (Click để toggle Submenu Ảnh 7) -->
+          <li>
+            <button class="nav-btn" id="btn-items-menus">
+              <span class="nav-btn-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z" /><circle cx="7" cy="7" r=".7" fill="currentColor" />
+                </svg>
+              </span>
+              <span class="nav-btn-label">Items &amp; menus</span>
+              <span class="chevron-icon" id="chevron-items-menus">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="m6 9 6 6 6-6" />
+                </svg>
+              </span>
+            </button>
+
+            <!-- Submenu Level 1 (Ảnh 7) -->
+            <div class="submenu-level-1" id="submenu-items-menus">
+              <div>
+                <button class="submenu-btn" id="btn-items">
+                  <span>Items</span>
+                  <span class="chevron-icon" id="chevron-items">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="m6 9 6 6 6-6" />
+                    </svg>
+                  </span>
+                </button>
+
+                <!-- Submenu Level 2 (Ảnh 8) -->
+                <div class="submenu-level-2" id="submenu-items">
+                  <button class="subitem-btn">Item library</button>
+                  <button class="subitem-btn">Channel listings</button>
+                  <button class="subitem-btn">Service library</button>
+                  <button class="subitem-btn">Image library</button>
+                  <button class="subitem-btn">Modifiers</button>
+                  <button class="subitem-btn">Categories</button>
+                  <button class="subitem-btn">Discounts</button>
+                  <button class="subitem-btn">Options</button>
+                  <button class="subitem-btn">Units</button>
+                  <button class="subitem-btn">Custom attributes</button>
+                  <button class="subitem-btn">
+                    <span>Settings</span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="m6 9 6 6 6-6" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <button class="submenu-btn">Menus</button>
+              <button class="submenu-btn">
+                <span>Inventory management</span>
+                <span class="star-badge">★</span>
+              </button>
+              <button class="submenu-btn">
+                <span>Order guide</span>
+                <span class="star-badge">★</span>
+              </button>
+              <button class="submenu-btn">
+                <span>Gift Cards</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="m6 9 6 6 6-6" />
+                </svg>
+              </button>
+              <button class="submenu-btn">Subscription plans</button>
+            </div>
+          </li>
+
+          <li>
+            <button class="nav-btn">
+              <span class="nav-btn-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect width="16" height="20" x="4" y="2" rx="2" /><line x1="8" x2="16" y1="6" y2="6" /><line x1="8" x2="16" y1="10" y2="10" /><line x1="8" x2="12" y1="14" y2="14" />
+                </svg>
+              </span>
+              <span class="nav-btn-label">Orders &amp; payments</span>
+            </button>
+          </li>
+          <li>
+            <button class="nav-btn">
+              <span class="nav-btn-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect width="18" height="18" x="3" y="3" rx="2" /><circle cx="12" cy="10" r="3" /><path d="M7 17a5 5 0 0 1 10 0" />
+                </svg>
+              </span>
+              <span class="nav-btn-label">Customers</span>
+            </button>
+          </li>
+          <li>
+            <button class="nav-btn">
+              <span class="nav-btn-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="18" x2="18" y1="20" y2="10" /><line x1="12" x2="12" y1="20" y2="4" /><line x1="6" x2="6" y1="20" y2="14" />
+                </svg>
+              </span>
+              <span class="nav-btn-label">Reports</span>
+            </button>
+          </li>
+          <li>
+            <button class="nav-btn">
+              <span class="nav-btn-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+              </span>
+              <span class="nav-btn-label">Staff</span>
+            </button>
+          </li>
+          <li>
+            <button class="nav-btn">
+              <span class="nav-btn-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="3" x2="21" y1="22" y2="22" /><line x1="6" x2="6" y1="18" y2="11" /><line x1="10" x2="10" y1="18" y2="11" /><line x1="14" x2="14" y1="18" y2="11" /><line x1="18" x2="18" y1="18" y2="11" /><polygon points="12 2 20 7 4 7" />
+                </svg>
+              </span>
+              <span class="nav-btn-label">Banking</span>
+            </button>
+          </li>
+          <li>
+            <button class="nav-btn">
+              <span class="nav-btn-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="m3 11 18-5v12L3 14v-3z" /><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6" />
+                </svg>
+              </span>
+              <span class="nav-btn-label">What's new</span>
+            </button>
+          </li>
+          <li>
+            <button class="nav-btn">
+              <span class="nav-btn-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                </svg>
+              </span>
+              <span class="nav-btn-label">Settings</span>
+            </button>
+          </li>
+          <li>
+            <button class="nav-btn">
+              <span class="nav-btn-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="1.5" /><circle cx="19" cy="12" r="1.5" /><circle cx="5" cy="12" r="1.5" />
+                </svg>
+              </span>
+              <span class="nav-btn-label">Add more</span>
+            </button>
+          </li>
+        </ul>
+
+        <hr class="sidebar-divider" />
+
+        <ul class="nav-list">
+          <li>
+            <button class="nav-btn">
+              <span class="nav-btn-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect width="7" height="7" x="3" y="3" rx="1" /><rect width="7" height="7" x="14" y="3" rx="1" /><rect width="7" height="7" x="14" y="14" rx="1" /><rect width="7" height="7" x="3" y="14" rx="1" />
+                </svg>
+              </span>
+              <span class="nav-btn-label">Channels</span>
+            </button>
+          </li>
+          <li>
+            <button class="nav-btn">
+              <span class="nav-btn-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" /><line x1="3" x2="21" y1="6" y2="6" /><path d="M16 10a4 4 0 0 1-8 0" />
+                </svg>
+              </span>
+              <span class="nav-btn-label">Online ordering</span>
+            </button>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Đáy Sidebar: 4 icon + nút Take payment -->
+      <div class="sidebar-bottom">
+        <div class="sidebar-icons-row">
+          <button class="icon-btn" title="Notifications">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+            </svg>
+          </button>
+          <button class="icon-btn" title="Messages">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" />
+            </svg>
+          </button>
+          <button class="icon-btn" title="Help">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /><line x1="12" x2="12.01" y1="17" y2="17" />
+            </svg>
+          </button>
+          <button class="icon-btn" title="AI Sparkle">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z" />
+            </svg>
+          </button>
+        </div>
+        <button class="btn-take-payment" onclick="alert('Take payment clicked!')">Take payment</button>
+      </div>
+    </aside>
+
+    <!-- ====================================================================
+         2. MAIN CONTENT (Ảnh 1, 2, 4, 5, 6)
+         ==================================================================== -->
+    <main class="main-content">
+      <!-- 2.1 Header (Ảnh 2) -->
+      <header class="dashboard-header">
+        <h1 class="dashboard-title">Set up your business to start selling</h1>
+        <p class="dashboard-subtitle">1 of 6 steps completed</p>
+      </header>
+
+      <!-- 2.2 Onboarding Cards Grid (Ảnh 4) -->
+      <section class="onboarding-grid">
+        <!-- Hàng 1, Cột 1: Promo card (Blurred Green) -->
+        <div class="card-promo">
+          <span class="promo-expiry">Expires in 2 days 23 hours</span>
+          <p class="promo-text">Get free processing on up to $1,000 when you take your first card payment</p>
+        </div>
+
+        <!-- Hàng 1, Cột 2: Demo your new POS -->
+        <div class="card-standard" id="card-pos">
+          <div>
+            <div class="card-icon-wrap">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="20" height="14" x="2" y="3" rx="2" /><line x1="8" x2="16" y1="21" y2="21" /><line x1="12" x2="12" y1="17" y2="21" />
+              </svg>
+            </div>
+            <h3 class="card-title">Demo your new POS</h3>
+            <p class="card-desc">Run a test sale to get familiar.</p>
+          </div>
+          <div class="card-actions">
+            <button class="btn-pill-gray">Try it out</button>
+            <button class="link-dismiss" onclick="document.getElementById('card-pos').style.display='none'">Dismiss</button>
+          </div>
+        </div>
+
+        <!-- Hàng 1, Cột 3: Get approved to take payments -->
+        <div class="card-standard">
+          <div>
+            <div class="card-icon-wrap">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><path d="m9 12 2 2 4-4" />
+              </svg>
+            </div>
+            <h3 class="card-title">Get approved to take payments</h3>
+            <p class="card-desc">Verify your identity to accept payments.</p>
+          </div>
+          <div class="card-actions">
+            <button class="btn-pill-gray">Verify your identity</button>
+          </div>
+        </div>
+
+        <!-- Hàng 2, Cột 1: Add hardware -->
+        <div class="card-standard">
+          <div>
+            <div class="card-icon-wrap">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="18" height="18" x="3" y="3" rx="2" /><circle cx="8" cy="8" r="1.5" /><circle cx="16" cy="8" r="1.5" /><circle cx="8" cy="16" r="1.5" /><circle cx="16" cy="16" r="1.5" />
+              </svg>
+            </div>
+            <h3 class="card-title">Add hardware</h3>
+            <p class="card-desc">Order hardware or set up devices you have.</p>
+          </div>
+          <div class="card-actions">
+            <button class="btn-pill-gray">Shop hardware</button>
+            <button class="link-dismiss">Set up hardware</button>
+          </div>
+        </div>
+
+        <!-- Hàng 2, Cột 2: Take your first payment -->
+        <div class="card-standard">
+          <div>
+            <div class="card-icon-wrap">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="20" height="14" x="2" y="5" rx="2" /><line x1="2" x2="22" y1="10" y2="10" />
+              </svg>
+            </div>
+            <h3 class="card-title">Take your first payment</h3>
+            <p class="card-desc">Choose how you'd like to take your first payment.</p>
+          </div>
+          <div class="card-actions">
+            <button class="btn-pill-gray">Get started</button>
+          </div>
+        </div>
+
+        <!-- Hàng 2, Cột 3: Để trống theo thiết kế -->
+        <div class="card-empty" aria-hidden="true"></div>
+      </section>
+
+      <!-- 2.3 Khối chính 2 cột (Ảnh 5 + Ảnh 6) -->
+      <section class="dashboard-columns">
+        <!-- Cột trái (70%) -->
+        <div class="col-left">
+          <!-- a) AI Chat Input -->
+          <form class="ai-input-card" onsubmit="event.preventDefault(); alert('Query submitted');">
+            <input type="text" class="ai-input-field" placeholder="How do I deactivate an employee?" />
+            <button type="submit" class="ai-submit-btn" aria-label="Send query">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" x2="12" y1="19" y2="5" /><polyline points="5 12 12 5 19 12" />
+              </svg>
+            </button>
+          </form>
+
+          <!-- b) Card "Order volume" (Ảnh 5) -->
+          <div class="order-volume-card">
+            <div class="ov-header">
+              <div>
+                <h2 class="ov-title">Order volume</h2>
+                <div class="ov-legend-row">
+                  <span class="ov-legend-label">New orders</span>
+                  <span class="ov-legend-today">
+                    <span class="box-solid-blue"></span>
+                    Today
+                  </span>
+                  <span class="ov-legend-comparison">
+                    <span class="box-striped-blue"></span>
+                    Friday, October 2, 2026
+                  </span>
+                </div>
+              </div>
+              <a href="#view-orders" class="ov-link-orders">View orders</a>
+            </div>
+
+            <div class="chart-area">
+              <div class="chart-gridlines">
+                <div class="gridline"></div>
+                <div class="gridline"></div>
+                <div class="gridline"></div>
+              </div>
+              <div class="chart-empty-badge">No current order activity</div>
+              <div class="chart-x-axis">
+                <span>3:00 AM</span>
+                <span>4:00 AM</span>
+                <span>5:00 AM</span>
+                <span>6:00 AM</span>
+                <span>7:00 AM</span>
+                <span>8:00 AM</span>
+                <span>9:00 AM</span>
+                <span>10:00 AM</span>
+                <span>11:00 AM</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- c) Card "Performance" (Ảnh 6) -->
+          <div class="performance-card">
+            <h2 class="perf-title">Performance</h2>
+
+            <!-- 3 Filter chips -->
+            <div class="perf-filters">
+              <button class="filter-chip">
+                <span class="chip-prefix">Date</span>
+                <span class="chip-val">Oct 9</span>
+              </button>
+              <button class="filter-chip">
+                <span class="chip-prefix">vs</span>
+                <span class="chip-val">Prior day</span>
+              </button>
+              <button class="filter-chip">
+                <span class="chip-prefix">Checks</span>
+                <span class="chip-val">Closed</span>
+              </button>
+            </div>
+
+            <!-- Net sales + Biểu đồ -->
+            <div class="perf-main-row">
+              <div class="net-sales-block">
+                <div>
+                  <span class="net-sales-label">Net sales</span>
+                  <h3 class="net-sales-val">$0.00</h3>
+                  <span class="na-badge">▲ N/A</span>
+                </div>
+
+                <div class="perf-legend-col">
+                  <div class="perf-legend-item">
+                    <span class="box-solid-blue"></span>
+                    <span>Today</span>
+                  </div>
+                  <div class="perf-legend-item">
+                    <span class="box-light-blue"></span>
+                    <span>Thu, Oct 8, 2026</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="perf-chart-wrap">
+                <div class="chart-gridlines">
+                  <div class="gridline"></div>
+                  <div class="gridline"></div>
+                  <div class="gridline"></div>
+                </div>
+                <div class="chart-empty-badge">No data available for selected timeframe</div>
+                <div class="chart-x-axis">
+                  <span>8am</span>
+                  <span>9</span>
+                  <span>10</span>
+                  <span>11</span>
+                  <span>12pm</span>
+                  <span>1</span>
+                  <span>2pm</span>
+                </div>
+              </div>
+            </div>
+
+            <hr class="perf-divider" />
+
+            <!-- Lưới chỉ số 2 cột -->
+            <div class="metrics-grid">
+              <div class="metric-item">
+                <div class="metric-info">
+                  <span class="metric-label">Gross sales</span>
+                  <span class="metric-val">$0.00</span>
+                </div>
+                <span class="na-badge">▲ N/A</span>
+              </div>
+
+              <div class="metric-item">
+                <div class="metric-info">
+                  <span class="metric-label">Transactions</span>
+                  <span class="metric-val">0</span>
+                </div>
+                <span class="na-badge">▲ N/A</span>
+              </div>
+
+              <div class="metric-item">
+                <div class="metric-info">
+                  <span class="metric-label">Labor % of net sales</span>
+                  <span class="metric-val">0.00%</span>
+                </div>
+                <span class="na-badge">▲ N/A</span>
+              </div>
+
+              <div class="metric-item">
+                <div class="metric-info">
+                  <span class="metric-label">Average sale</span>
+                  <span class="metric-val">$0.00</span>
+                </div>
+                <span class="na-badge">▲ N/A</span>
+              </div>
+
+              <div class="metric-item">
+                <div class="metric-info">
+                  <span class="metric-label">Comps &amp; discounts</span>
+                  <span class="metric-val">$0.00</span>
+                </div>
+                <span class="na-badge">▲ N/A</span>
+              </div>
+
+              <div class="metric-item">
+                <div class="metric-info">
+                  <span class="metric-label">Tips</span>
+                  <span class="metric-val">$0.00</span>
+                </div>
+                <span class="na-badge">▲ N/A</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cột phải (30%) -->
+        <div class="col-right">
+          <!-- Card "Banking" -->
+          <div class="banking-card">
+            <h3 class="banking-title">Banking</h3>
+            <div class="banking-row">
+              <span class="banking-balance-label">Balance</span>
+              <span class="banking-balance-val">0,00 US$</span>
+            </div>
+          </div>
+
+          <!-- Card "Quick actions" -->
+          <div class="quick-actions-card">
+            <h3 class="qa-title">Quick actions</h3>
+            <ul class="qa-list">
+              <li class="qa-item">
+                <button class="qa-btn" onclick="alert('Take payment')">Take payment</button>
+              </li>
+              <li class="qa-item">
+                <button class="qa-btn" onclick="alert('Edit menu')">Edit menu</button>
+              </li>
+              <li class="qa-item">
+                <button class="qa-btn" onclick="alert('Add item')">Add item</button>
+              </li>
+              <li class="qa-item">
+                <button class="qa-btn" onclick="alert('Pay a bill')">Pay a bill</button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ====================================================================
+       INTERACTIONS SCRIPT (Submenus toggling - Ảnh 7 & Ảnh 8)
+       ==================================================================== -->
+  <script>
+    // Submenu Items & Menus toggle
+    const btnItemsMenus = document.getElementById('btn-items-menus');
+    const submenuItemsMenus = document.getElementById('submenu-items-menus');
+    const chevronItemsMenus = document.getElementById('chevron-items-menus');
+
+    // Submenu Items (level 2) toggle
+    const btnItems = document.getElementById('btn-items');
+    const submenuItems = document.getElementById('submenu-items');
+    const chevronItems = document.getElementById('chevron-items');
+
+    btnItemsMenus.addEventListener('click', () => {
+      const isOpen = submenuItemsMenus.classList.toggle('is-open');
+      chevronItemsMenus.classList.toggle('is-rotated', isOpen);
+      btnItemsMenus.classList.toggle('is-active', isOpen);
+    });
+
+    btnItems.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isOpen = submenuItems.classList.toggle('is-open');
+      chevronItems.classList.toggle('is-rotated', isOpen);
+      btnItems.classList.toggle('is-active', isOpen);
+    });
+
+    // Subitems click highlight
+    document.querySelectorAll('.subitem-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.subitem-btn').forEach(b => b.classList.remove('is-active'));
+        btn.classList.add('is-active');
+      });
+    });
+  </script>
+</body>
+</html>

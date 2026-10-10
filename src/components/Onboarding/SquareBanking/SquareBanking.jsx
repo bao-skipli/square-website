@@ -70,7 +70,7 @@ export default class SquareBanking extends Component {
       checkingAuth: true,
       loading: false,
       redirectToSignIn: false,
-      redirectToHome: false,
+      redirectToDashboard: false,
     };
 
     this.unsubscribeAuth = null;
@@ -128,7 +128,7 @@ export default class SquareBanking extends Component {
         onboardingCompleted: true,
         onboardingCompletedAt: new Date().toISOString(),
       });
-      this.setState({ loading: false, redirectToHome: true });
+      this.setState({ loading: false, redirectToDashboard: true });
     } catch (err) {
       console.error("Save banking settings error:", err);
       this.setState({ loading: false });
@@ -142,15 +142,15 @@ export default class SquareBanking extends Component {
       checkingAuth,
       loading,
       redirectToSignIn,
-      redirectToHome,
+      redirectToDashboard,
     } = this.state;
 
     if (redirectToSignIn) {
       return <Navigate to="/signin" replace />;
     }
 
-    if (redirectToHome) {
-      return <Navigate to="/" replace />;
+    if (redirectToDashboard) {
+      return <Navigate to="/dashboard" replace />;
     }
 
     if (checkingAuth) {
