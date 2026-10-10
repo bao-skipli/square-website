@@ -19,6 +19,7 @@ import BusinessMatch from "./components/Onboarding/BusinessMatch/BusinessMatch";
 import BusinessMcc from "./components/Onboarding/BusinessMcc/BusinessMcc";
 import EstimatedRevenue from "./components/Onboarding/EstimatedRevenue/EstimatedRevenue";
 import SquareBanking from "./components/Onboarding/SquareBanking/SquareBanking";
+import Dashboard from "./components/Dashboard/Dashboard";
 
 class HomePage extends Component {
   constructor(props) {
@@ -79,6 +80,7 @@ export default class App extends Component {
           <Route path="/signup/business-mcc-selection" element={<BusinessMcc />} />
           <Route path="/signup/estimated-annual-revenue" element={<EstimatedRevenue />} />
           <Route path="/signup/square-banking" element={<SquareBanking />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="*" element={<HomePage />} />
         </Routes>
       </BrowserRouter>
