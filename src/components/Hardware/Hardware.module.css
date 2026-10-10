@@ -1,0 +1,140 @@
+.hardware-section {
+  position: relative;
+  min-height: 95vh;
+  padding: 100px 6vw 0px 6vw;
+  z-index: 30;
+}
+
+.hardware-section-inner {
+  max-width: var(--container-max-width, 1400px);
+  margin: 0 auto;
+}
+
+.hardware-section-eyebrow {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.75rem;
+  line-height: 1;
+  padding-bottom: 20px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.hardware-section-title {
+  margin: 0;
+  max-width: 900px;
+  font-family: var(--font-serif, Georgia, 'Times New Roman', serif);
+  font-size: 2.5rem;
+  font-weight: 100;
+  color: #111;
+}
+
+.hardware-section-actions {
+  opacity: 0;
+  transform: translateY(60px);
+
+  animation-name: hardwareActionsReveal;
+  animation-duration: 1s;
+  animation-timing-function: linear;
+  animation-fill-mode: both;
+  animation-timeline: view();
+  animation-range: entry 5% entry 400%;
+
+  will-change:
+    opacity,
+    transform;
+}
+
+@keyframes hardwareActionsReveal {
+  from {
+    opacity: 0;
+    transform: translateY(60px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hardware-section-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.hardware-section-link {
+  position: relative;
+  padding: 0 0 4px;
+  border: 0;
+  background: transparent;
+  color: #111;
+
+  font-family: var(--font-mono, monospace);
+  font-size: 14px;
+  line-height: 1;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.hardware-section-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 2px;
+  background: #111;
+
+  transform-origin: right;
+  transform: scaleX(1);
+
+  transition: transform 0.35s ease;
+}
+
+.hardware-section-link:hover::after {
+  transform-origin: right;
+  transform: scaleX(0);
+}
+
+.hardware-section-arrows {
+  display: flex;
+  align-items: center;
+}
+
+.hardware-section-arrow {
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: transparent;
+  color: #111;
+  font-family: Arial, sans-serif;
+  font-size: 42px;
+  line-height: 1;
+  font-weight: 300;
+  cursor: pointer;
+}
+
+.hardware-section-description {
+  max-width: 520px;
+  margin-bottom: 16px;
+  font-family:
+    Arial,
+    Helvetica,
+    sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #333;
+}
+
+.hardware-section-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}

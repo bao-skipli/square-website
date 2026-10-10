@@ -1,0 +1,234 @@
+/* ==========================================================
+   HEADER 1: TRANSPARENT HERO HEADER (SCROLLS WITH PAGE)
+   ========================================================== */
+
+.hero-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: var(--header-height, 74px);
+  background: transparent;
+  z-index: 45;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--header-padding-x, 48px);
+  box-sizing: border-box;
+  color: #ffffff;
+  pointer-events: auto;
+}
+
+.hero-header-left {
+  display: flex;
+  align-items: center;
+  gap: 36px;
+}
+
+.logo-link {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: inherit;
+  transition: opacity 0.2s ease;
+}
+
+.logo-link:hover {
+  opacity: 0.85;
+}
+
+.hero-nav {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.nav-link {
+  color: #ffffff;
+  text-decoration: none;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  transition: opacity 0.2s ease;
+  white-space: nowrap;
+}
+
+.nav-link:hover {
+  opacity: 0.8;
+}
+
+.hero-header-right {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.header-text-btn {
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  padding: 0;
+  transition: opacity 0.2s ease;
+  white-space: nowrap;
+}
+
+.header-text-btn:hover {
+  opacity: 0.8;
+}
+
+.header-icon-btn {
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: 50%;
+  transition: opacity 0.2s ease, background-color 0.2s ease;
+}
+
+.header-icon-btn:hover {
+  opacity: 0.8;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* ==========================================================
+   HEADER 2: STICKY HEADER (APPEARS AFTER 60% HERO)
+   ========================================================== */
+
+.sticky-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: var(--header-height, 74px);
+  background-color: #ffffff;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--header-padding-x, 48px);
+  box-sizing: border-box;
+
+  /* Smooth Entrance / Exit */
+  transform: translateY(-100%);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
+  will-change: transform, opacity;
+}
+
+.sticky-header.is-visible {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.sticky-header-left {
+  display: flex;
+  align-items: center;
+}
+
+.sticky-logo-link {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: #000000;
+  transition: opacity 0.2s ease;
+}
+
+.sticky-logo-link:hover {
+  opacity: 0.85;
+}
+
+.sticky-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-contact-sales {
+  background-color: #006aff;
+  color: #ffffff;
+  border: none;
+  padding: 11px 22px;
+  border-radius: 9999px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.btn-contact-sales:hover {
+  background-color: #0056d6;
+}
+
+.btn-contact-sales:active {
+  transform: scale(0.98);
+}
+
+.btn-get-started {
+  background-color: transparent;
+  color: #006aff;
+  border: 1.5px solid #006aff;
+  padding: 10px 22px;
+  border-radius: 9999px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.btn-get-started:hover {
+  background-color: rgba(0, 106, 255, 0.05);
+}
+
+.btn-get-started:active {
+  transform: scale(0.98);
+}
+
+/* ==========================================================
+   RESPONSIVE
+   ========================================================== */
+
+@media (max-width: 992px) {
+  .hero-nav {
+    display: none;
+  }
+
+  .hero-header,
+  .sticky-header {
+    padding: 0 24px;
+    height: 64px;
+  }
+}
+
+@media (max-width: 600px) {
+  .hero-header-right {
+    gap: 14px;
+  }
+
+  .header-text-btn {
+    font-size: 14px;
+  }
+
+  .btn-contact-sales,
+  .btn-get-started {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+}

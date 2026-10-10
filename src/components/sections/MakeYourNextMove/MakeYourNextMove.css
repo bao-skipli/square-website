@@ -1,0 +1,442 @@
+/* ==========================================================
+   MAKE YOUR NEXT MOVE SECTION - CSS THUẦN (KHÔNG TAILWIND)
+   Thiết kế ở viewport 1440px (khớp từng px)
+   ========================================================== */
+
+:root,
+.next-move-section {
+  /* ==========================================================
+     CONFIGURABLE MEASUREMENTS (BIẾN CSS Ở ĐẦU FILE)
+     ========================================================== */
+
+  /* Colors */
+  --nm-bg-section: #000000;
+  --nm-color-white: #ffffff;
+  --nm-color-blue: #2c68f6;
+  --nm-color-blue-hover: #1b5be4;
+  --nm-color-btn-white-hover: #f0f0f0;
+  --nm-overlay-dark: rgba(0, 0, 0, 0.42);
+
+  /* Central Card */
+  --nm-card-width: 480px;
+  --nm-card-height: 480px;
+  --nm-card-radius: 44px;
+
+  /* Typography */
+  --nm-font-serif: var(--font-serif, Georgia, "Times New Roman", serif);
+  --nm-font-sans: var(--font-sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif);
+  --nm-heading-size-desktop: 56px;
+  --nm-heading-size-mobile: 36px;
+  --nm-heading-line-height: 1.1;
+  --nm-heading-letter-spacing: -0.02em;
+
+  /* Internal Card Spacing */
+  --nm-pad-top-to-text: 127px;
+  --nm-gap-text-to-btns: 66px;
+  --nm-gap-between-btns: 20px;
+  --nm-pad-btns-to-bottom: 116px;
+
+  /* Buttons */
+  --nm-btn-height: 44px;
+  --nm-btn-radius: 9999px;
+  --nm-btn-start-width: 126px;
+  --nm-btn-contact-width: 143px;
+  --nm-btn-font-size: 14px;
+  --nm-btn-font-weight: 500;
+
+  /* Rotating Inline Image */
+  --nm-thumb-size: 0.9em;
+  --nm-thumb-radius: 8px;
+  --nm-thumb-margin-left: 0.25em;
+
+  /* Image Trail Hover Effect */
+  --nm-trail-size-desktop: 180px;
+  --nm-trail-size-tablet: 140px;
+  --nm-trail-radius-desktop: 12px;
+  --nm-trail-radius-tablet: 10px;
+  --nm-trail-dist-desktop: 100px;
+  --nm-trail-dist-tablet: 80px;
+
+  /* Section Layout */
+  --nm-section-pad-x-desktop: 64px;
+  --nm-section-pad-x-tablet: 40px;
+  --nm-section-pad-x-mobile: 20px;
+  --nm-section-min-height: 100svh;
+}
+
+/* ==========================================================
+   SECTION CONTAINER
+   ========================================================== */
+.next-move-section {
+  position: relative;
+  width: 100%;
+  min-height: var(--nm-section-min-height);
+  background-color: var(--nm-bg-section);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 60px var(--nm-section-pad-x-desktop);
+  box-sizing: border-box;
+  overflow: hidden;
+  overflow-x: clip;
+  user-select: none;
+}
+
+/* ==========================================================
+   IMAGE TRAIL LAYER (NẰM DƯỚI CARD & TEXT)
+   ========================================================== */
+.next-move-trail-container {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.nm-trail-item {
+  position: absolute;
+  width: var(--nm-trail-size-desktop);
+  height: var(--nm-trail-size-desktop);
+  border-radius: var(--nm-trail-radius-desktop);
+  overflow: hidden;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  animation: trailLifecycle 1.15s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  will-change: transform, opacity;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
+}
+
+.nm-trail-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+@keyframes trailLifecycle {
+  0% {
+    transform: translate(-50%, -50%) scale(0.6);
+    opacity: 0;
+  }
+  21.7% {
+    /* 250ms / 1150ms: Xuất hiện scale 0.6 -> 1, opacity 0 -> 1 */
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+  47.8% {
+    /* (250ms + 300ms) = 550ms: Giữ nguyên trong 300ms */
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+  100% {
+    /* (550ms + 600ms) = 1150ms: Biến mất scale 1 -> 0.3, opacity 1 -> 0 */
+    transform: translate(-50%, -50%) scale(0.3);
+    opacity: 0;
+  }
+}
+
+/* ==========================================================
+   CENTRAL CARD (480px x 480px, bo góc 44px)
+   ========================================================== */
+.next-move-card {
+  position: relative;
+  width: var(--nm-card-width);
+  height: var(--nm-card-height);
+  border-radius: var(--nm-card-radius);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  z-index: 10;
+  box-sizing: border-box;
+  padding-top: var(--nm-pad-top-to-text);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+  flex-shrink: 0;
+  transition: box-shadow 0.6s ease;
+}
+
+.next-move-card.is-bg-hidden {
+  box-shadow: none;
+}
+
+/* Nền ảnh xoay vòng của Card */
+.next-move-card-bg-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  overflow: hidden;
+  transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity;
+}
+
+.next-move-card-bg-layer.is-hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.next-move-card-bg-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity 0.6s ease-in-out, transform 0.8s ease-out;
+  opacity: 0;
+}
+
+.next-move-card-bg-img.is-active {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Lớp phủ màu tối đảm bảo chữ trắng luôn tương phản cao */
+.next-move-card-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--nm-overlay-dark);
+  backdrop-filter: blur(0.5px);
+  z-index: 2;
+  pointer-events: none;
+  transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity;
+}
+
+.next-move-card-overlay.is-hidden {
+  opacity: 0;
+}
+
+/* ==========================================================
+   CARD CONTENT (TEXT & BUTTONS)
+   ========================================================== */
+.next-move-content {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+}
+
+/* Heading: Make your next move */
+.next-move-heading {
+  margin: 0;
+  padding: 0;
+  font-family: var(--nm-font-serif);
+  font-size: clamp(var(--nm-heading-size-mobile), 4.2vw, var(--nm-heading-size-desktop));
+  line-height: var(--nm-heading-line-height);
+  letter-spacing: var(--nm-heading-letter-spacing);
+  color: var(--nm-color-white);
+  font-weight: 400;
+  text-align: center;
+  text-wrap: balance;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.next-move-line {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+/* Ảnh nhỏ sau text (Xoay vòng mỗi 3 giây) */
+.next-move-inline-thumb {
+  display: inline-block;
+  position: relative;
+  width: var(--nm-thumb-size);
+  height: var(--nm-thumb-size);
+  border-radius: var(--nm-thumb-radius);
+  margin-left: var(--nm-thumb-margin-left);
+  vertical-align: -0.08em;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  flex-shrink: 0;
+}
+
+.next-move-inline-thumb-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity 0.5s ease;
+  opacity: 0;
+}
+
+.next-move-inline-thumb-img.is-active {
+  opacity: 1;
+}
+
+/* ==========================================================
+   CTA BUTTONS
+   ========================================================== */
+.next-move-buttons {
+  margin-top: var(--nm-gap-text-to-btns);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: var(--nm-gap-between-btns);
+}
+
+.next-move-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--nm-btn-height);
+  border-radius: var(--nm-btn-radius);
+  font-family: var(--nm-font-sans);
+  font-size: var(--nm-btn-font-size);
+  font-weight: var(--nm-btn-font-weight);
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.15s ease, opacity 0.2s ease;
+  box-sizing: border-box;
+  padding: 0 16px;
+  white-space: nowrap;
+}
+
+.next-move-btn:active {
+  transform: scale(0.97);
+}
+
+/* Button 1: Get started (Nền trắng, chữ xanh) */
+.next-move-btn-start {
+  width: var(--nm-btn-start-width);
+  background-color: var(--nm-color-white);
+  color: var(--nm-color-blue);
+  border: none;
+}
+
+.next-move-btn-start:hover {
+  background-color: var(--nm-color-btn-white-hover);
+}
+
+/* Button 2: Contact sales (Nền xanh, chữ trắng) */
+.next-move-btn-contact {
+  width: var(--nm-btn-contact-width);
+  background-color: var(--nm-color-blue);
+  color: var(--nm-color-white);
+  border: none;
+}
+
+.next-move-btn-contact:hover {
+  background-color: var(--nm-color-blue-hover);
+}
+
+/* ==========================================================
+   RESPONSIVE (DESKTOP TRƯỚC, MAX-WIDTH MEDIA QUERIES)
+   ========================================================== */
+
+/* Tablet (768px - 1024px) */
+@media (max-width: 1024px) {
+  .next-move-section {
+    padding: 40px var(--nm-section-pad-x-tablet);
+  }
+
+  .nm-trail-item {
+    width: var(--nm-trail-size-tablet);
+    height: var(--nm-trail-size-tablet);
+    border-radius: var(--nm-trail-radius-tablet);
+  }
+}
+
+/* Mobile (< 768px) */
+@media (max-width: 768px) {
+  .next-move-section {
+    padding: 30px var(--nm-section-pad-x-mobile);
+    min-height: 100svh;
+  }
+
+  .next-move-card {
+    width: min(100%, 420px);
+    height: auto;
+    min-height: 420px;
+    aspect-ratio: 1 / 1;
+    border-radius: 32px;
+    padding-top: clamp(80px, 20vw, 127px);
+    padding-bottom: 30px;
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .next-move-heading {
+    font-size: clamp(32px, 8vw, 44px);
+  }
+
+  .next-move-buttons {
+    margin-top: clamp(36px, 10vw, 54px);
+    gap: 14px;
+  }
+
+  .next-move-btn-start {
+    width: 120px;
+  }
+
+  .next-move-btn-contact {
+    width: 135px;
+  }
+}
+
+/* Small Mobile (< 400px) */
+@media (max-width: 400px) {
+  .next-move-card {
+    aspect-ratio: auto;
+    min-height: 380px;
+    padding-top: 60px;
+    border-radius: 28px;
+  }
+
+  .next-move-line {
+    white-space: normal;
+  }
+
+  .next-move-buttons {
+    flex-direction: column;
+    width: 100%;
+    gap: 12px;
+  }
+
+  .next-move-btn-start,
+  .next-move-btn-contact {
+    width: 100%;
+    max-width: 200px;
+  }
+}
+
+/* ==========================================================
+   TOUCH DEVICES (media (hover: none))
+   ========================================================== */
+@media (hover: none) {
+  .next-move-trail-container {
+    display: none;
+  }
+}
+
+/* ==========================================================
+   PREFERS-REDUCED-MOTION
+   ========================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .next-move-trail-container {
+    display: none;
+  }
+
+  .next-move-card-bg-img,
+  .next-move-inline-thumb-img {
+    transition: none;
+  }
+
+  .nm-trail-item {
+    animation: none;
+  }
+}

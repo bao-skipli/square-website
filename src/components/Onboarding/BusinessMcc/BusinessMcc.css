@@ -1,0 +1,178 @@
+.business-mcc-page {
+  min-height: 100vh;
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: #111111;
+  box-sizing: border-box;
+  padding: 24px 32px 80px;
+}
+
+.mcc-header {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto 20px auto;
+}
+
+.mcc-top-next-btn {
+  background-color: #111111;
+  color: #ffffff;
+  border: none;
+  border-radius: 9999px;
+  padding: 10px 26px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease, opacity 0.15s ease;
+}
+
+.mcc-top-next-btn:hover:not(:disabled) {
+  background-color: #2a2a2a;
+}
+
+.mcc-top-next-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.business-mcc-container {
+  width: 100%;
+  max-width: 600px;
+  margin: 20px auto 0 auto;
+}
+
+.mcc-title {
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: #111111;
+  margin: 0 0 16px 0;
+  letter-spacing: -0.02em;
+}
+
+.mcc-description {
+  font-size: 15px;
+  line-height: 1.5;
+  color: #333333;
+  margin: 0 0 28px 0;
+}
+
+/* Search Box */
+.mcc-search-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid #d9d9d9;
+  border-radius: 8px;
+  padding: 0 16px;
+  height: 52px;
+  background-color: #ffffff;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  margin-bottom: 16px;
+  box-sizing: border-box;
+}
+
+.mcc-search-box:focus-within {
+  border-color: #111111;
+  border-width: 2px;
+  padding: 0 15px;
+}
+
+.mcc-search-icon {
+  color: #555555;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.mcc-search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 15px;
+  color: #111111;
+  font-family: inherit;
+}
+
+.mcc-search-input::placeholder {
+  color: #666666;
+}
+
+/* Category List Card */
+.mcc-list-card {
+  border: 1px solid #eaeaea;
+  border-radius: 12px;
+  background: #ffffff;
+  max-height: 380px;
+  overflow-y: auto;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.mcc-list-item {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid #f0f0f0;
+  padding: 14px 20px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background-color 0.12s ease;
+}
+
+.mcc-list-item:last-child {
+  border-bottom: none;
+}
+
+.mcc-list-item:hover {
+  background-color: #f8f8f8;
+}
+
+.mcc-list-item.is-selected {
+  background-color: #f4f4f4;
+}
+
+.mcc-item-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mcc-item-primary {
+  font-size: 15px;
+  font-weight: 600;
+  color: #111111;
+}
+
+.mcc-item-secondary {
+  font-size: 13px;
+  color: #666666;
+}
+
+.mcc-check-icon {
+  color: #111111;
+  flex-shrink: 0;
+}
+
+.mcc-empty {
+  padding: 32px 20px;
+  text-align: center;
+  color: #777777;
+  font-size: 14px;
+}
+
+@media (max-width: 640px) {
+  .business-mcc-page {
+    padding: 16px 16px 60px;
+  }
+  .mcc-title {
+    font-size: 26px;
+  }
+}

@@ -1,0 +1,239 @@
+.verify-page {
+  min-height: 100vh;
+  width: 100%;
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+.verify-header {
+  padding: 32px 48px 0 48px;
+}
+
+.verify-logo-link {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  color: #000000;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.verify-logo-link:hover {
+  opacity: 0.8;
+}
+
+.verify-container {
+  max-width: 600px;
+  width: 100%;
+  margin: 96px auto 48px auto;
+  padding: 0 24px;
+  box-sizing: border-box;
+  text-align: left;
+}
+
+.verify-title {
+  font-size: 32px;
+  font-weight: 800;
+  color: #111111;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+  margin: 0 0 16px 0;
+}
+
+.verify-description {
+  font-size: 15px;
+  color: #333333;
+  line-height: 1.55;
+  margin: 0 0 16px 0;
+}
+
+.verify-description strong {
+  color: #111111;
+  font-weight: 700;
+}
+
+.verify-links-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.verify-code-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #f7f7f7;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  padding: 10px 16px;
+  margin-bottom: 24px;
+  font-size: 14px;
+  color: #333333;
+}
+
+.verify-code-banner strong {
+  font-size: 18px;
+  letter-spacing: 2px;
+  color: #111111;
+  font-weight: 700;
+  font-family: monospace, -apple-system, sans-serif;
+}
+
+.verify-link-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #111111;
+  text-decoration: underline;
+  cursor: pointer;
+  font-family: inherit;
+  transition: opacity 0.15s ease;
+}
+
+.verify-link-btn:hover:not(:disabled) {
+  opacity: 0.7;
+}
+
+.verify-link-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  text-decoration: none;
+}
+
+.verify-divider {
+  color: #d4d4d4;
+  font-size: 14px;
+  user-select: none;
+}
+
+/* ================= SINGLE ENCLOSING INPUT BOX ================= */
+.verify-input-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  width: 100%;
+  height: 56px;
+  border: 1px solid #d4d4d4;
+  border-radius: 12px;
+  background-color: #ffffff;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.verify-input-box.is-focused {
+  border-color: #111111;
+  box-shadow: 0 0 0 1px #111111;
+}
+
+.verify-input-box.has-error {
+  border-color: #d9383a;
+  box-shadow: 0 0 0 1px #d9383a;
+}
+
+.verify-slot {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.verify-slot-input {
+  width: 100%;
+  height: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  text-align: center;
+  font-size: 22px;
+  font-weight: 700;
+  color: #111111;
+  font-family: inherit;
+  caret-color: #111111;
+  z-index: 2;
+  box-sizing: border-box;
+  padding: 0;
+}
+
+/* 6 gray placeholder dots */
+.verify-dot {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background-color: #d9d9d9;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Error message under the box */
+.verify-error-text {
+  color: #d9383a;
+  font-size: 14px;
+  margin-top: 10px;
+  line-height: 1.4;
+}
+
+/* Info message (resend feedback) */
+.verify-info-text {
+  color: #007a3d;
+  font-size: 14px;
+  margin-top: 10px;
+  line-height: 1.4;
+}
+
+/* Submit Button */
+.verify-submit-btn {
+  width: 100%;
+  height: 52px;
+  background-color: #111111;
+  color: #ffffff;
+  border: none;
+  border-radius: 9999px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.15s ease, background-color 0.15s ease;
+  font-family: inherit;
+}
+
+.verify-submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.verify-submit-btn:hover:not(:disabled) {
+  background-color: #333333;
+}
+
+@media (max-width: 640px) {
+  .verify-header {
+    padding: 24px 24px 0 24px;
+  }
+
+  .verify-container {
+    margin-top: 48px;
+    padding: 0 20px;
+  }
+
+  .verify-title {
+    font-size: 26px;
+  }
+
+  .verify-slot-input {
+    font-size: 20px;
+  }
+}

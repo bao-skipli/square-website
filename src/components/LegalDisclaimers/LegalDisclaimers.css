@@ -1,0 +1,59 @@
+:root {
+  --legal-bg: #000000;
+  --legal-text-color: #8a8a8a;
+  --legal-link-color: #8a8a8a;
+  --legal-font-size: 12px;
+  --legal-line-height: 1.6;
+  --legal-max-width: 1280px;
+  --legal-content-max-width: 660px;
+}
+
+.legal-disclaimers-section {
+  background-color: var(--legal-bg);
+  padding: 40px 48px 60px 48px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.legal-disclaimers-container {
+  max-width: var(--legal-max-width);
+  margin: 0 auto;
+}
+
+.legal-disclaimers-content {
+  max-width: var(--legal-content-max-width);
+}
+
+.legal-disclaimer-p {
+  color: var(--legal-text-color);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: var(--legal-font-size);
+  line-height: var(--legal-line-height);
+  margin: 0 0 22px 0;
+  text-align: left;
+}
+
+.legal-disclaimer-p:last-child {
+  margin-bottom: 0;
+}
+
+.legal-disclaimer-p a {
+  color: var(--legal-link-color);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.15s ease;
+}
+
+.legal-disclaimer-p a:hover {
+  color: #ffffff;
+}
+
+@media (max-width: 768px) {
+  .legal-disclaimers-section {
+    padding: 32px 24px 48px 24px;
+  }
+
+  .legal-disclaimers-content {
+    max-width: 100%;
+  }
+}

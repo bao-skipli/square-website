@@ -1,0 +1,141 @@
+:root {
+  --nl-bg: #000000;
+  --nl-title-color: #ffffff;
+  --nl-input-bg: #000000;
+  --nl-input-border: rgba(255, 255, 255, 0.4);
+  --nl-input-focus-border: #ffffff;
+  --nl-btn-bg: #006aff;
+  --nl-btn-hover-bg: #0056cc;
+  --nl-disclaimer-color: #8a8a8a;
+  --nl-link-color: #8a8a8a;
+  --nl-max-width: 620px;
+}
+
+.newsletter-section {
+  background-color: var(--nl-bg);
+  padding: 100px 24px 70px 24px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.newsletter-container {
+  max-width: var(--nl-max-width);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.newsletter-title {
+  color: var(--nl-title-color);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 26px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.015em;
+  text-align: center;
+  margin: 0 0 24px 0;
+}
+
+.newsletter-form {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.newsletter-input-wrapper {
+  flex: 1;
+  position: relative;
+}
+
+.newsletter-input {
+  width: 100%;
+  height: 48px;
+  background-color: var(--nl-input-bg);
+  border: 1px solid var(--nl-input-border);
+  border-radius: 8px;
+  padding: 0 16px;
+  color: #ffffff;
+  font-size: 15px;
+  font-family: inherit;
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.newsletter-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 15px;
+}
+
+.newsletter-input:focus {
+  border-color: var(--nl-input-focus-border);
+  box-shadow: 0 0 0 1px #ffffff;
+}
+
+.newsletter-submit-btn {
+  height: 48px;
+  padding: 0 28px;
+  background-color: var(--nl-btn-bg);
+  color: #ffffff;
+  border: none;
+  border-radius: 9999px;
+  font-size: 15px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.15s ease;
+}
+
+.newsletter-submit-btn:hover {
+  background-color: var(--nl-btn-hover-bg);
+}
+
+.newsletter-disclaimer {
+  width: 100%;
+  margin: 16px 0 0 0;
+  color: var(--nl-disclaimer-color);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: left;
+}
+
+.newsletter-disclaimer a {
+  color: var(--nl-disclaimer-color);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.15s ease;
+}
+
+.newsletter-disclaimer a:hover {
+  color: #ffffff;
+}
+
+@media (max-width: 600px) {
+  .newsletter-section {
+    padding: 70px 20px 50px 20px;
+  }
+
+  .newsletter-title {
+    font-size: 22px;
+  }
+
+  .newsletter-form {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .newsletter-input-wrapper {
+    width: 100%;
+  }
+
+  .newsletter-submit-btn {
+    width: 100%;
+  }
+}

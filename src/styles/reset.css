@@ -1,0 +1,16 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  overflow-x: hidden;
+  background: var(--color-bg, #ffffff);
+  color: var(--color-text-primary, #111111);
+  font-family: var(--font-sans);
+}

@@ -1,0 +1,38 @@
+.scroll-reveal-text {
+  /* overflow: hidden; */
+  display: block;
+  view-timeline: --split-text block;
+
+}
+
+.scroll-reveal-mask {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  padding-bottom: 0.15em;
+  margin-bottom: -0.15em;
+}
+
+.scroll-reveal-mask:not(:last-child) {
+  margin-right: 0.25em;
+}
+
+.scroll-reveal-word {
+  display: inline-block;
+  transform: translateY(110%);
+  animation: scrollRevealWord linear both;
+  animation-timeline: var(--tl, --split-text);
+  animation-range-start: var(--rn, cover) calc(var(--start) + var(--index) * var(--stagger));
+  animation-range-end: var(--rn, cover) calc(var(--end) + var(--index) * var(--stagger));
+  will-change: transform;
+}
+
+@keyframes scrollRevealWord {
+  from {
+    transform: translateY(110%);
+  }
+
+  to {
+    transform: translateY(0);
+  }
+}

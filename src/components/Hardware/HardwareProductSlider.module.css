@@ -1,0 +1,21 @@
+.hardware-products {
+  position: relative;
+  width: 100%;
+  margin-top: 64px;
+  view-timeline: --hw-cards block;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+
+.hardware-products::-webkit-scrollbar {
+  display: none;
+}
+
+.hardware-products-track {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  width: max-content;
+  padding-right: 6vw;
+}

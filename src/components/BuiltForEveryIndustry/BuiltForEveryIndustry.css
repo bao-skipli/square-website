@@ -1,0 +1,340 @@
+:root,
+.built-for-every-industry {
+  --bfei-bg: #000000;
+  --bfei-padding-top: 140px;
+  --bfei-padding-bottom: 70px;
+  --bfei-padding-x: 6vw;
+  --bfei-max-width: 1400px;
+
+  --bfei-eyebrow-color: #888888;
+  --bfei-eyebrow-font: "Cash Sans Mono", "Noto Sans JP", monospace;
+  --bfei-eyebrow-size: 0.75rem;
+  --bfei-eyebrow-line-height: 1.2;
+  --bfei-eyebrow-spacing: 0.12em;
+  --bfei-eyebrow-margin-bottom: 24px;
+
+  --bfei-title-color: #ffffff;
+  --bfei-title-font: Georgia, "Times New Roman", serif;
+  --bfei-title-size: 2.5rem;
+  --bfei-title-line-height: 1.15;
+  --bfei-title-letter-spacing: -0.015em;
+  --bfei-title-margin-bottom: 64px;
+
+  --bfei-cards-gap: 20px;
+  --bfei-scale-initial: 0.8;
+  --bfei-scale-target: 1.0;
+
+  --bfei-card-height: 480px;
+  --bfei-card-radius: 0px;
+  --bfei-card-inactive-flex: 1;
+  --bfei-card-active-flex: 3.3;
+  --bfei-card-transition-duration: 650ms;
+  --bfei-card-transition-ease: cubic-bezier(0.25, 1, 0.35, 1);
+
+  --bfei-inactive-title-size: clamp(28px, 2.5vw, 42px);
+  --bfei-inactive-title-color: rgba(255, 255, 255, 0.65);
+  --bfei-inactive-overlay: rgba(0, 0, 0, 0.48);
+
+  --bfei-active-overlay: linear-gradient(to top,
+      rgba(0, 0, 0, 0.9) 0%,
+      rgba(0, 0, 0, 0.5) 32%,
+      rgba(0, 0, 0, 0.15) 58%,
+      transparent 100%);
+
+  --bfei-svg-width: 320px;
+  --bfei-svg-max-width: 82%;
+  --bfei-svg-transition: transform 140ms cubic-bezier(0.2, 0, 0.2, 1);
+
+  --bfei-bottom-padding: 28px;
+  --bfei-bottom-transition-duration: 520ms;
+  --bfei-bottom-transition-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --bfei-divider-color: rgba(255, 255, 255, 0.25);
+  --bfei-stat-size: clamp(38px, 3.6vw, 56px);
+  --bfei-stat-color: #ffffff;
+  --bfei-sub-size: 15px;
+  --bfei-sub-color: rgba(255, 255, 255, 0.85);
+  --bfei-link-size: 16px;
+  --bfei-link-color: #ffffff;
+}
+
+.built-for-every-industry {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  background-color: var(--bfei-bg);
+  padding: var(--bfei-padding-top) var(--bfei-padding-x) var(--bfei-padding-bottom);
+  box-sizing: border-box;
+  z-index: 30;
+}
+
+.bfei-container {
+  max-width: var(--bfei-max-width);
+  margin: 0 auto;
+}
+
+.bfei-header {
+  margin-bottom: var(--bfei-title-margin-bottom);
+}
+
+.bfei-eyebrow {
+  font-family: var(--bfei-eyebrow-font);
+  font-size: var(--bfei-eyebrow-size);
+  line-height: var(--bfei-eyebrow-line-height);
+  font-weight: 600;
+  letter-spacing: var(--bfei-eyebrow-spacing);
+  text-transform: uppercase;
+  color: var(--bfei-eyebrow-color);
+  margin-bottom: var(--bfei-eyebrow-margin-bottom);
+}
+
+.bfei-title {
+  margin: 0;
+  font-family: var(--bfei-title-font);
+  font-size: var(--bfei-title-size);
+  line-height: var(--bfei-title-line-height);
+  letter-spacing: var(--bfei-title-letter-spacing);
+  font-weight: 400;
+  color: var(--bfei-title-color);
+  max-width: 800px;
+}
+
+.bfei-cards-track {
+  display: flex;
+  gap: var(--bfei-cards-gap);
+  width: 100%;
+  align-items: stretch;
+  transform-origin: center center;
+  transition: transform 180ms ease-out;
+  will-change: transform;
+}
+
+.bfei-card {
+  position: relative;
+  height: var(--bfei-card-height);
+  border-radius: var(--bfei-card-radius);
+  overflow: hidden;
+  cursor: pointer;
+  user-select: none;
+
+  flex: var(--bfei-card-inactive-flex) 1 0%;
+  transition: flex var(--bfei-card-transition-duration) var(--bfei-card-transition-ease);
+  will-change: flex;
+}
+
+.bfei-card.is-active {
+  flex: var(--bfei-card-active-flex) 1 0%;
+  cursor: default;
+}
+
+.bfei-card-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  z-index: 1;
+  transition: transform 900ms cubic-bezier(0.25, 1, 0.35, 1);
+  will-change: transform;
+}
+
+.bfei-card:hover .bfei-card-bg {
+  transform: scale(1.03);
+}
+
+.bfei-card-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: var(--bfei-inactive-overlay);
+  transition: background var(--bfei-card-transition-duration) var(--bfei-card-transition-ease);
+  pointer-events: none;
+}
+
+.bfei-card.is-active .bfei-card-overlay {
+  background: var(--bfei-active-overlay);
+}
+
+.bfei-inactive-title {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  text-align: center;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: var(--bfei-inactive-title-size);
+  font-weight: 500;
+  line-height: 1.15;
+  color: var(--bfei-inactive-title-color);
+  z-index: 4;
+  pointer-events: none;
+  white-space: pre-line;
+  transform: translateY(0);
+  transition: transform var(--bfei-card-transition-duration) var(--bfei-card-transition-ease);
+}
+
+.bfei-card.is-active .bfei-inactive-title {
+  transform: translateY(50px);
+  visibility: hidden;
+}
+
+.bfei-floating-svg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--bfei-svg-width);
+  max-width: var(--bfei-svg-max-width);
+  pointer-events: none;
+  z-index: 6;
+
+  transform: translate3d(calc(var(--mouse-x, 260px) - 50%),
+      calc(var(--mouse-y, 220px) - 50%),
+      0);
+  transition: var(--bfei-svg-transition);
+  will-change: transform;
+}
+
+.bfei-svg-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.45));
+}
+
+.bfei-bottom-content {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: var(--bfei-bottom-padding);
+  z-index: 10;
+
+  transform: translateY(105%);
+  transition: transform var(--bfei-bottom-transition-duration) var(--bfei-bottom-transition-ease);
+  will-change: transform;
+}
+
+.bfei-card.is-active .bfei-bottom-content {
+  transform: translateY(0);
+}
+
+.bfei-divider {
+  width: 100%;
+  height: 1px;
+  background-color: var(--bfei-divider-color);
+  margin-bottom: 24px;
+}
+
+.bfei-info-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.bfei-stat-block {
+  display: flex;
+  flex-direction: column;
+}
+
+.bfei-stat {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: var(--bfei-stat-size);
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--bfei-stat-color);
+  letter-spacing: -0.02em;
+  margin-bottom: 8px;
+}
+
+.bfei-subtitle {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: var(--bfei-sub-size);
+  line-height: 1.4;
+  color: var(--bfei-sub-color);
+  max-width: 380px;
+}
+
+.bfei-link {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: var(--bfei-link-size);
+  line-height: 1.4;
+  font-weight: 600;
+  color: var(--bfei-link-color);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1.5px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+  flex-shrink: 0;
+  margin-bottom: 4px;
+}
+
+.bfei-link:hover {
+  opacity: 0.7;
+}
+
+@media (max-width: 1024px) {
+  .built-for-every-industry {
+    min-height: auto;
+    padding: 100px 6vw 80px 6vw;
+  }
+
+  .bfei-cards-track {
+    flex-direction: column;
+    transform: none !important;
+  }
+
+  .bfei-card {
+    flex: none !important;
+    width: 100%;
+    height: 380px;
+    transition: height var(--bfei-card-transition-duration) var(--bfei-card-transition-ease);
+  }
+
+  .bfei-card.is-active {
+    height: 480px;
+  }
+
+  .bfei-floating-svg {
+    max-width: 60%;
+  }
+}
+
+@media (max-width: 640px) {
+  .built-for-every-industry {
+    padding: 80px 5vw;
+  }
+
+  .bfei-title {
+    font-size: 2.5rem;
+    margin-bottom: 40px;
+  }
+
+  .bfei-card {
+    height: 300px;
+    border-radius: 0px;
+    transition: height var(--bfei-card-transition-duration) var(--bfei-card-transition-ease);
+  }
+
+  .bfei-card.is-active {
+    height: 440px;
+  }
+
+  .bfei-bottom-content {
+    padding: 24px;
+  }
+
+  .bfei-stat {
+    font-size: 32px;
+  }
+
+  .bfei-info-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+}
