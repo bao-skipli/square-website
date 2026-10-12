@@ -1,0 +1,75 @@
+.sq-input-group {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.sq-input-control {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--color-border-subtle, #d4d4d8);
+  border-radius: var(--radius-lg, 12px);
+  background-color: #ffffff;
+  padding: 8px 14px;
+  transition: all var(--transition-fast, 150ms ease);
+}
+
+.sq-input-control:focus-within {
+  border-color: var(--color-primary, #111111);
+  box-shadow: 0 0 0 1px var(--color-primary, #111111);
+}
+
+.sq-input-group.has-error .sq-input-control {
+  border-color: var(--color-error, #dc2626) !important;
+  background-color: var(--color-error-bg, #fffafb);
+}
+
+.sq-input-field-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.sq-input-floating-label {
+  font-size: 11px;
+  color: var(--color-text-subtle, #71717a);
+  line-height: 1.2;
+  margin-bottom: 2px;
+}
+
+.sq-input-field {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: var(--font-size-base, 14px);
+  color: var(--color-text-primary, #111111);
+  padding: 0;
+}
+
+.sq-input-field::placeholder {
+  color: #71717a;
+}
+
+.sq-input-prefix,
+.sq-input-suffix {
+  display: flex;
+  align-items: center;
+  color: #71717a;
+}
+
+.sq-input-prefix {
+  margin-right: 8px;
+}
+
+.sq-input-suffix {
+  margin-left: 8px;
+}
+
+.sq-input-error-msg {
+  color: var(--color-error, #dc2626);
+  font-size: var(--font-size-xs, 12px);
+  margin-top: 4px;
+  font-weight: 500;
+}

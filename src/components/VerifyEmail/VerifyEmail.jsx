@@ -5,39 +5,10 @@ import {
   logoutUser,
   sendVerificationEmailCode,
   confirmVerificationCode,
-} from "../../firebase/authService";
+} from "@/firebase/authService";
+import { SquareLogoIcon } from "@/components/ui/Icon";
+import { DigitCodeInput } from "@/components/ui/Input";
 import "./VerifyEmail.css";
-
-function SquareLogoIcon({ size = 32, color = "#000000" }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-label="Square Logo"
-    >
-      <rect
-        x="3"
-        y="3"
-        width="18"
-        height="18"
-        rx="4.5"
-        stroke={color}
-        strokeWidth="2.5"
-      />
-      <rect
-        x="8.5"
-        y="8.5"
-        width="7"
-        height="7"
-        rx="1.2"
-        fill={color}
-      />
-    </svg>
-  );
-}
 
 export default class VerifyEmail extends Component {
   constructor(props) {
@@ -60,68 +31,40 @@ export default class VerifyEmail extends Component {
     };
 
     this.inputRefs = [];
-    this.countdownInterval = null;
+    this.countdownTimer = null;
     this.unsubscribeAuth = null;
   }
 
   componentDidMount() {
-    this.unsubscribeAuth = subscribeAuth((user) => {
+    this.unsubscribeAuth = subscribeAuth(async (user) => {
       if (!user) {
         this.setState({ checkingAuth: false, redirectToSignIn: true });
         return;
       }
+      this.setState({ currentUser: user, checkingAuth: false });
 
       if (user.emailVerified) {
-        this.setState({ checkingAuth: false, redirectToBusinessMatch: true });
-        return;
+        this.setState({ redirectToBusinessMatch: true });
       }
-
-      this.setState({ currentUser: user, checkingAuth: false }, () => {
-        // Tự động focus ô đầu tiên
-        if (this.inputRefs[0]) {
-          this.inputRefs[0].focus();
-        }
-
-        const existingCode = sessionStorage.getItem(`verify_code_${user.uid}`);
-        if (existingCode) {
-          this.setState({ displayCode: existingCode });
-        } else {
-          sendVerificationEmailCode().then((res) => {
-            if (res?.code) {
-              this.setState({ displayCode: res.code });
-            }
-          });
-        }
-      });
     });
+
+    if (this.inputRefs[0]) {
+      this.inputRefs[0].focus();
+    }
   }
 
   componentWillUnmount() {
-    if (this.unsubscribeAuth) {
-      this.unsubscribeAuth();
-    }
-    if (this.countdownInterval) {
-      clearInterval(this.countdownInterval);
-    }
+    if (this.unsubscribeAuth) this.unsubscribeAuth();
+    if (this.countdownTimer) clearInterval(this.countdownTimer);
   }
 
-  isCodeComplete = () => {
-    return this.state.digits.every((d) => d !== "");
-  };
-
-  getCodeString = () => {
-    return this.state.digits.join("");
-  };
-
   startCountdown = (seconds = 30) => {
-    if (this.countdownInterval) {
-      clearInterval(this.countdownInterval);
-    }
+    if (this.countdownTimer) clearInterval(this.countdownTimer);
     this.setState({ countdown: seconds });
-    this.countdownInterval = setInterval(() => {
+    this.countdownTimer = setInterval(() => {
       this.setState((prev) => {
         if (prev.countdown <= 1) {
-          clearInterval(this.countdownInterval);
+          clearInterval(this.countdownTimer);
           return { countdown: 0 };
         }
         return { countdown: prev.countdown - 1 };
@@ -129,57 +72,45 @@ export default class VerifyEmail extends Component {
     }, 1000);
   };
 
-  handleDigitChange = (e, index) => {
-    const rawVal = e.target.value;
-    const cleanDigits = rawVal.replace(/\D/g, "");
+  isCodeComplete = () => {
+    return this.state.digits.every((d) => d.trim().length === 1);
+  };
 
-    // Xử lý trường hợp nhập nhiều số cùng lúc
-    if (cleanDigits.length > 1) {
-      this.applyPastedCode(cleanDigits, index);
+  getCodeString = () => {
+    return this.state.digits.join("");
+  };
+
+  handleDigitChange = (e, index) => {
+    const val = e.target.value.replace(/\D/g, "");
+    if (!val) {
+      const nextDigits = [...this.state.digits];
+      nextDigits[index] = "";
+      this.setState({ digits: nextDigits, error: "" });
       return;
     }
 
+    const char = val.slice(-1);
     const nextDigits = [...this.state.digits];
-    nextDigits[index] = cleanDigits;
+    nextDigits[index] = char;
 
     this.setState({ digits: nextDigits, error: "" }, () => {
-      if (cleanDigits && index < 5 && this.inputRefs[index + 1]) {
+      if (index < 5 && this.inputRefs[index + 1]) {
         this.inputRefs[index + 1].focus();
       }
     });
   };
 
   handleKeyDown = (e, index) => {
-    const { digits } = this.state;
-
     if (e.key === "Backspace") {
-      if (!digits[index] && index > 0 && this.inputRefs[index - 1]) {
-        e.preventDefault();
-        const nextDigits = [...digits];
-        nextDigits[index - 1] = "";
-        this.setState({ digits: nextDigits, error: "" });
-        this.inputRefs[index - 1].focus();
+      if (!this.state.digits[index] && index > 0) {
+        if (this.inputRefs[index - 1]) {
+          this.inputRefs[index - 1].focus();
+        }
       }
-      return;
-    }
-
-    if (e.key === "ArrowLeft" && index > 0 && this.inputRefs[index - 1]) {
-      e.preventDefault();
-      this.inputRefs[index - 1].focus();
-      return;
-    }
-
-    if (e.key === "ArrowRight" && index < 5 && this.inputRefs[index + 1]) {
-      e.preventDefault();
-      this.inputRefs[index + 1].focus();
-      return;
-    }
-
-    if (e.key === "Enter") {
-      e.preventDefault();
-      if (this.isCodeComplete() && !this.state.loading) {
-        this.handleVerify();
-      }
+    } else if (e.key === "ArrowLeft" && index > 0) {
+      if (this.inputRefs[index - 1]) this.inputRefs[index - 1].focus();
+    } else if (e.key === "ArrowRight" && index < 5) {
+      if (this.inputRefs[index + 1]) this.inputRefs[index + 1].focus();
     }
   };
 
@@ -187,21 +118,14 @@ export default class VerifyEmail extends Component {
     e.preventDefault();
     const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
     if (!pasted) return;
-    this.applyPastedCode(pasted, 0);
-  };
 
-  applyPastedCode = (codeString, startIndex = 0) => {
-    const chars = codeString.split("");
+    const chars = pasted.split("");
     const nextDigits = [...this.state.digits];
-
     for (let i = 0; i < chars.length; i++) {
-      const targetIndex = startIndex + i;
-      if (targetIndex < 6) {
-        nextDigits[targetIndex] = chars[i];
-      }
+      if (i < 6) nextDigits[i] = chars[i];
     }
 
-    const nextFocusIndex = Math.min(startIndex + chars.length, 5);
+    const nextFocusIndex = Math.min(chars.length, 5);
     this.setState({ digits: nextDigits, error: "" }, () => {
       if (this.inputRefs[nextFocusIndex]) {
         this.inputRefs[nextFocusIndex].focus();
@@ -227,9 +151,7 @@ export default class VerifyEmail extends Component {
           loading: false,
         },
         () => {
-          if (this.inputRefs[0]) {
-            this.inputRefs[0].focus();
-          }
+          if (this.inputRefs[0]) this.inputRefs[0].focus();
         }
       );
     }
@@ -354,32 +276,17 @@ export default class VerifyEmail extends Component {
           )}
 
           <form onSubmit={this.handleVerify}>
-            <div
-              className={`verify-input-box ${isBoxFocused ? "is-focused" : ""} ${
-                error ? "has-error" : ""
-              }`}
+            <DigitCodeInput
+              digits={digits}
+              isBoxFocused={isBoxFocused}
+              error={error}
               onFocus={() => this.setState({ isBoxFocused: true })}
               onBlur={() => this.setState({ isBoxFocused: false })}
-            >
-              {digits.map((digit, index) => (
-                <div key={index} className="verify-slot">
-                  {!digit && <div className="verify-dot" aria-hidden="true" />}
-                  <input
-                    ref={(el) => (this.inputRefs[index] = el)}
-                    type="text"
-                    inputMode="numeric"
-                    autoComplete="one-time-code"
-                    maxLength={1}
-                    value={digit}
-                    onChange={(e) => this.handleDigitChange(e, index)}
-                    onKeyDown={(e) => this.handleKeyDown(e, index)}
-                    onPaste={this.handlePaste}
-                    className="verify-slot-input"
-                    aria-label={`Digit ${index + 1}`}
-                  />
-                </div>
-              ))}
-            </div>
+              inputRefs={this.inputRefs}
+              onDigitChange={this.handleDigitChange}
+              onKeyDown={this.handleKeyDown}
+              onPaste={this.handlePaste}
+            />
 
             {error && <div className="verify-error-text">{error}</div>}
             {infoMessage && <div className="verify-info-text">{infoMessage}</div>}

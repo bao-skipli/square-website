@@ -1,109 +1,14 @@
 import React, { Component } from "react";
 import { Link, Navigate } from "react-router-dom";
-import { loginUser, getFriendlyErrorMessage } from "../../firebase/authService";
+import { loginUser, getFriendlyErrorMessage } from "@/firebase/authService";
+import { SIGNIN_ITEMS } from "@/constants/signInItems";
+import { SquareLogoIcon } from "@/components/ui/Icon";
+import SignInShowcase from "@/features/auth/SignInShowcase";
 import "./SignIn.css";
 
-const SIGNIN_ITEMS = [
-  {
-    text: "Monitor your team's sales",
-    image: "/images/signin/monitor-team-sales.png",
-  },
-  {
-    text: "Sell prepaid services",
-    image: "/images/signin/sell-prepaid-services.png",
-  },
-  {
-    text: "Track your team's hours",
-    image: "/images/signin/track-team-hours.png",
-  },
-  {
-    text: "Fill cancellations",
-    image: "/images/signin/fill-cancellations.png",
-  },
-  {
-    text: "Optimize scheduling",
-    image: "/images/signin/optimize-scheduling.png",
-  },
-  {
-    text: "Track live sales",
-    image: "/images/signin/track-live-sales.png",
-  },
-  {
-    text: "Automate marketing",
-    image: "/images/signin/automate-marketing.png",
-  },
-  {
-    text: "Create floor plans",
-    image: "/images/signin/create-floor-plans.png",
-  },
-  {
-    text: "Pre-authorize cards",
-    image: "/images/signin/pre-authorize-cards.png",
-  },
-  {
-    text: "Grow your customer base",
-    image: "/images/signin/grow-customer-base.png",
-  },
-  {
-    text: "Receive instant payouts",
-    image: "/images/signin/receive-instant-payouts.png",
-  },
-  {
-    text: "Increase order speed",
-    image: "/images/signin/increase-order-speed.png",
-  },
-  {
-    text: "Build repeat business",
-    image: "/images/signin/build-repeat-business.png",
-  },
-  {
-    text: "Enable coursing",
-    image: "/images/signin/enable-coursing.png",
-  },
-  {
-    text: "Increase sales",
-    image: "/images/signin/increase-sales.png",
-  },
-  {
-    text: "Connect with your team",
-    image: "/images/signin/connect-with-team.png",
-  },
-];
-
-const TOTAL_ITEMS = [...SIGNIN_ITEMS, ...SIGNIN_ITEMS, ...SIGNIN_ITEMS];
+const ROW_HEIGHT = 48;
 const ITEM_COUNT = SIGNIN_ITEMS.length;
-const ROW_HEIGHT = 52; // px
-
-function SquareLogo({ size = 26, color = "currentColor" }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-label="Square"
-    >
-      <rect
-        x="3"
-        y="3"
-        width="18"
-        height="18"
-        rx="4"
-        stroke={color}
-        strokeWidth="2.5"
-      />
-      <rect
-        x="8.5"
-        y="8.5"
-        width="7"
-        height="7"
-        rx="1"
-        fill={color}
-      />
-    </svg>
-  );
-}
+const TOTAL_ITEMS = [...SIGNIN_ITEMS, ...SIGNIN_ITEMS, ...SIGNIN_ITEMS];
 
 export default class SignIn extends Component {
   constructor(props) {
@@ -221,7 +126,7 @@ export default class SignIn extends Component {
       <div className="signin-page">
         <div className="signin-left-col">
           <Link to="/" className="signin-brand-link" aria-label="Square Home">
-            <SquareLogo size={28} color="#000000" />
+            <SquareLogoIcon size={28} color="#000000" />
             <span className="signin-brand-text">Square</span>
           </Link>
 
@@ -308,89 +213,22 @@ export default class SignIn extends Component {
           <div style={{ height: "20px" }} />
         </div>
 
-        <div className="signin-right-col">
-          <div className="signin-showcase-container">
-            <div className="signin-dark-card">
-              <div className="signin-ticker-viewport" ref={this.viewportRef}>
-                <div className="signin-ticker-fade-top" />
-                <div className="signin-ticker-fade-bottom" />
-
-                <div
-                  className="signin-ticker-track"
-                  style={{
-                    transform: `translateY(${translateY}px)`,
-                    transition: isTransitioning
-                      ? "transform 0.65s cubic-bezier(0.16, 1, 0.3, 1)"
-                      : "none",
-                  }}
-                >
-                  {TOTAL_ITEMS.map((item, idx) => {
-                    const isActive = idx === globalIndex;
-                    return (
-                      <div
-                        key={idx}
-                        className={`signin-ticker-item ${isActive ? "is-active" : "is-inactive"
-                          }`}
-                        onClick={() => {
-                          this.setState({
-                            isTransitioning: true,
-                            globalIndex: idx,
-                          });
-                        }}
-                      >
-                        {item.text}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div className="signin-preview-viewport">
-                <div className="signin-card-preview-peek">
-                  <img
-                    src={nextItem.image}
-                    alt=""
-                    loading="lazy"
-                  />
-                </div>
-
-                <div className="signin-card-preview" key={activeItem.image}>
-                  <img
-                    src={activeItem.image}
-                    alt={activeItem.text}
-                    className="signin-card-img"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="signin-promo-section">
-              <h2 className="signin-promo-title">
-                See what's possible with Square Plus
-              </h2>
-              <p className="signin-promo-desc">
-                More tools, lower processing fees, and features built for growing businesses.
-              </p>
-
-              <label className="signin-checkbox-label">
-                <input
-                  type="checkbox"
-                  className="signin-checkbox-input"
-                  checked={tellMeMore}
-                  onChange={(e) => this.setState({ tellMeMore: e.target.checked })}
-                />
-                <span className="signin-custom-checkbox">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                </span>
-                <span className="signin-checkbox-text">
-                  Tell me more after sign in
-                </span>
-              </label>
-            </div>
-          </div>
-        </div>
+        <SignInShowcase
+          viewportRef={this.viewportRef}
+          translateY={translateY}
+          isTransitioning={isTransitioning}
+          totalItems={TOTAL_ITEMS}
+          globalIndex={globalIndex}
+          onItemClick={(idx) =>
+            this.setState({ isTransitioning: true, globalIndex: idx })
+          }
+          nextItem={nextItem}
+          activeItem={activeItem}
+          tellMeMore={tellMeMore}
+          onTellMeMoreChange={(e) =>
+            this.setState({ tellMeMore: e.target.checked })
+          }
+        />
       </div>
     );
   }

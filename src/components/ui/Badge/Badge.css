@@ -1,0 +1,34 @@
+.sq-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  border-radius: var(--radius-full, 9999px);
+  font-size: var(--font-size-xs, 11px);
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.sq-badge__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+.sq-badge--available,
+.sq-badge--success {
+  background-color: #e6f4ea;
+  color: #137333;
+}
+
+.sq-badge--archived,
+.sq-badge--neutral {
+  background-color: #f1f3f4;
+  color: #5f6368;
+}
+
+.sq-badge--warning {
+  background-color: #fef7e0;
+  color: #b06000;
+}
