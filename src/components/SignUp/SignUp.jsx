@@ -4,88 +4,11 @@ import {
   registerUser,
   getFriendlyErrorMessage,
   sendVerificationEmailCode,
-} from "../../firebase/authService";
+} from "@/firebase/authService";
+import { LOCALES } from "@/constants/locales";
+import { SquareLogoIcon, EyeIcon } from "@/components/ui/Icon";
+import SignUpShowcase from "@/features/auth/SignUpShowcase";
 import "./SignUp.css";
-
-const VIDEO_SRC = "/images/signup/30a093e0-ab59-4745-b05a-179535ceb901-en-PD06867_-_auto_video_15_cut_mobile.webm";
-const LOGOS_SRC = "/images/signup/us-logos.72b97247.webp";
-
-const LOCALES = [
-  { id: "us", name: "United States (English)" },
-  { id: "ca", name: "Canada (English)" },
-  { id: "uk", name: "United Kingdom (English)" },
-  { id: "au", name: "Australia (English)" },
-  { id: "jp", name: "Japan (日本語)" },
-  { id: "fr", name: "France (Français)" },
-  { id: "es", name: "Spain (Español)" },
-  { id: "ie", name: "Ireland (English)" },
-];
-
-function SquareLogoIcon({ size = 32, color = "#000000" }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-label="Square Logo"
-    >
-      <rect
-        x="3"
-        y="3"
-        width="18"
-        height="18"
-        rx="4.5"
-        stroke={color}
-        strokeWidth="2.5"
-      />
-      <rect
-        x="8.5"
-        y="8.5"
-        width="7"
-        height="7"
-        rx="1.2"
-        fill={color}
-      />
-    </svg>
-  );
-}
-
-function EyeIcon({ visible }) {
-  if (visible) {
-    return (
-      <svg
-        width="20"
-        height="20"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-        <circle cx="12" cy="12" r="3" />
-      </svg>
-    );
-  }
-  return (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
-      <line x1="1" y1="1" x2="23" y2="23" />
-    </svg>
-  );
-}
 
 export default class SignUp extends Component {
   constructor(props) {
@@ -124,7 +47,9 @@ export default class SignUp extends Component {
     e.preventDefault();
     const { email, password, selectedLocale, agreed } = this.state;
     if (!agreed) {
-      this.setState({ error: "Please agree to the Terms, Privacy Policy, and E-Sign Consent to continue." });
+      this.setState({
+        error: "Please agree to the Terms, Privacy Policy, and E-Sign Consent to continue.",
+      });
       return;
     }
 
@@ -215,7 +140,9 @@ export default class SignUp extends Component {
                 <button
                   type="button"
                   className="signup-password-toggle"
-                  onClick={() => this.setState((prev) => ({ showPassword: !prev.showPassword }))}
+                  onClick={() =>
+                    this.setState((prev) => ({ showPassword: !prev.showPassword }))
+                  }
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   <EyeIcon visible={showPassword} />
@@ -228,7 +155,9 @@ export default class SignUp extends Component {
               >
                 <div
                   className="signup-locale-trigger"
-                  onClick={() => this.setState((prev) => ({ isDropdownOpen: !prev.isDropdownOpen }))}
+                  onClick={() =>
+                    this.setState((prev) => ({ isDropdownOpen: !prev.isDropdownOpen }))
+                  }
                   role="button"
                   tabIndex={0}
                   onKeyDown={(e) => {
@@ -281,11 +210,11 @@ export default class SignUp extends Component {
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="currentColor"
-                      strokeWidth="2"
+                      strokeWidth="2.5"
                       strokeLinecap="round"
                       strokeLinejoin="round"
                     >
-                      <polyline points="6 9 12 15 18 9" />
+                      <path d="m6 9 6 6 6-6" />
                     </svg>
                   </div>
                 </div>
@@ -361,11 +290,21 @@ export default class SignUp extends Component {
           <div className="signup-footer">
             <p className="signup-recaptcha-text">
               This site is protected by reCAPTCHA Enterprise and the Google{" "}
-              <a href="https://policies.google.com/privacy" target="_blank" rel="noreferrer" className="signup-inline-link">
+              <a
+                href="https://policies.google.com/privacy"
+                target="_blank"
+                rel="noreferrer"
+                className="signup-inline-link"
+              >
                 Privacy Policy
               </a>{" "}
               and{" "}
-              <a href="https://policies.google.com/terms" target="_blank" rel="noreferrer" className="signup-inline-link">
+              <a
+                href="https://policies.google.com/terms"
+                target="_blank"
+                rel="noreferrer"
+                className="signup-inline-link"
+              >
                 Terms of Service
               </a>{" "}
               apply.
@@ -373,38 +312,7 @@ export default class SignUp extends Component {
           </div>
         </div>
 
-        <div className="signup-right-col">
-          <div className="signup-showcase-card">
-            <video
-              className="signup-showcase-video"
-              autoPlay
-              muted
-              loop
-              playsInline
-            >
-              <source src={VIDEO_SRC} type="video/webm" />
-            </video>
-
-            <div className="signup-showcase-overlay" />
-
-            <div className="signup-showcase-content">
-              <h2 className="signup-showcase-title">
-                Join the 4 million+ businesses
-                <br />
-                running with Square.
-              </h2>
-
-              <div className="signup-showcase-logos-wrapper">
-                <img
-                  src={LOGOS_SRC}
-                  alt="Businesses running with Square"
-                  className="signup-showcase-logos"
-                  loading="eager"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
+        <SignUpShowcase />
       </div>
     );
   }

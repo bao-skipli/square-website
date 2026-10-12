@@ -4,62 +4,10 @@ import {
   subscribeAuth,
   saveUserBusinessInfo,
   getUserBusinessInfo,
-} from "../../../firebase/authService";
+} from "@/firebase/authService";
+import { MCC_CATEGORIES } from "@/constants/mccCategories";
+import { SearchIcon, CheckmarkIcon } from "@/components/ui/Icon";
 import "./BusinessMcc.css";
-
-const MCC_CATEGORIES = [
-  { id: "clothing", title: "Clothing and Accessories", category: "Retail" },
-  { id: "events", title: "Events/Festivals", category: "Leisure and Entertainment" },
-  { id: "food_truck", title: "Food Truck/Cart", category: "Food and Drink" },
-  { id: "taxi", title: "Taxi", category: "Transportation" },
-  { id: "specialty_shop", title: "Specialty Shop", category: "Retail" },
-  { id: "nail_salon", title: "Nail Salon", category: "Health and Beauty" },
-  { id: "bakery", title: "Bakery", category: "Food and Drink" },
-  { id: "coffee_shop", title: "Coffee Shop", category: "Food and Drink" },
-  { id: "hair_salon", title: "Hair Salon / Barbershop", category: "Health and Beauty" },
-  { id: "restaurant", title: "Restaurant / Bar", category: "Food and Drink" },
-  { id: "fitness", title: "Fitness / Personal Training", category: "Sports and Recreation" },
-  { id: "consulting", title: "Consulting / Professional Services", category: "Professional Services" },
-  { id: "photography", title: "Photography", category: "Art and Photography" },
-  { id: "home_services", title: "Home Services", category: "Home and Repair" },
-];
-
-function SearchIcon({ size = 18 }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <circle cx="11" cy="11" r="8" />
-      <line x1="21" y1="21" x2="16.65" y2="16.65" />
-    </svg>
-  );
-}
-
-function CheckmarkIcon({ size = 18 }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <polyline points="20 6 9 17 4 12" />
-    </svg>
-  );
-}
 
 export default class BusinessMcc extends Component {
   constructor(props) {
@@ -184,7 +132,6 @@ export default class BusinessMcc extends Component {
 
     return (
       <div className="business-mcc-page">
-        {/* Top Header with Next button */}
         <header className="mcc-header">
           <button
             type="button"
@@ -205,7 +152,6 @@ export default class BusinessMcc extends Component {
             We'll personalize Square to fit your business needs.
           </p>
 
-          {/* Search Box */}
           <div className="mcc-search-box">
             <span className="mcc-search-icon">
               <SearchIcon size={18} />
@@ -220,7 +166,6 @@ export default class BusinessMcc extends Component {
             />
           </div>
 
-          {/* Category List */}
           <div className="mcc-list-card">
             {filteredList.length === 0 ? (
               <div className="mcc-empty">

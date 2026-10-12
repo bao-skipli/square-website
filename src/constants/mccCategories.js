@@ -1,0 +1,16 @@
+export const MCC_CATEGORIES = [
+  { id: "clothing", title: "Clothing and Accessories", category: "Retail" },
+  { id: "events", title: "Events/Festivals", category: "Leisure and Entertainment" },
+  { id: "food_truck", title: "Food Truck/Cart", category: "Food and Drink" },
+  { id: "taxi", title: "Taxi", category: "Transportation" },
+  { id: "specialty_shop", title: "Specialty Shop", category: "Retail" },
+  { id: "nail_salon", title: "Nail Salon", category: "Health and Beauty" },
+  { id: "bakery", title: "Bakery", category: "Food and Drink" },
+  { id: "coffee_shop", title: "Coffee Shop", category: "Food and Drink" },
+  { id: "hair_salon", title: "Hair Salon / Barbershop", category: "Health and Beauty" },
+  { id: "restaurant", title: "Restaurant / Bar", category: "Food and Drink" },
+  { id: "fitness", title: "Fitness / Personal Training", category: "Sports and Recreation" },
+  { id: "consulting", title: "Consulting / Professional Services", category: "Professional Services" },
+  { id: "photography", title: "Photography", category: "Art and Photography" },
+  { id: "home_services", title: "Home Services", category: "Home and Repair" },
+];

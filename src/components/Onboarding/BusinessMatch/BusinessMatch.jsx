@@ -4,20 +4,9 @@ import {
   subscribeAuth,
   saveUserBusinessInfo,
   getUserBusinessInfo,
-} from "../../../firebase/authService";
+} from "@/firebase/authService";
+import { SAMPLE_ADDRESSES } from "@/constants/sampleAddresses";
 import "./BusinessMatch.css";
-
-const SAMPLE_ADDRESSES = [
-  { primary: "Baoy Ave", secondary: "Port Charlotte, FL, USA" },
-  { primary: "Boabab Circle", secondary: "Holladay, UT, USA" },
-  { primary: "Boardwalk", secondary: "Point Pleasant Beach, NJ, USA" },
-  { primary: "Baorwater Way", secondary: "San Antonio, TX, USA" },
-  { primary: "Baobab Wy", secondary: "Crosby, TX, USA" },
-  { primary: "1455 Market St", secondary: "San Francisco, CA, USA" },
-  { primary: "100 Broadway", secondary: "New York, NY, USA" },
-  { primary: "500 Elm Street", secondary: "Dallas, TX, USA" },
-  { primary: "220 Michigan Ave", secondary: "Chicago, IL, USA" },
-];
 
 export default class BusinessMatch extends Component {
   constructor(props) {
@@ -114,7 +103,9 @@ export default class BusinessMatch extends Component {
     try {
       await saveUserBusinessInfo({
         businessName: businessName.trim(),
-        businessAddress: noPermanentAddress ? "No permanent physical address" : businessAddress.trim(),
+        businessAddress: noPermanentAddress
+          ? "No permanent physical address"
+          : businessAddress.trim(),
         noPermanentAddress,
       });
       this.setState({ loading: false, redirectToNext: true });
@@ -179,7 +170,6 @@ export default class BusinessMatch extends Component {
           </p>
 
           <form className="business-match-form" onSubmit={this.handleSubmit}>
-            {/* Business Name Input */}
             <div className="bm-input-group">
               <div className="bm-input-wrapper">
                 {businessName && <label className="bm-label">Business name</label>}
@@ -194,7 +184,6 @@ export default class BusinessMatch extends Component {
               </div>
             </div>
 
-            {/* Business Address Input with Autocomplete */}
             <div className="bm-input-group" ref={this.dropdownRef}>
               <div
                 className={`bm-input-wrapper ${
@@ -236,7 +225,6 @@ export default class BusinessMatch extends Component {
               )}
             </div>
 
-            {/* Checkbox */}
             <label className="bm-checkbox-row">
               <input
                 type="checkbox"
@@ -249,7 +237,6 @@ export default class BusinessMatch extends Component {
               </span>
             </label>
 
-            {/* Action Row */}
             <div className="bm-action-row">
               <button
                 type="submit"
