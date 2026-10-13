@@ -19,12 +19,18 @@
 
 .scroll-reveal-word {
   display: inline-block;
-  transform: translateY(110%);
-  animation: scrollRevealWord linear both;
-  animation-timeline: var(--tl, --split-text);
-  animation-range-start: var(--rn, cover) calc(var(--start) + var(--index) * var(--stagger));
-  animation-range-end: var(--rn, cover) calc(var(--end) + var(--index) * var(--stagger));
+  transform: translateY(0);
   will-change: transform;
+}
+
+@supports (animation-timeline: view()) or (animation-timeline: scroll()) {
+  .scroll-reveal-word {
+    transform: translateY(110%);
+    animation: scrollRevealWord linear both;
+    animation-timeline: var(--tl, --split-text);
+    animation-range-start: var(--rn, cover) calc(var(--start) + var(--index) * var(--stagger));
+    animation-range-end: var(--rn, cover) calc(var(--end) + var(--index) * var(--stagger));
+  }
 }
 
 @keyframes scrollRevealWord {

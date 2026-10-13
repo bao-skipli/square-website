@@ -63,30 +63,30 @@ export default class HardwareProductCard extends Component {
           <div className={styles["hardware-product-overlay"]} />
 
           <div className={styles["hardware-product-content"]}>
-            <h3 className={styles["hardware-product-title-wrapper"]}>
-              <button
-                type="button"
-                className={styles["hardware-product-title-btn"]}
-                aria-label={`Select ${product.title}`}
-              >
-                {product.title}
-              </button>
-            </h3>
+            <button
+              type="button"
+              className={styles["hardware-product-title"]}
+              aria-label={`Select ${product.title}`}
+            >
+              {product.title}
+            </button>
 
-            <p className={styles["hardware-product-desc"]}>
-              {product.description}
-            </p>
+            <div className={styles["hardware-product-details"]}>
+              <p className={styles["hardware-product-description"]}>
+                {product.description}
+              </p>
 
-            <div className={styles["hardware-product-actions"]}>
-              <span className={styles["hardware-product-price"]}>
-                {product.price}
-              </span>
-              <a
-                href="#shop"
-                className={styles["hardware-product-shop-btn"]}
-              >
-                Shop
-              </a>
+              <div className={styles["hardware-product-actions"]}>
+                <span className={styles["hardware-product-price"]}>
+                  {product.price}
+                </span>
+                <a
+                  href="#shop"
+                  className={styles["hardware-product-shop-btn"]}
+                >
+                  Shop
+                </a>
+              </div>
             </div>
           </div>
         </div>

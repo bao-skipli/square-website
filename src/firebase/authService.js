@@ -136,6 +136,18 @@ export async function getUserProfile(uid) {
   return null;
 }
 
+export async function isEmailVerified(user) {
+  if (!user) return false;
+  if (user.emailVerified) return true;
+  try {
+    const profile = await getUserProfile(user.uid);
+    return Boolean(profile && profile.emailVerified);
+  } catch (err) {
+    console.warn("Check email verified error:", err);
+    return false;
+  }
+}
+
 export async function saveUserBusinessInfo(data) {
   const user = auth.currentUser;
   if (!user) throw new Error("User must be signed in to save business information.");

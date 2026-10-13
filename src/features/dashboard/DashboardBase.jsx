@@ -145,7 +145,13 @@ export class DashboardBase extends Component {
     document.addEventListener("mousedown", this.handleClickOutside);
 
     this.unsubscribeAuth = subscribeAuth(async (user) => {
-      const uid = user ? user.uid : null;
+      if (!user) {
+        if (this._isMounted && this.props.router?.navigate) {
+          this.props.router.navigate("/signin");
+        }
+        return;
+      }
+      const uid = user.uid;
       this.setState({ userId: uid });
       this.setupRealtimeSubscriptions(uid);
     });

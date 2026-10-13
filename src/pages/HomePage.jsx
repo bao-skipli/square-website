@@ -17,15 +17,15 @@ export default class HomePage extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      redirectToVerify: false,
+      redirectToDashboard: false,
     };
     this.unsubscribeAuth = null;
   }
 
   componentDidMount() {
     this.unsubscribeAuth = subscribeAuth((user) => {
-      if (user && !user.emailVerified) {
-        this.setState({ redirectToVerify: true });
+      if (user) {
+        this.setState({ redirectToDashboard: true });
       }
     });
   }
@@ -37,8 +37,8 @@ export default class HomePage extends Component {
   }
 
   render() {
-    if (this.state.redirectToVerify) {
-      return <Navigate to="/verify" replace />;
+    if (this.state.redirectToDashboard) {
+      return <Navigate to="/dashboard" replace />;
     }
 
     return (

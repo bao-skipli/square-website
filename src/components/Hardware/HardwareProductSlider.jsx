@@ -88,7 +88,10 @@ export default class HardwareProductSlider extends Component {
 
     return (
       <div className={styles["hardware-product-slider"]} ref={this.sliderRef}>
-        <div className={styles["hardware-product-track"]}>
+        <div
+          className={styles["hardware-product-track"]}
+          onMouseLeave={() => setActiveIndex(null)}
+        >
           {products.map((product, index) => (
             <HardwareProductCard
               key={product.title}
