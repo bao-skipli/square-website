@@ -9,6 +9,7 @@ import {
   ChevronIcon,
 } from "@/components/ui/Icon";
 import ItemFormFulfillment from "./ItemFormFulfillment";
+import ItemModifiersSection from "./ItemModifiersSection";
 
 const AVAILABLE_PRICE_UNITS = [
   { name: "Each", code: "ea" },
@@ -73,6 +74,13 @@ export default class ItemFormDetails extends PureComponent {
       onSkuChange,
       formGtin,
       onGtinChange,
+      editingItemId,
+      itemModifierSetsMap,
+      allModifierSets,
+      onApplyItemModifierSets,
+      onRemoveItemModifierSet,
+      onSaveItemModifierOverrides,
+      onReorderItemModifierSets,
       ...fulfillmentProps
     } = this.props;
 
@@ -343,6 +351,20 @@ export default class ItemFormDetails extends PureComponent {
 
         <div className="sq-divider-thick-block" />
 
+        {/* Modifiers Section */}
+        <ItemModifiersSection
+          itemId={editingItemId}
+          itemName={formName}
+          itemModifierSetsMap={itemModifierSetsMap}
+          allModifierSets={allModifierSets}
+          onApplyItemModifierSets={onApplyItemModifierSets}
+          onRemoveItemModifierSet={onRemoveItemModifierSet}
+          onSaveItemModifierOverrides={onSaveItemModifierOverrides}
+          onReorderItemModifierSets={onReorderItemModifierSets}
+        />
+
+        <div className="sq-divider-thick-block" />
+
         {/* Variations */}
         <div className="sq-section-row">
           <div className="sq-section-row-info">
@@ -364,22 +386,6 @@ export default class ItemFormDetails extends PureComponent {
             </span>
             <span className="sq-section-row-desc">
               Sell this item in multiple units, such as individually or by the case.
-            </span>
-          </div>
-          <button type="button" className="sq-btn-pill-gray">
-            Add <ChevronIcon size={14} />
-          </button>
-        </div>
-
-        {/* Modifiers */}
-        <div className="sq-section-row">
-          <div className="sq-section-row-info">
-            <span className="sq-section-row-title">Modifiers</span>
-            <span className="sq-section-row-desc">
-              Allow customizations such as toppings, sides, or special requests.{" "}
-              <a href="#learn" style={{ textDecoration: "underline", color: "#111" }}>
-                Learn more
-              </a>
             </span>
           </div>
           <button type="button" className="sq-btn-pill-gray">

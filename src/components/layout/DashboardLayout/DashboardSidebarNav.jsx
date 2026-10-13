@@ -137,7 +137,9 @@ export default class DashboardSidebarNav extends PureComponent {
                             <button
                               type="button"
                               className={`sq-subsubitem-btn ${
-                                activeMenu === "modifiers" ? "is-active" : ""
+                                activeMenu === "modifiers" && currentView === "modifiers"
+                                  ? "is-active"
+                                  : ""
                               }`}
                               onClick={() => onMenuClick("modifiers")}
                             >
