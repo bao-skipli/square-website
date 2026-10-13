@@ -25,36 +25,89 @@
   max-width: 900px;
   font-family: var(--font-serif, Georgia, 'Times New Roman', serif);
   font-size: 2.5rem;
-  font-weight: 100;
+  font-weight: 400;
+  line-height: 1.15;
   color: #111;
 }
 
 .hardware-section-actions {
-  opacity: 0;
-  transform: translateY(60px);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 56px;
+  opacity: 1;
+  transform: translateY(0);
+}
 
-  animation-name: hardwareActionsReveal;
-  animation-duration: 1s;
-  animation-timing-function: linear;
-  animation-fill-mode: both;
-  animation-timeline: view();
-  animation-range: entry 5% entry 400%;
-
-  will-change:
-    opacity,
-    transform;
+@supports (animation-timeline: view()) {
+  .hardware-section-actions {
+    opacity: 0;
+    transform: translateY(30px);
+    animation-name: hardwareActionsReveal;
+    animation-duration: 1s;
+    animation-timing-function: linear;
+    animation-fill-mode: both;
+    animation-timeline: view();
+    animation-range: entry 5% cover 30%;
+  }
 }
 
 @keyframes hardwareActionsReveal {
   from {
     opacity: 0;
-    transform: translateY(60px);
+    transform: translateY(30px);
   }
 
   to {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+.btn-shop-all {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 48px;
+  padding: 0 28px;
+  background-color: #111111;
+  color: #ffffff;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  text-decoration: none;
+  border-radius: 9999px;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+  cursor: pointer;
+}
+
+.btn-shop-all:hover {
+  background-color: #333333;
+  transform: scale(1.02);
+}
+
+.btn-compare {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 48px;
+  padding: 0 28px;
+  background-color: transparent;
+  color: #111111;
+  border: 1px solid #d0d0d0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  text-decoration: none;
+  border-radius: 9999px;
+  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+  cursor: pointer;
+}
+
+.btn-compare:hover {
+  background-color: #f7f7f7;
+  border-color: #111111;
+  transform: scale(1.02);
 }
 
 .hardware-section-controls {

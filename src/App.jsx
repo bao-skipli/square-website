@@ -1,8 +1,8 @@
 import React, { Component, Suspense, lazy } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import HomePage from "@/pages/HomePage";
 import DashboardLoading from "@/components/Dashboard/DashboardLoading";
 
-const HomePage = lazy(() => import("@/pages/HomePage"));
 const SignIn = lazy(() => import("@/components/SignIn/SignIn"));
 const SignUp = lazy(() => import("@/components/SignUp/SignUp"));
 const VerifyEmail = lazy(() => import("@/components/VerifyEmail/VerifyEmail"));
@@ -16,27 +16,130 @@ export default class App extends Component {
   render() {
     return (
       <BrowserRouter>
-        <Suspense fallback={<DashboardLoading message="Loading Square..." />}>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/signin" element={<SignIn />} />
-            <Route path="/signup" element={<SignUp />} />
-            <Route path="/verify" element={<VerifyEmail />} />
-            <Route path="/signup/business-match" element={<BusinessMatch />} />
-            <Route path="/signup/business-mcc-selection" element={<BusinessMcc />} />
-            <Route path="/signup/estimated-annual-revenue" element={<EstimatedRevenue />} />
-            <Route path="/signup/square-banking" element={<SquareBanking />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/dashboard/items/library" element={<Dashboard />} />
-            <Route path="/dashboard/items/library/new" element={<Dashboard />} />
-            <Route path="/dashboard/items/library/:itemId" element={<Dashboard />} />
-            <Route path="/dashboard/items/categories" element={<Dashboard />} />
-            <Route path="/dashboard/items/categories/new" element={<Dashboard />} />
-            <Route path="/dashboard/items/categories/:categoryId" element={<Dashboard />} />
-            <Route path="/dashboard/*" element={<Dashboard />} />
-            <Route path="*" element={<HomePage />} />
-          </Routes>
-        </Suspense>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route
+            path="/signin"
+            element={
+              <Suspense fallback={null}>
+                <SignIn />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/signup"
+            element={
+              <Suspense fallback={null}>
+                <SignUp />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/verify"
+            element={
+              <Suspense fallback={null}>
+                <VerifyEmail />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/signup/business-match"
+            element={
+              <Suspense fallback={null}>
+                <BusinessMatch />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/signup/business-mcc-selection"
+            element={
+              <Suspense fallback={null}>
+                <BusinessMcc />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/signup/estimated-annual-revenue"
+            element={
+              <Suspense fallback={null}>
+                <EstimatedRevenue />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/signup/square-banking"
+            element={
+              <Suspense fallback={null}>
+                <SquareBanking />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/dashboard"
+            element={
+              <Suspense fallback={<DashboardLoading message="Loading Square..." />}>
+                <Dashboard />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/dashboard/items/library"
+            element={
+              <Suspense fallback={<DashboardLoading message="Loading Square..." />}>
+                <Dashboard />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/dashboard/items/library/new"
+            element={
+              <Suspense fallback={<DashboardLoading message="Loading Square..." />}>
+                <Dashboard />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/dashboard/items/library/:itemId"
+            element={
+              <Suspense fallback={<DashboardLoading message="Loading Square..." />}>
+                <Dashboard />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/dashboard/items/categories"
+            element={
+              <Suspense fallback={<DashboardLoading message="Loading Square..." />}>
+                <Dashboard />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/dashboard/items/categories/new"
+            element={
+              <Suspense fallback={<DashboardLoading message="Loading Square..." />}>
+                <Dashboard />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/dashboard/items/categories/:categoryId"
+            element={
+              <Suspense fallback={<DashboardLoading message="Loading Square..." />}>
+                <Dashboard />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/dashboard/*"
+            element={
+              <Suspense fallback={<DashboardLoading message="Loading Square..." />}>
+                <Dashboard />
+              </Suspense>
+            }
+          />
+          <Route path="*" element={<HomePage />} />
+        </Routes>
       </BrowserRouter>
     );
   }

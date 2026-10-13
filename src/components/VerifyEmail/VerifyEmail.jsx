@@ -5,6 +5,7 @@ import {
   logoutUser,
   sendVerificationEmailCode,
   confirmVerificationCode,
+  isEmailVerified,
 } from "@/firebase/authService";
 import { SquareLogoIcon } from "@/components/ui/Icon";
 import { DigitCodeInput } from "@/components/ui/Input";
@@ -43,7 +44,8 @@ export default class VerifyEmail extends Component {
       }
       this.setState({ currentUser: user, checkingAuth: false });
 
-      if (user.emailVerified) {
+      const verified = await isEmailVerified(user);
+      if (verified) {
         this.setState({ redirectToBusinessMatch: true });
       }
     });

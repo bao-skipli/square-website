@@ -1,18 +1,21 @@
-.hardware-products {
+.hardware-products,
+.hardware-product-slider {
   position: relative;
   width: 100%;
-  margin-top: 64px;
-  view-timeline: --hw-cards block;
+  margin-top: 56px;
   overflow-x: auto;
   overflow-y: hidden;
   scrollbar-width: none;
+  padding: 12px 0 24px 0;
 }
 
-.hardware-products::-webkit-scrollbar {
+.hardware-products::-webkit-scrollbar,
+.hardware-product-slider::-webkit-scrollbar {
   display: none;
 }
 
-.hardware-products-track {
+.hardware-products-track,
+.hardware-product-track {
   display: flex;
   align-items: flex-start;
   gap: 24px;

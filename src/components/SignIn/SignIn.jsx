@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { Link, Navigate } from "react-router-dom";
-import { loginUser, getFriendlyErrorMessage } from "@/firebase/authService";
+import { loginUser, subscribeAuth, getFriendlyErrorMessage } from "@/firebase/authService";
 import { SIGNIN_ITEMS } from "@/constants/signInItems";
 import { SquareLogoIcon } from "@/components/ui/Icon";
 import SignInShowcase from "@/features/auth/SignInShowcase";
@@ -23,16 +23,23 @@ export default class SignIn extends Component {
       viewportHeight: 440,
       loading: false,
       error: "",
-      redirectToHome: false,
+      redirectToDashboard: false,
       redirectToVerify: false,
     };
 
     this.viewportRef = React.createRef();
     this.tickerInterval = null;
     this.resetTimer = null;
+    this.unsubscribeAuth = null;
   }
 
   componentDidMount() {
+    this.unsubscribeAuth = subscribeAuth((user) => {
+      if (user) {
+        this.setState({ redirectToDashboard: true });
+      }
+    });
+
     this.updateViewportHeight();
     window.addEventListener("resize", this.updateViewportHeight);
 
@@ -60,6 +67,7 @@ export default class SignIn extends Component {
     window.removeEventListener("resize", this.updateViewportHeight);
     if (this.tickerInterval) clearInterval(this.tickerInterval);
     if (this.resetTimer) clearTimeout(this.resetTimer);
+    if (this.unsubscribeAuth) this.unsubscribeAuth();
   }
 
   updateViewportHeight = () => {
@@ -79,12 +87,8 @@ export default class SignIn extends Component {
 
     this.setState({ loading: true, error: "" });
     try {
-      const user = await loginUser(email, password);
-      if (!user.emailVerified) {
-        this.setState({ redirectToVerify: true });
-      } else {
-        this.setState({ redirectToHome: true });
-      }
+      await loginUser(email, password);
+      this.setState({ redirectToDashboard: true });
     } catch (err) {
       this.setState({
         error: getFriendlyErrorMessage(err),
@@ -104,12 +108,12 @@ export default class SignIn extends Component {
       viewportHeight,
       loading,
       error,
-      redirectToHome,
+      redirectToDashboard,
       redirectToVerify,
     } = this.state;
 
-    if (redirectToHome) {
-      return <Navigate to="/" replace />;
+    if (redirectToDashboard) {
+      return <Navigate to="/dashboard" replace />;
     }
     if (redirectToVerify) {
       return <Navigate to="/verify" replace />;
