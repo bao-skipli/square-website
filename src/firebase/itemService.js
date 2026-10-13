@@ -290,14 +290,55 @@ export async function saveItemToFirebase(userId, itemData) {
  */
 export async function deleteItemFromFirebase(userId, itemId) {
   if (userId) {
-    const itemRef = ref(database, `users/${userId}/items/${itemId}`);
-    await remove(itemRef);
-    return true;
+    try {
+      const itemSnap = await get(ref(database, `users/${userId}/items/${itemId}`));
+      const updates = {};
+      updates[`users/${userId}/items/${itemId}`] = null;
+
+      if (itemSnap.exists()) {
+        const itemVal = itemSnap.val();
+        if (itemVal && itemVal.modifierSets) {
+          Object.keys(itemVal.modifierSets).forEach((setId) => {
+            updates[`users/${userId}/modifierSetItems/${setId}/${itemId}`] = null;
+          });
+        }
+      }
+
+      await update(ref(database), updates);
+      return true;
+    } catch (e) {
+      console.warn("Error deleting item with modifier cleanup, falling back to direct removal:", e);
+      const itemRef = ref(database, `users/${userId}/items/${itemId}`);
+      await remove(itemRef);
+      return true;
+    }
   }
 
   const currentItems = getLocalItems();
   const updated = currentItems.filter((i) => i.id !== itemId);
   setLocalItems(updated);
+
+  // Clean local modifier set items index for guest
+  try {
+    const raw = localStorage.getItem("sq_dashboard_modifier_set_items");
+    if (raw) {
+      const index = JSON.parse(raw);
+      let changed = false;
+      Object.keys(index).forEach((setId) => {
+        if (index[setId] && index[setId][itemId]) {
+          delete index[setId][itemId];
+          changed = true;
+        }
+      });
+      if (changed) {
+        localStorage.setItem("sq_dashboard_modifier_set_items", JSON.stringify(index));
+        window.dispatchEvent(new CustomEvent("sq_modifier_set_items_updated", { detail: index }));
+      }
+    }
+  } catch (err) {
+    console.warn("Guest local modifier index cleanup error:", err);
+  }
+
   return true;
 }
 

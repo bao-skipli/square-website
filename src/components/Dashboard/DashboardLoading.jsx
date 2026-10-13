@@ -1,12 +1,14 @@
 import React, { PureComponent } from "react";
+import "./DashboardLoading.css";
 
 export default class DashboardLoading extends PureComponent {
   render() {
-    const { message, size = 36 } = this.props;
+    const { message, size = 36, fullScreen = false } = this.props;
+    const isFullScreen = fullScreen || Boolean(message);
 
     return (
       <div
-        className="sq-dashboard-loading-area"
+        className={`sq-dashboard-loading-area ${isFullScreen ? "is-fullscreen" : ""}`}
         role="status"
         aria-live="polite"
         aria-label="Loading content"

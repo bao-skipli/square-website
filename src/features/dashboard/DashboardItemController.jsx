@@ -9,6 +9,10 @@ import {
 export class DashboardItemController extends DashboardBase {
   openCreateItem = (updateUrl = true) => {
     this.setState({
+      currentView: "item-library",
+      activeMenu: "item-library",
+      isItemsMenusOpen: true,
+      isItemsOpen: true,
       isCreateItemOpen: true,
       editingItemId: null,
       formName: "",
@@ -32,6 +36,10 @@ export class DashboardItemController extends DashboardBase {
   openEditItem = (item, updateUrl = true) => {
     const rawPrice = item.price ? item.price.replace("$", "") : "";
     this.setState({
+      currentView: "item-library",
+      activeMenu: "item-library",
+      isItemsMenusOpen: true,
+      isItemsOpen: true,
       isCreateItemOpen: true,
       editingItemId: item.id,
       formName: item.name || "",

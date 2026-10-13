@@ -11,16 +11,19 @@ import {
   INITIAL_LIBRARY_ITEMS,
   MENU_LABELS,
 } from "./dashboardConstants";
+import { getInitialDashboardRouteState } from "./dashboardRouteHelper";
 
 export class DashboardBase extends Component {
   constructor(props) {
     super(props);
+    const initialRoute = getInitialDashboardRouteState(props.router?.location?.pathname);
+
     this.state = {
       businessName: "Skipli",
-      currentView: "home",
-      activeMenu: "home",
-      isItemsMenusOpen: false,
-      isItemsOpen: false,
+      currentView: initialRoute.currentView,
+      activeMenu: initialRoute.activeMenu,
+      isItemsMenusOpen: initialRoute.isItemsMenusOpen,
+      isItemsOpen: initialRoute.isItemsOpen,
       searchQuery: "",
       aiQuery: "",
       dismissedPosCard: false,
@@ -30,7 +33,7 @@ export class DashboardBase extends Component {
 
       items: [...INITIAL_LIBRARY_ITEMS],
       librarySearchQuery: "",
-      isCreateItemOpen: false,
+      isCreateItemOpen: initialRoute.isCreateItemOpen,
       isHeaderScrolled: false,
       formError: "",
 
@@ -44,17 +47,17 @@ export class DashboardBase extends Component {
 
       isActionsOpen: false,
 
-      formName: "",
+      formName: initialRoute.formName,
       formItemType: "Prepared food and beverage",
-      formKitchenName: "",
-      formPrice: "",
+      formKitchenName: initialRoute.formKitchenName,
+      formPrice: initialRoute.formPrice,
       formPriceUnit: "ea",
-      formDescription: "",
-      formCategory: "",
-      formMenu: "",
-      formSku: "",
-      formGtin: "",
-      formStatus: "Available",
+      formDescription: initialRoute.formDescription,
+      formCategory: initialRoute.formCategory,
+      formMenu: initialRoute.formMenu,
+      formSku: initialRoute.formSku,
+      formGtin: initialRoute.formGtin,
+      formStatus: initialRoute.formStatus,
       formShippingWeight: "0.00",
       formCannotBePurchasedAlone: false,
       formSkipCustomization: true,
@@ -73,13 +76,13 @@ export class DashboardBase extends Component {
       expandedCategoryIds: ["cat-food"],
       selectedCategoryIds: [],
 
-      isCreateCategoryOpen: false,
-      editingCategoryId: null,
-      categoryFormName: "",
-      categoryFormParentId: null,
-      categoryFormItems: [],
-      categoryFormPointsOfSale: true,
-      categoryFormInitial: null,
+      isCreateCategoryOpen: initialRoute.isCreateCategoryOpen,
+      editingCategoryId: initialRoute.editingCategoryId,
+      categoryFormName: initialRoute.categoryFormName,
+      categoryFormParentId: initialRoute.categoryFormParentId,
+      categoryFormItems: initialRoute.categoryFormItems,
+      categoryFormPointsOfSale: initialRoute.categoryFormPointsOfSale,
+      categoryFormInitial: initialRoute.categoryFormInitial,
       isCategoryActionsOpen: false,
 
       isParentCategoryModalOpen: false,
@@ -90,16 +93,17 @@ export class DashboardBase extends Component {
       addItemsSearch: "",
       draftSelectedItems: [],
 
-      editingItemId: null,
-      itemFormInitial: null,
+      editingItemId: initialRoute.editingItemId,
+      itemFormInitial: initialRoute.itemFormInitial,
       isItemActionsOpen: false,
 
       isUnsavedChangesModalOpen: false,
       unsavedChangesTarget: "item",
 
       userId: null,
-      isHomeLoading: true,
-      isContentLoading: false,
+      isHomeLoading: initialRoute.isHomeLoading,
+      isContentLoading: initialRoute.isContentLoading,
+      hasLoadedModifiers: false,
       isSavingItem: false,
       isSavingCategory: false,
       categoryFormError: "",
@@ -120,6 +124,10 @@ export class DashboardBase extends Component {
     this.categoriesFirstPromise = new Promise((resolve) => {
       this.resolveCategoriesFirst = resolve;
     });
+    this.modifiersFirstPromise = new Promise((resolve) => {
+      this.resolveModifiersFirst = resolve;
+    });
+    this.hasLoadedModifiers = false;
 
     this.unsubscribeAuth = null;
     this.unsubscribeHome = null;
@@ -134,7 +142,9 @@ export class DashboardBase extends Component {
     this._isMounted = true;
     const initialPath = this.props.router?.location?.pathname || "/dashboard";
     let initialView = "home";
-    if (initialPath.includes("/categories")) {
+    if (initialPath.includes("/modifiers")) {
+      initialView = "modifiers";
+    } else if (initialPath.includes("/categories")) {
       initialView = "categories";
     } else if (initialPath.includes("/library")) {
       initialView = "item-library";
@@ -176,6 +186,7 @@ export class DashboardBase extends Component {
       const prevPath = prevProps.router.location.pathname;
       const newPath = this.props.router.location.pathname;
       const getBaseView = (path) => {
+        if (path.includes("/modifiers")) return "modifiers";
         if (path.includes("/categories")) return "categories";
         if (path.includes("/library")) return "item-library";
         if (path === "/dashboard" || path === "/dashboard/") return "home";
@@ -190,7 +201,7 @@ export class DashboardBase extends Component {
     }
   }
 
-  setupRealtimeSubscriptions = (userId) => {
+  setupRealtimeSubscriptions(userId) {
     if (this.unsubscribeHome) this.unsubscribeHome();
     if (this.unsubscribeItems) this.unsubscribeItems();
     if (this.unsubscribeCategories) this.unsubscribeCategories();
@@ -212,9 +223,30 @@ export class DashboardBase extends Component {
       userId,
       (items) => {
         this.setState({ items });
+        const currentPath = this.props.router?.location?.pathname || "";
+        if (currentPath.startsWith("/dashboard/items/library/")) {
+          const itemId = currentPath.replace("/dashboard/items/library/", "");
+          const targetItem = items.find((i) => i.id === itemId);
+          if (targetItem) {
+            this.openEditItem(targetItem, false);
+          } else if (this.hasLoadedItems) {
+            this.navigateToItemLibrary();
+          }
+        }
       },
       (items) => {
+        this.hasLoadedItems = true;
         this.resolveItemsFirst(items);
+        const currentPath = this.props.router?.location?.pathname || "";
+        if (currentPath.startsWith("/dashboard/items/library/")) {
+          const itemId = currentPath.replace("/dashboard/items/library/", "");
+          const targetItem = items.find((i) => i.id === itemId);
+          if (targetItem) {
+            this.openEditItem(targetItem, false);
+          } else {
+            this.navigateToItemLibrary();
+          }
+        }
       }
     );
     this.unsubscribeItems = itemsSub.unsubscribe;
@@ -223,13 +255,34 @@ export class DashboardBase extends Component {
       userId,
       (categories) => {
         this.setState({ categories });
+        const currentPath = this.props.router?.location?.pathname || "";
+        if (currentPath.startsWith("/dashboard/items/categories/")) {
+          const catId = currentPath.replace("/dashboard/items/categories/", "");
+          const targetCat = categories.find((c) => c.id === catId);
+          if (targetCat) {
+            this.openEditCategory(targetCat, false);
+          } else if (this.hasLoadedCategories) {
+            this.navigateToCategories();
+          }
+        }
       },
       (categories) => {
+        this.hasLoadedCategories = true;
         this.resolveCategoriesFirst(categories);
+        const currentPath = this.props.router?.location?.pathname || "";
+        if (currentPath.startsWith("/dashboard/items/categories/")) {
+          const catId = currentPath.replace("/dashboard/items/categories/", "");
+          const targetCat = categories.find((c) => c.id === catId);
+          if (targetCat) {
+            this.openEditCategory(targetCat, false);
+          } else {
+            this.navigateToCategories();
+          }
+        }
       }
     );
     this.unsubscribeCategories = catSub.unsubscribe;
-  };
+  }
 
   startViewLoading = async (targetView) => {
     const loadingId = ++this.activeLoadingId;
@@ -279,6 +332,32 @@ export class DashboardBase extends Component {
       if (this._isMounted && this.activeLoadingId === loadingId) {
         this.setState({ isContentLoading: false });
       }
+    } else if (targetView === "modifiers") {
+      this.setState({ isContentLoading: true, isHomeLoading: false });
+      try {
+        if (!this.hasLoadedModifiers) {
+          const sets = await withMinDelay(this.modifiersFirstPromise, MIN_LOADING_MS);
+          this.hasLoadedModifiers = true;
+          if (this._isMounted && Array.isArray(sets)) {
+            this.setState({ modifierSets: sets, hasLoadedModifiers: true });
+            const currentPath = this.props.router?.location?.pathname || "";
+            if (currentPath.startsWith("/dashboard/items/modifiers/")) {
+              const setId = currentPath.replace("/dashboard/items/modifiers/", "");
+              const targetSet = sets.find((s) => s.id === setId);
+              if (targetSet && this.openEditModifierSet) {
+                this.openEditModifierSet(targetSet, false);
+              }
+            }
+          }
+        } else {
+          await withMinDelay(Promise.resolve(), MIN_LOADING_MS);
+        }
+      } catch (err) {
+        console.warn("Modifiers initial load error:", err);
+      }
+      if (this._isMounted && this.activeLoadingId === loadingId) {
+        this.setState({ isContentLoading: false, hasLoadedModifiers: true });
+      }
     } else {
       this.setState({ isContentLoading: true, isHomeLoading: false });
       try {
@@ -300,7 +379,42 @@ export class DashboardBase extends Component {
     if (!this.props.router?.location) return;
     const { pathname } = this.props.router.location;
 
-    if (pathname === "/dashboard/items/categories/new") {
+    if (pathname === "/dashboard/items/modifiers/new") {
+      this.setState({
+        currentView: "modifiers",
+        activeMenu: "modifiers",
+        isItemsMenusOpen: true,
+        isItemsOpen: true,
+        isCreateModifierOpen: true,
+        editingModifierSetId: null,
+        editingModifierSet: null,
+      });
+    } else if (pathname.startsWith("/dashboard/items/modifiers/")) {
+      const setId = pathname.replace("/dashboard/items/modifiers/", "");
+      const set = this.state.modifierSets?.find((s) => s.id === setId);
+      if (set && this.openEditModifierSet) {
+        this.openEditModifierSet(set, false);
+      } else if (this.hasLoadedModifiers && this.navigateToModifiers) {
+        this.navigateToModifiers();
+      } else {
+        this.setState({
+          currentView: "modifiers",
+          activeMenu: "modifiers",
+          isItemsMenusOpen: true,
+          isItemsOpen: true,
+          isCreateModifierOpen: true,
+          editingModifierSetId: setId,
+        });
+      }
+    } else if (pathname === "/dashboard/items/modifiers") {
+      this.setState({
+        currentView: "modifiers",
+        activeMenu: "modifiers",
+        isItemsMenusOpen: true,
+        isItemsOpen: true,
+        isCreateModifierOpen: false,
+      });
+    } else if (pathname === "/dashboard/items/categories/new") {
       this.setState({
         currentView: "categories",
         activeMenu: "categories",
@@ -319,8 +433,17 @@ export class DashboardBase extends Component {
       const cat = this.state.categories.find((c) => c.id === catId);
       if (cat) {
         this.openEditCategory(cat, false);
-      } else {
+      } else if (this.hasLoadedCategories && this.navigateToCategories) {
         this.navigateToCategories();
+      } else {
+        this.setState({
+          currentView: "categories",
+          activeMenu: "categories",
+          isItemsMenusOpen: true,
+          isItemsOpen: true,
+          isCreateCategoryOpen: true,
+          editingCategoryId: catId,
+        });
       }
     } else if (pathname === "/dashboard/items/categories") {
       this.setState({
@@ -354,8 +477,17 @@ export class DashboardBase extends Component {
       const item = this.state.items.find((i) => i.id === itemId);
       if (item) {
         this.openEditItem(item, false);
-      } else {
+      } else if (this.hasLoadedItems && this.navigateToItemLibrary) {
         this.navigateToItemLibrary();
+      } else {
+        this.setState({
+          currentView: "item-library",
+          activeMenu: "item-library",
+          isItemsMenusOpen: true,
+          isItemsOpen: true,
+          isCreateItemOpen: true,
+          editingItemId: itemId,
+        });
       }
     } else if (
       pathname === "/dashboard/items/library" ||
@@ -455,6 +587,12 @@ export class DashboardBase extends Component {
       this.navigateToItemLibrary();
     } else if (menuKey === "categories") {
       this.navigateToCategories();
+    } else if (menuKey === "modifiers") {
+      if (this.navigateToModifiers) {
+        this.navigateToModifiers();
+      } else {
+        this.setState({ activeMenu: "modifiers", currentView: "modifiers" });
+      }
     } else {
       if (this.state.currentView !== menuKey) {
         this.startViewLoading(menuKey);

@@ -295,3 +295,16 @@ export class SavingsCoinIcon extends PureComponent {
   }
 }
 
+export class StoreIcon extends PureComponent {
+  render() {
+    const { size = 18, color = "currentColor", className = "" } = this.props;
+    return (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
+        <path d="m2 7 2-4h16l2 4" />
+        <path d="M2 7v1a3 3 0 0 0 6 0v-1m0 0a3 3 0 0 0 6 0v-1m0 0a3 3 0 0 0 6 0v-1" />
+        <path d="M4 11v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-9" />
+      </svg>
+    );
+  }
+}
+

@@ -1,0 +1,58 @@
+/* ==========================================================================
+   DASHBOARD LOADING SPINNER & VIEW
+   Self-contained styles ensuring perfect viewport centering from frame 0
+   ========================================================================== */
+
+.sq-dashboard-loading-area {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: calc(100vh - 140px);
+  height: 100%;
+  flex: 1;
+  box-sizing: border-box;
+}
+
+.sq-dashboard-loading-area.is-fullscreen {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  min-height: 100vh;
+  background-color: #fafafa;
+  z-index: 99999;
+}
+
+.sq-dashboard-loading-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.sq-dashboard-loading-spinner {
+  width: 36px;
+  height: 36px;
+  animation: sq-spin 0.75s linear infinite;
+  display: block;
+  user-select: none;
+}
+
+.sq-dashboard-loading-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b7280;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+@keyframes sq-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

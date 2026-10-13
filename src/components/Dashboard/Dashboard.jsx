@@ -1,5 +1,5 @@
 import React from "react";
-import { DashboardCategoryController } from "@/features/dashboard/DashboardCategoryController";
+import { DashboardModifierController } from "@/features/dashboard/DashboardModifierController";
 import { withRouter } from "@/features/dashboard/withRouter";
 import {
   getFilteredItems,
@@ -27,11 +27,16 @@ import {
   GenericView,
   UnsavedChangesModal,
 } from "@/features/dashboard/common";
+import {
+  ModifiersView,
+  ModifierSetModal,
+  ApplyToItemsModal,
+} from "@/features/dashboard/modifiers";
 import HomeSkeleton from "./HomeSkeleton";
 import DashboardLoading from "./DashboardLoading";
 import "./Dashboard.css";
 
-class Dashboard extends DashboardCategoryController {
+class Dashboard extends DashboardModifierController {
   render() {
     const {
       businessName,
@@ -83,6 +88,14 @@ class Dashboard extends DashboardCategoryController {
       isSavingItem,
       isSavingCategory,
       categoryFormError,
+      hasLoadedModifiers = false,
+      modifierSets = [],
+      modifierSetItems = {},
+      isCreateModifierOpen = false,
+      editingModifierSetId = null,
+      editingModifierSet = null,
+      isApplyToItemsOpen = false,
+      applyToItemsSet = null,
     } = this.state;
 
     const filteredItems = getFilteredItems(
@@ -119,12 +132,23 @@ class Dashboard extends DashboardCategoryController {
           onNavigateToHome={this.navigateToHome}
           onNavigateToItemLibrary={this.navigateToItemLibrary}
           onNavigateToCategories={this.navigateToCategories}
+          onNavigateToModifiers={this.navigateToModifiers}
           onMenuClick={this.handleMenuClick}
         >
           {currentView === "home" && isHomeLoading ? (
             <HomeSkeleton />
-          ) : currentView !== "home" && isContentLoading ? (
+          ) : currentView !== "home" && (isContentLoading || (currentView === "modifiers" && !hasLoadedModifiers)) ? (
             <DashboardLoading />
+          ) : currentView === "modifiers" ? (
+            <ModifiersView
+              isLoading={!hasLoadedModifiers || isContentLoading}
+              modifierSets={modifierSets}
+              locations={[{ id: "loc-skipli", name: "Skipli" }]}
+              onOpenCreateModifier={this.openCreateModifierSet}
+              onOpenEditModifier={this.openEditModifierSet}
+              onOpenApplyToItems={this.openApplyToItems}
+              onReorderSets={this.handleReorderModifierSets}
+            />
           ) : currentView === "categories" ? (
             <CategoriesView
               onOpenCreateCategory={this.openCreateCategory}
@@ -299,6 +323,34 @@ class Dashboard extends DashboardCategoryController {
           onResetAllDrafts={this.handleResetAllDrafts}
           onApplyFilters={this.handleApplyFilters}
           onChangeDrawerView={(view) => this.setState({ filterDrawerView: view })}
+        />
+
+        {/* Create / Edit Modifier Set Fullscreen Modal */}
+        {isCreateModifierOpen && (
+          <ModifierSetModal
+            key={editingModifierSetId || "new_modifier_set"}
+            isOpen={isCreateModifierOpen}
+            editingModifierSetId={editingModifierSetId}
+            initialData={editingModifierSet}
+            locations={[{ id: "loc-skipli", name: "Skipli" }]}
+            onClose={this.handleCloseModifierSet}
+            onSave={this.handleSaveModifierSet}
+            onDelete={this.handleDeleteModifierSet}
+          />
+        )}
+
+        {/* Apply Modifier Set to Items Modal */}
+        <ApplyToItemsModal
+          isOpen={isApplyToItemsOpen}
+          onClose={this.handleCloseApplyToItems}
+          modifierSet={applyToItemsSet}
+          items={items}
+          appliedItemIds={
+            applyToItemsSet && modifierSetItems[applyToItemsSet.id]
+              ? Object.keys(modifierSetItems[applyToItemsSet.id])
+              : []
+          }
+          onApply={this.handleApplyModifierSetToItems}
         />
       </div>
     );

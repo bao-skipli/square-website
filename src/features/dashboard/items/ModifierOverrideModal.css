@@ -1,0 +1,131 @@
+/* Modifier Override Modal (image copy 10.png) */
+.sq-override-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.sq-override-modal-header {
+  height: 72px;
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  background-color: #ffffff;
+  box-sizing: border-box;
+}
+
+.sq-override-close-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #f4f4f5;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #18181b;
+  transition: background-color 0.15s ease;
+}
+
+.sq-override-close-btn:hover {
+  background-color: #e4e4e7;
+}
+
+.sq-override-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sq-override-actions-wrapper {
+  position: relative;
+}
+
+.sq-override-modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 32px 100px;
+}
+
+.sq-override-form-container {
+  max-width: 860px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.sq-override-main-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #18181b;
+  margin: 0 0 8px;
+}
+
+.sq-override-main-desc {
+  font-size: 14px;
+  color: #71717a;
+  margin: 0 0 32px;
+}
+
+.sq-override-section {
+  margin-bottom: 16px;
+}
+
+.sq-override-section-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #18181b;
+  margin: 0 0 16px;
+}
+
+/* Overrides table */
+.sq-override-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.sq-override-table th {
+  text-align: left;
+  font-size: 13px;
+  font-weight: 600;
+  color: #71717a;
+  padding: 10px 12px;
+  border-bottom: 1px solid #e4e4e7;
+}
+
+.sq-override-table td {
+  padding: 14px 12px;
+  border-bottom: 1px solid #f4f4f5;
+  font-size: 14px;
+  color: #18181b;
+  vertical-align: middle;
+}
+
+.sq-override-col-name {
+  width: 50%;
+  font-weight: 500;
+}
+
+.sq-override-col-price {
+  width: 30%;
+  color: #52525b;
+}
+
+.sq-override-col-preselect {
+  width: 20%;
+  text-align: left;
+}
+
+.sq-override-checkbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #18181b;
+}

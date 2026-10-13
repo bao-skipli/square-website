@@ -77,7 +77,7 @@ export default class App extends Component {
           <Route
             path="/dashboard"
             element={
-              <Suspense fallback={<DashboardLoading message="Loading Square..." />}>
+              <Suspense fallback={<DashboardLoading fullScreen message="Loading Square..." />}>
                 <Dashboard />
               </Suspense>
             }
@@ -85,7 +85,7 @@ export default class App extends Component {
           <Route
             path="/dashboard/items/library"
             element={
-              <Suspense fallback={<DashboardLoading message="Loading Square..." />}>
+              <Suspense fallback={<DashboardLoading fullScreen message="Loading Square..." />}>
                 <Dashboard />
               </Suspense>
             }
@@ -93,7 +93,7 @@ export default class App extends Component {
           <Route
             path="/dashboard/items/library/new"
             element={
-              <Suspense fallback={<DashboardLoading message="Loading Square..." />}>
+              <Suspense fallback={<DashboardLoading fullScreen message="Loading Square..." />}>
                 <Dashboard />
               </Suspense>
             }
@@ -101,7 +101,7 @@ export default class App extends Component {
           <Route
             path="/dashboard/items/library/:itemId"
             element={
-              <Suspense fallback={<DashboardLoading message="Loading Square..." />}>
+              <Suspense fallback={<DashboardLoading fullScreen message="Loading Square..." />}>
                 <Dashboard />
               </Suspense>
             }
@@ -109,7 +109,7 @@ export default class App extends Component {
           <Route
             path="/dashboard/items/categories"
             element={
-              <Suspense fallback={<DashboardLoading message="Loading Square..." />}>
+              <Suspense fallback={<DashboardLoading fullScreen message="Loading Square..." />}>
                 <Dashboard />
               </Suspense>
             }
@@ -117,7 +117,7 @@ export default class App extends Component {
           <Route
             path="/dashboard/items/categories/new"
             element={
-              <Suspense fallback={<DashboardLoading message="Loading Square..." />}>
+              <Suspense fallback={<DashboardLoading fullScreen message="Loading Square..." />}>
                 <Dashboard />
               </Suspense>
             }
@@ -125,7 +125,31 @@ export default class App extends Component {
           <Route
             path="/dashboard/items/categories/:categoryId"
             element={
-              <Suspense fallback={<DashboardLoading message="Loading Square..." />}>
+              <Suspense fallback={<DashboardLoading fullScreen message="Loading Square..." />}>
+                <Dashboard />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/dashboard/items/modifiers"
+            element={
+              <Suspense fallback={<DashboardLoading fullScreen message="Loading Square..." />}>
+                <Dashboard />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/dashboard/items/modifiers/new"
+            element={
+              <Suspense fallback={<DashboardLoading fullScreen message="Loading Square..." />}>
+                <Dashboard />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/dashboard/items/modifiers/:setId"
+            element={
+              <Suspense fallback={<DashboardLoading fullScreen message="Loading Square..." />}>
                 <Dashboard />
               </Suspense>
             }
@@ -133,7 +157,7 @@ export default class App extends Component {
           <Route
             path="/dashboard/*"
             element={
-              <Suspense fallback={<DashboardLoading message="Loading Square..." />}>
+              <Suspense fallback={<DashboardLoading fullScreen message="Loading Square..." />}>
                 <Dashboard />
               </Suspense>
             }

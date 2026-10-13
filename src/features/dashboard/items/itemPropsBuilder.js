@@ -1,6 +1,15 @@
 export function buildItemDetailsProps(comp) {
   const s = comp.state;
   return {
+    editingItemId: s.editingItemId,
+    itemModifierSetsMap: s.editingItemId
+      ? s.items.find((i) => i.id === s.editingItemId)?.modifierSets || {}
+      : {},
+    allModifierSets: s.modifierSets || [],
+    onApplyItemModifierSets: comp.handleApplyItemModifierSets,
+    onRemoveItemModifierSet: comp.handleRemoveItemModifierSet,
+    onSaveItemModifierOverrides: comp.handleSaveItemModifierOverrides,
+    onReorderItemModifierSets: comp.handleReorderItemModifierSets,
     formItemType: s.formItemType,
     formName: s.formName,
     formError: s.formError,

@@ -7,6 +7,10 @@ import {
 export class DashboardCategoryController extends DashboardItemController {
   openCreateCategory = (updateUrl = true) => {
     this.setState({
+      currentView: "categories",
+      activeMenu: "categories",
+      isItemsMenusOpen: true,
+      isItemsOpen: true,
       isCreateCategoryOpen: true,
       editingCategoryId: null,
       categoryFormName: "",
@@ -28,6 +32,10 @@ export class DashboardCategoryController extends DashboardItemController {
       .map((i) => i.id);
 
     this.setState({
+      currentView: "categories",
+      activeMenu: "categories",
+      isItemsMenusOpen: true,
+      isItemsOpen: true,
       isCreateCategoryOpen: true,
       editingCategoryId: cat.id,
       categoryFormName: cat.name,
