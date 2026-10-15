@@ -1,117 +1,311 @@
-import React from "react";
-import { TrashIcon, PlusIcon } from "@/components/ui/Icon";
+import React, { useState, useEffect, useRef } from "react";
+import { CloseXIcon, PlusIcon } from "@/components/ui/Icon";
+import { UnsavedChangesModal } from "@/features/dashboard/common";
+import { auth } from "@/firebase/firebaseConfig";
+import {
+  saveModifierSet,
+  getLocalModifierSets,
+  setLocalModifierSets,
+} from "@/firebase/modifiersService";
+
+function getLocationDisplay(set, locations = [{ id: "loc-skipli", name: "Skipli" }]) {
+  if (!set.locationIds || set.locationIds.allLocations) {
+    if (locations.length > 1) return "All locations";
+    return locations[0]?.name || "Skipli";
+  }
+  const locNames = Object.keys(set.locationIds)
+    .filter((k) => set.locationIds[k])
+    .map((k) => locations.find((l) => l.id === k)?.name || k);
+  return locNames.length > 0 ? locNames.join(", ") : "All locations";
+}
+
+function getSetOptionsSummary(set) {
+  if (set.type === "text") {
+    const limit = set.textSettings?.charLimit || 150;
+    return `Text · ${limit} chars`;
+  }
+  if (!set.modifiers) return "No modifiers";
+  const modList = Array.isArray(set.modifiers) ? set.modifiers : Object.values(set.modifiers);
+  if (modList.length === 0) return "No modifiers";
+  return modList.map((m) => m.name).filter(Boolean).join(", ");
+}
 
 export default function NestedModifierEditor({
-  nestedSet,
-  onChange,
-  onRemove,
+  isOpen,
+  onClose,
+  initialSelectedSetIds = [],
+  allModifierSets = [],
+  currentModifierSetId = null,
+  locations = [{ id: "loc-skipli", name: "Skipli" }],
+  onSave,
 }) {
-  if (!nestedSet) return null;
+  const [selectedMap, setSelectedMap] = useState({});
+  const [isUnsavedModalOpen, setIsUnsavedModalOpen] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [newSetName, setNewSetName] = useState("");
+  const [createdSets, setCreatedSets] = useState([]);
+  const initialSnapshotRef = useRef("");
 
-  const options = nestedSet.modifiers || [];
+  useEffect(() => {
+    if (!isOpen) return;
 
-  const handleNameChange = (val) => {
-    onChange({
-      ...nestedSet,
-      name: val,
+    const initial = {};
+    (initialSelectedSetIds || []).forEach((id) => {
+      if (id) initial[id] = true;
     });
+
+    setSelectedMap(initial);
+    initialSnapshotRef.current = JSON.stringify(initial);
+    setIsUnsavedModalOpen(false);
+    setIsCreating(false);
+    setNewSetName("");
+  }, [isOpen, initialSelectedSetIds]);
+
+  const hasChanges = () => {
+    return JSON.stringify(selectedMap) !== initialSnapshotRef.current;
   };
 
-  const handleOptionNameChange = (idx, val) => {
-    const next = [...options];
-    next[idx] = { ...next[idx], name: val };
-    onChange({ ...nestedSet, modifiers: next });
+  const handleCloseAttempt = () => {
+    if (hasChanges()) {
+      setIsUnsavedModalOpen(true);
+    } else {
+      onClose();
+    }
   };
 
-  const handleOptionPriceChange = (idx, val) => {
-    // Only numeric
-    const cleanNum = val.replace(/[^0-9]/g, "");
-    const cents = parseInt(cleanNum, 10) || 0;
-    const next = [...options];
-    next[idx] = { ...next[idx], priceCents: cents };
-    onChange({ ...nestedSet, modifiers: next });
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        if (isUnsavedModalOpen) return;
+        if (isCreating) {
+          setIsCreating(false);
+          return;
+        }
+        handleCloseAttempt();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, isUnsavedModalOpen, isCreating, selectedMap]);
+
+  if (!isOpen) return null;
+
+  // Fallback to local sets if none passed
+  const baseSets = allModifierSets && allModifierSets.length > 0
+    ? allModifierSets
+    : getLocalModifierSets();
+
+  // Combine with any sets newly created in this session
+  const combinedSets = [...createdSets, ...baseSets.filter((s) => !createdSets.some((c) => c.id === s.id))];
+
+  // Exclude current modifier set being edited to prevent cyclical nesting
+  const availableSets = combinedSets.filter((s) => s.id !== currentModifierSetId);
+
+  const handleToggleSet = (setId) => {
+    setSelectedMap((prev) => ({
+      ...prev,
+      [setId]: !prev[setId],
+    }));
   };
 
-  const handleAddOption = () => {
-    const next = [
-      ...options,
-      { id: `nested_mod_${Date.now()}_${options.length}`, name: "", priceCents: 0 },
-    ];
-    onChange({ ...nestedSet, modifiers: next });
+  const handleDone = () => {
+    const selectedSets = availableSets
+      .filter((s) => selectedMap[s.id])
+      .map((s) => ({
+        id: s.id,
+        name: s.name,
+        displayName: s.displayName || s.name,
+        type: s.type || "list",
+        selectionRules: s.selectionRules || null,
+        modifiers: s.modifiers || null,
+        locationIds: s.locationIds || null,
+      }));
+
+    if (onSave) {
+      onSave(selectedSets);
+    }
+    onClose();
   };
 
-  const handleDeleteOption = (idx) => {
-    const next = options.filter((_, i) => i !== idx);
-    onChange({ ...nestedSet, modifiers: next });
+  const handleDiscard = () => {
+    setIsUnsavedModalOpen(false);
+    onClose();
   };
 
-  const formatPrice = (cents) => {
-    if (!cents) return "";
-    return `$${(cents / 100).toFixed(2)}`;
+  const handleResume = () => {
+    setIsUnsavedModalOpen(false);
+  };
+
+  const handleQuickCreate = async () => {
+    const trimmed = newSetName.trim();
+    if (!trimmed) return;
+
+    const newId = `mod_set_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+    const newSet = {
+      id: newId,
+      name: trimmed,
+      displayName: trimmed,
+      type: "list",
+      locationIds: { allLocations: true },
+      channels: { all: true, pointsOfSale: true },
+      modifiers: {},
+      selectionRules: { required: false, allowMultiple: false },
+    };
+
+    try {
+      const user = auth?.currentUser;
+      await saveModifierSet(user?.uid, newSet);
+    } catch (err) {
+      console.warn("Could not save to Firebase, updating local modifier sets:", err);
+      const local = getLocalModifierSets();
+      setLocalModifierSets([newSet, ...local]);
+    }
+
+    setCreatedSets((prev) => [newSet, ...prev]);
+    setSelectedMap((prev) => ({ ...prev, [newId]: true }));
+    setNewSetName("");
+    setIsCreating(false);
   };
 
   return (
-    <div className="sq-nested-mod-wrapper">
-      <div className="sq-nested-mod-header">
-        <div className="sq-nested-mod-title-row">
-          <span className="sq-nested-mod-badge">Nested Set</span>
-          <input
-            type="text"
-            className="sq-nested-mod-name-input"
-            placeholder="Nested set name (e.g., Choose sauce)"
-            value={nestedSet.name || ""}
-            onChange={(e) => handleNameChange(e.target.value)}
-          />
-        </div>
-        <button
-          type="button"
-          className="sq-btn-remove-nested"
-          onClick={onRemove}
-          title="Remove nested modifier set"
+    <>
+      <div className="sq-popup-modal-backdrop" onClick={handleCloseAttempt}>
+        <div
+          className="sq-popup-modal-card sq-nested-modal-card"
+          onClick={(e) => e.stopPropagation()}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Edit nested modifier sets"
         >
-          <TrashIcon size={14} color="#dc2626" />
-          <span>Remove nested set</span>
-        </button>
-      </div>
-
-      <div className="sq-nested-mod-options-list">
-        {options.map((opt, idx) => (
-          <div key={opt.id || idx} className="sq-nested-mod-row">
-            <span className="sq-nested-mod-indent">↳</span>
-            <input
-              type="text"
-              className="sq-nested-input-name"
-              placeholder="Nested option name"
-              value={opt.name || ""}
-              onChange={(e) => handleOptionNameChange(idx, e.target.value)}
-            />
-            <input
-              type="text"
-              className="sq-nested-input-price"
-              placeholder="$0.00"
-              value={formatPrice(opt.priceCents)}
-              onChange={(e) => handleOptionPriceChange(idx, e.target.value)}
-            />
+          {/* Header */}
+          <div className="sq-popup-modal-header">
             <button
               type="button"
-              className="sq-btn-delete-nested-row"
-              onClick={() => handleDeleteOption(idx)}
-              title="Delete option"
+              className="sq-modal-circle-close"
+              onClick={handleCloseAttempt}
+              aria-label="Close"
             >
-              <TrashIcon size={14} color="#a1a1aa" />
+              <CloseXIcon size={18} />
+            </button>
+            <button
+              type="button"
+              className="sq-modal-btn-done is-active"
+              onClick={handleDone}
+            >
+              Done
             </button>
           </div>
-        ))}
 
-        <button
-          type="button"
-          className="sq-btn-add-nested-option"
-          onClick={handleAddOption}
-        >
-          <PlusIcon size={13} />
-          <span>Add option</span>
-        </button>
+          {/* Heading */}
+          <h2 className="sq-nested-modal-title">Edit nested modifier sets</h2>
+          <p className="sq-nested-modal-subtitle">
+            Search for modifiers, or select from the list below
+          </p>
+
+          {/* Action Row: Create modifier set */}
+          {isCreating ? (
+            <div className="sq-nested-quick-create-box">
+              <input
+                type="text"
+                className="sq-nested-quick-input"
+                placeholder="Modifier set name"
+                value={newSetName}
+                onChange={(e) => setNewSetName(e.target.value)}
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleQuickCreate();
+                  if (e.key === "Escape") setIsCreating(false);
+                }}
+              />
+              <div className="sq-nested-quick-btn-group">
+                <button
+                  type="button"
+                  className="sq-nested-quick-btn-cancel"
+                  onClick={() => setIsCreating(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="sq-nested-quick-btn-submit"
+                  onClick={handleQuickCreate}
+                  disabled={!newSetName.trim()}
+                >
+                  Create
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div
+              className="sq-nested-modal-create-row"
+              onClick={() => setIsCreating(true)}
+              role="button"
+              tabIndex={0}
+            >
+              <div className="sq-nested-modal-plus-box">
+                <PlusIcon size={18} color="#18181b" />
+              </div>
+              <span className="sq-nested-modal-create-label">
+                Create modifier set
+              </span>
+            </div>
+          )}
+
+          {/* Divider */}
+          <div className="sq-nested-modal-divider" />
+
+          {/* List of Modifier Sets */}
+          <div className="sq-nested-modal-list">
+            {availableSets.length === 0 ? (
+              <div className="sq-nested-modal-empty">
+                No modifier sets available. Create one above to get started.
+              </div>
+            ) : (
+              availableSets.map((set) => {
+                const isChecked = Boolean(selectedMap[set.id]);
+                return (
+                  <label
+                    key={set.id}
+                    className="sq-nested-modal-item-row"
+                  >
+                    <div className="sq-nested-modal-item-info">
+                      <div className="sq-nested-modal-item-name">
+                        {set.name}
+                      </div>
+                      <div className="sq-nested-modal-item-desc">
+                        {getSetOptionsSummary(set)}
+                      </div>
+                    </div>
+                    <div className="sq-nested-modal-item-right">
+                      <span className="sq-nested-modal-item-location">
+                        {getLocationDisplay(set, locations)}
+                      </span>
+                      <input
+                        type="checkbox"
+                        className="sq-submodal-checkbox"
+                        checked={isChecked}
+                        onChange={() => handleToggleSet(set.id)}
+                        aria-label={`Select ${set.name}`}
+                      />
+                    </div>
+                  </label>
+                );
+              })
+            )}
+          </div>
+        </div>
       </div>
-    </div>
+
+      {/* Confirmation Modal when Discarding / Closing with Unsaved Changes */}
+      <UnsavedChangesModal
+        isOpen={isUnsavedModalOpen}
+        onDiscard={handleDiscard}
+        onResume={handleResume}
+        onSave={handleDone}
+      />
+    </>
   );
 }

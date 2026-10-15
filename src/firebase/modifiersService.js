@@ -165,7 +165,8 @@ export function normalizeModifierSetPayload(setData, currentSetsCount = 0) {
         order: m.order !== undefined ? m.order : idx,
         image: m.image || null,
         appearance: m.appearance && m.appearance.color ? { color: m.appearance.color } : { color: null },
-        nestedSet: m.nestedSet || null,
+        nestedSet: m.nestedSet || (Array.isArray(m.nestedSets) && m.nestedSets[0] ? m.nestedSets[0] : null),
+        nestedSets: Array.isArray(m.nestedSets) && m.nestedSets.length > 0 ? m.nestedSets : (m.nestedSet ? [m.nestedSet] : null),
       };
       idx++;
     });

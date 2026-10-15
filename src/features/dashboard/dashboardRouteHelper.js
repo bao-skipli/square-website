@@ -137,6 +137,11 @@ export function getInitialDashboardRouteState(pathname) {
         }
       }
     }
+  } else if (path.includes("/online")) {
+    currentView = "online-ordering";
+    activeMenu = "online-ordering";
+    isHomeLoading = false;
+    isContentLoading = false;
   } else if (path === "/dashboard" || path === "/dashboard/") {
     currentView = "home";
     activeMenu = "home";

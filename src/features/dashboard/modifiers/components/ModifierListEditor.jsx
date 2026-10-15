@@ -1,35 +1,28 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import {
   UploadImageIcon,
   DotsIcon,
+  DotsDragHandleIcon,
+  CloseXIcon,
 } from "@/components/ui/Icon";
 import Toggle from "@/components/ui/Toggle";
+import { getLocalModifierSets } from "@/firebase/modifiersService";
 import ModifierRowMenu from "./ModifierRowMenu";
 import ModifierAppearancePicker from "./ModifierAppearancePicker";
 import NestedModifierEditor from "./NestedModifierEditor";
-
-function createBlankRow() {
-  return {
-    id: `mod_row_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
-    name: "",
-    priceCents: 0,
-    preselect: false,
-    inStock: true,
-    image: null,
-    appearance: { color: null },
-    nestedSet: null,
-    isPlaceholder: true,
-  };
-}
 
 export default function ModifierListEditor({
   modifiers = [],
   onChange,
   showAvailability = true,
   validationErrors = {},
+  modifierSets = [],
+  currentModifierSetId = null,
+  locations = [{ id: "loc-skipli", name: "Skipli" }],
 }) {
   const [activeMenuId, setActiveMenuId] = useState(null);
   const [activeAppearanceId, setActiveAppearanceId] = useState(null);
+  const [nestedEditorRowId, setNestedEditorRowId] = useState(null);
   const inputRefs = useRef({});
   const fileInputRefs = useRef({});
 
@@ -46,9 +39,65 @@ export default function ModifierListEditor({
     image: null,
     appearance: { color: null },
     nestedSet: null,
+    nestedSets: null,
     isPlaceholder: true,
   };
   const rows = [...realModifiers, placeholderRow];
+
+  // Resolve modifier library
+  const allSets =
+    modifierSets && modifierSets.length > 0
+      ? modifierSets
+      : getLocalModifierSets();
+
+  const getRowNestedSets = (row) => {
+    if (!row) return [];
+    if (Array.isArray(row.nestedSets) && row.nestedSets.length > 0) {
+      return row.nestedSets;
+    }
+    if (row.nestedSet) {
+      return [row.nestedSet];
+    }
+    return [];
+  };
+
+  const formatNestedRuleAndOptions = (set) => {
+    if (!set) return "";
+    if (set.type === "text") {
+      const limit = set.textSettings?.charLimit || 150;
+      const reqText = set.textSettings?.required ? "Required" : "Optional";
+      return `${reqText} · Text (${limit} chars)`;
+    }
+
+    const isRequired = Boolean(set.selectionRules?.required);
+    const reqText = isRequired ? "Required" : "Optional";
+
+    let allowText = "1 allowed";
+    if (set.selectionRules?.allowMultiple) {
+      if (set.selectionRules?.max) {
+        allowText = `Up to ${set.selectionRules.max} allowed`;
+      } else {
+        allowText = "Multiple allowed";
+      }
+    }
+
+    let optionsText = "";
+    if (set.modifiers) {
+      const modList = Array.isArray(set.modifiers)
+        ? set.modifiers
+        : Object.values(set.modifiers);
+      optionsText = modList
+        .map((m) => m.name)
+        .filter(Boolean)
+        .join(", ");
+    }
+
+    const rulePart = `${reqText} / ${allowText}`;
+    if (optionsText) {
+      return `${rulePart} · ${optionsText}`;
+    }
+    return rulePart;
+  };
 
   const handleNameChange = (rowId, val) => {
     if (rowId === placeholderRowIdRef.current) {
@@ -64,9 +113,9 @@ export default function ModifierListEditor({
           image: null,
           appearance: { color: null },
           nestedSet: null,
+          nestedSets: null,
           isPlaceholder: false,
         };
-        // Reset placeholder ID for the subsequent trailing row
         placeholderRowIdRef.current = `mod_placeholder_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
         onChange([...realModifiers, newRow]);
         setTimeout(() => {
@@ -78,7 +127,9 @@ export default function ModifierListEditor({
       return;
     }
 
-    const next = realModifiers.map((r) => (r.id === rowId ? { ...r, name: val } : r));
+    const next = realModifiers.map((r) =>
+      r.id === rowId ? { ...r, name: val } : r
+    );
     onChange(next);
   };
 
@@ -113,12 +164,16 @@ export default function ModifierListEditor({
   };
 
   const handlePreselectChange = (rowId, checked) => {
-    const next = realModifiers.map((r) => (r.id === rowId ? { ...r, preselect: checked } : r));
+    const next = realModifiers.map((r) =>
+      r.id === rowId ? { ...r, preselect: checked } : r
+    );
     onChange(next);
   };
 
   const handleStockChange = (rowId, checked) => {
-    const next = realModifiers.map((r) => (r.id === rowId ? { ...r, inStock: checked } : r));
+    const next = realModifiers.map((r) =>
+      r.id === rowId ? { ...r, inStock: checked } : r
+    );
     onChange(next);
   };
 
@@ -127,31 +182,35 @@ export default function ModifierListEditor({
     onChange(next);
   };
 
-  const handleAddNestedSet = (rowId) => {
+  const handleOpenNestedEditor = (rowId) => {
+    setActiveMenuId(null);
+    setNestedEditorRowId(rowId);
+  };
+
+  const handleSaveNestedSets = (rowId, selectedSets) => {
     const next = realModifiers.map((r) => {
       if (r.id !== rowId) return r;
       return {
         ...r,
-        nestedSet: {
-          id: `nested_${Date.now()}`,
-          name: "",
-          modifiers: [
-            { id: `nested_opt_1`, name: "", priceCents: 0 },
-            { id: `nested_opt_2`, name: "", priceCents: 0 },
-          ],
-        },
+        nestedSets: selectedSets,
+        nestedSet: selectedSets.length > 0 ? selectedSets[0] : null,
       };
     });
     onChange(next);
+    setNestedEditorRowId(null);
   };
 
-  const handleNestedSetChange = (rowId, updatedNested) => {
-    const next = realModifiers.map((r) => (r.id === rowId ? { ...r, nestedSet: updatedNested } : r));
-    onChange(next);
-  };
-
-  const handleRemoveNestedSet = (rowId) => {
-    const next = realModifiers.map((r) => (r.id === rowId ? { ...r, nestedSet: null } : r));
+  const handleRemoveNestedSet = (rowId, setIdToRemove) => {
+    const next = realModifiers.map((r) => {
+      if (r.id !== rowId) return r;
+      const currentSets = getRowNestedSets(r);
+      const updatedSets = currentSets.filter((s) => s.id !== setIdToRemove);
+      return {
+        ...r,
+        nestedSets: updatedSets,
+        nestedSet: updatedSets.length > 0 ? updatedSets[0] : null,
+      };
+    });
     onChange(next);
   };
 
@@ -185,7 +244,9 @@ export default function ModifierListEditor({
         ctx.drawImage(img, 0, 0, width, height);
         const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
 
-        const next = realModifiers.map((r) => (r.id === rowId ? { ...r, image: dataUrl } : r));
+        const next = realModifiers.map((r) =>
+          r.id === rowId ? { ...r, image: dataUrl } : r
+        );
         onChange(next);
       };
       img.src = loadEvent.target.result;
@@ -200,6 +261,8 @@ export default function ModifierListEditor({
     onChange(next);
   };
 
+  const targetNestedRow = realModifiers.find((r) => r.id === nestedEditorRowId);
+
   return (
     <div className="sq-mod-list-section">
       <h3 className="sq-mod-list-section-title">Modifier list</h3>
@@ -213,7 +276,9 @@ export default function ModifierListEditor({
               <th className="sq-mod-col-appearance">Appearance</th>
               <th className="sq-mod-col-price">Price</th>
               <th className="sq-mod-col-preselect">Pre-select</th>
-              {showAvailability && <th className="sq-mod-col-avail">Availability</th>}
+              {showAvailability && (
+                <th className="sq-mod-col-avail">Availability</th>
+              )}
               <th className="sq-mod-col-more" aria-label="More actions"></th>
             </tr>
           </thead>
@@ -221,32 +286,52 @@ export default function ModifierListEditor({
             {rows.map((row, idx) => {
               const isPlaceholder = Boolean(row.isPlaceholder);
               const rowError = validationErrors[row.id];
+              const attachedSets = getRowNestedSets(row);
+              const hasNested = attachedSets.length > 0;
 
               return (
                 <React.Fragment key={row.id}>
-                  <tr className={`sq-mod-row ${isPlaceholder ? "is-placeholder-row" : ""}`}>
-                    {/* Image cell */}
+                  <tr
+                    className={`sq-mod-row ${isPlaceholder ? "is-placeholder-row" : ""} ${
+                      hasNested ? "has-nested" : ""
+                    }`}
+                  >
+                    {/* Image cell with drag handle */}
                     <td className="sq-mod-col-photo">
-                      <input
-                        type="file"
-                        ref={(el) => (fileInputRefs.current[row.id] = el)}
-                        accept="image/*"
-                        style={{ display: "none" }}
-                        onChange={(e) => handleImageSelect(row.id, e)}
-                      />
-                      <button
-                        type="button"
-                        className="sq-btn-mod-image"
-                        title={row.image ? "Change image" : "Add image"}
-                        onClick={() => fileInputRefs.current[row.id]?.click()}
-                        disabled={isPlaceholder}
-                      >
-                        {row.image ? (
-                          <img src={row.image} alt="Modifier" className="sq-mod-thumb-img" />
-                        ) : (
-                          <UploadImageIcon size={18} color="#a1a1aa" />
+                      <div className="sq-mod-photo-drag-wrapper">
+                        {!isPlaceholder && (
+                          <span
+                            className="sq-mod-row-drag-handle"
+                            title="Drag to reorder"
+                          >
+                            <DotsDragHandleIcon size={16} color="#a1a1aa" />
+                          </span>
                         )}
-                      </button>
+                        <input
+                          type="file"
+                          ref={(el) => (fileInputRefs.current[row.id] = el)}
+                          accept="image/*"
+                          style={{ display: "none" }}
+                          onChange={(e) => handleImageSelect(row.id, e)}
+                        />
+                        <button
+                          type="button"
+                          className="sq-btn-mod-image"
+                          title={row.image ? "Change image" : "Add image"}
+                          onClick={() => fileInputRefs.current[row.id]?.click()}
+                          disabled={isPlaceholder}
+                        >
+                          {row.image ? (
+                            <img
+                              src={row.image}
+                              alt="Modifier"
+                              className="sq-mod-thumb-img"
+                            />
+                          ) : (
+                            <UploadImageIcon size={18} color="#a1a1aa" />
+                          )}
+                        </button>
+                      </div>
                     </td>
 
                     {/* Name cell */}
@@ -255,14 +340,22 @@ export default function ModifierListEditor({
                         <input
                           ref={(el) => (inputRefs.current[row.id] = el)}
                           type="text"
-                          className={`sq-mod-name-input ${rowError ? "is-invalid" : ""}`}
+                          className={`sq-mod-name-input ${
+                            rowError ? "is-invalid" : ""
+                          }`}
                           placeholder="New modifier"
                           value={row.name || ""}
-                          onChange={(e) => handleNameChange(row.id, e.target.value)}
+                          onChange={(e) =>
+                            handleNameChange(row.id, e.target.value)
+                          }
                           onKeyDown={(e) => handleNameKeyDown(e, idx)}
                           aria-label="Modifier name"
                         />
-                        {rowError && <span className="sq-mod-inline-error">{rowError}</span>}
+                        {rowError && (
+                          <span className="sq-mod-inline-error">
+                            {rowError}
+                          </span>
+                        )}
                       </div>
                     </td>
 
@@ -272,7 +365,11 @@ export default function ModifierListEditor({
                         <button
                           type="button"
                           className="sq-link-customize"
-                          onClick={() => setActiveAppearanceId(activeAppearanceId === row.id ? null : row.id)}
+                          onClick={() =>
+                            setActiveAppearanceId(
+                              activeAppearanceId === row.id ? null : row.id
+                            )
+                          }
                           disabled={isPlaceholder}
                         >
                           Customize
@@ -287,7 +384,9 @@ export default function ModifierListEditor({
                           isOpen={activeAppearanceId === row.id}
                           onClose={() => setActiveAppearanceId(null)}
                           currentColor={row.appearance?.color}
-                          onSelectColor={(col) => handleAppearanceColor(row.id, col)}
+                          onSelectColor={(col) =>
+                            handleAppearanceColor(row.id, col)
+                          }
                         />
                       </div>
                     </td>
@@ -299,7 +398,9 @@ export default function ModifierListEditor({
                         className="sq-mod-price-input"
                         placeholder="$0.00"
                         value={formatPriceDisplay(row.priceCents)}
-                        onChange={(e) => handlePriceChange(row.id, e.target.value)}
+                        onChange={(e) =>
+                          handlePriceChange(row.id, e.target.value)
+                        }
                         disabled={isPlaceholder}
                         aria-label="Modifier price"
                       />
@@ -311,7 +412,9 @@ export default function ModifierListEditor({
                         type="checkbox"
                         className="sq-mod-preselect-checkbox"
                         checked={Boolean(row.preselect)}
-                        onChange={(e) => handlePreselectChange(row.id, e.target.checked)}
+                        onChange={(e) =>
+                          handlePreselectChange(row.id, e.target.checked)
+                        }
                         disabled={isPlaceholder}
                         aria-label="Pre-select modifier"
                       />
@@ -323,7 +426,9 @@ export default function ModifierListEditor({
                         <div className="sq-mod-avail-wrap">
                           <Toggle
                             checked={row.inStock !== false}
-                            onChange={(val) => handleStockChange(row.id, val)}
+                            onChange={(val) =>
+                              handleStockChange(row.id, val)
+                            }
                             disabled={isPlaceholder}
                             label="In stock"
                           />
@@ -338,7 +443,11 @@ export default function ModifierListEditor({
                           <button
                             type="button"
                             className="sq-btn-mod-more"
-                            onClick={() => setActiveMenuId(activeMenuId === row.id ? null : row.id)}
+                            onClick={() =>
+                              setActiveMenuId(
+                                activeMenuId === row.id ? null : row.id
+                              )
+                            }
                             aria-label="More options"
                           >
                             <DotsIcon size={16} color="#52525b" />
@@ -346,32 +455,85 @@ export default function ModifierListEditor({
                           <ModifierRowMenu
                             isOpen={activeMenuId === row.id}
                             onClose={() => setActiveMenuId(null)}
-                            onAddNested={() => handleAddNestedSet(row.id)}
+                            onAddNested={() => handleOpenNestedEditor(row.id)}
                             onDelete={() => handleDeleteRow(row.id)}
+                            hasNested={hasNested}
                           />
                         </div>
                       )}
                     </td>
                   </tr>
 
-                  {/* Nested set editor (if expanded) */}
-                  {row.nestedSet && (
-                    <tr className="sq-nested-mod-table-row">
-                      <td colSpan={showAvailability ? 7 : 6}>
-                        <NestedModifierEditor
-                          nestedSet={row.nestedSet}
-                          onChange={(updated) => handleNestedSetChange(row.id, updated)}
-                          onRemove={() => handleRemoveNestedSet(row.id)}
-                        />
-                      </td>
-                    </tr>
-                  )}
+                  {/* Attached nested modifier sets (displayed directly underneath modifier, image copy 4.png) */}
+                  {attachedSets.map((nested) => {
+                    const liveSet =
+                      allSets.find((s) => s.id === nested.id) || nested;
+                    return (
+                      <tr
+                        key={`${row.id}_nested_${liveSet.id}`}
+                        className="sq-nested-mod-attached-row"
+                      >
+                        <td className="sq-mod-col-photo" />
+                        <td
+                          colSpan={showAvailability ? 5 : 4}
+                          className="sq-nested-mod-attached-cell"
+                        >
+                          <div className="sq-nested-mod-info-block">
+                            <button
+                              type="button"
+                              className="sq-nested-mod-name-link"
+                              onClick={() => handleOpenNestedEditor(row.id)}
+                              title="Edit nested modifier sets"
+                            >
+                              {liveSet.name}
+                            </button>
+                            <div
+                              className="sq-nested-mod-details-text"
+                              title={formatNestedRuleAndOptions(liveSet)}
+                            >
+                              {formatNestedRuleAndOptions(liveSet)}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="sq-mod-col-more sq-nested-mod-remove-cell">
+                          <button
+                            type="button"
+                            className="sq-btn-remove-nested-pill"
+                            onClick={() =>
+                              handleRemoveNestedSet(row.id, liveSet.id)
+                            }
+                            title="Remove nested modifier set"
+                            aria-label="Remove nested modifier set"
+                          >
+                            <CloseXIcon size={14} color="#71717a" />
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </React.Fragment>
               );
             })}
           </tbody>
         </table>
       </div>
+
+      {/* Nested Modifier Sets Selection Popup Modal (image copy 3.png) */}
+      {nestedEditorRowId && (
+        <NestedModifierEditor
+          isOpen={Boolean(nestedEditorRowId)}
+          onClose={() => setNestedEditorRowId(null)}
+          initialSelectedSetIds={getRowNestedSets(targetNestedRow).map(
+            (s) => s.id
+          )}
+          allModifierSets={allSets}
+          currentModifierSetId={currentModifierSetId}
+          locations={locations}
+          onSave={(selectedSets) =>
+            handleSaveNestedSets(nestedEditorRowId, selectedSets)
+          }
+        />
+      )}
     </div>
   );
 }

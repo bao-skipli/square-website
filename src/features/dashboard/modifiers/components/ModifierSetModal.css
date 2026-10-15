@@ -378,7 +378,20 @@
 }
 
 .sq-mod-col-photo {
-  width: 48px;
+  width: 76px;
+}
+
+.sq-mod-photo-drag-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sq-mod-row-drag-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #a1a1aa;
 }
 
 .sq-btn-mod-image {
@@ -645,117 +658,268 @@
   color: #ffffff;
 }
 
-/* Nested set editor */
-.sq-nested-mod-wrapper {
-  margin: 8px 0 12px 24px;
-  padding: 16px;
-  background-color: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
+/* Nested modifier attached row (displayed right underneath modifier, image copy 4.png) */
+.sq-mod-row.has-nested td {
+  border-bottom: none;
+  padding-bottom: 2px;
 }
 
-.sq-nested-mod-header {
+.sq-nested-mod-attached-row td {
+  border-bottom: 1px solid #e4e4e7;
+  padding-top: 14px;
+  padding-bottom: 14px;
+  vertical-align: top;
+}
+
+.sq-nested-mod-attached-cell {
+  padding-left: 10px;
+}
+
+.sq-nested-mod-info-block {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.sq-nested-mod-name-link {
+  background: none;
+  border: none;
+  padding: 0;
+  text-align: left;
+  font-size: 15px;
+  font-weight: 700;
+  color: #18181b;
+  text-decoration: underline;
+  cursor: pointer;
+  width: fit-content;
+  display: inline-block;
+  line-height: 1.3;
+}
+
+.sq-nested-mod-name-link:hover {
+  opacity: 0.8;
+}
+
+.sq-nested-mod-details-text {
+  font-size: 13px;
+  color: #71717a;
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 520px;
+}
+
+.sq-nested-mod-remove-cell {
+  text-align: right;
+  vertical-align: middle;
+}
+
+.sq-btn-remove-nested-pill {
+  background: none;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #71717a;
+  transition: all 0.15s ease;
+}
+
+.sq-btn-remove-nested-pill:hover {
+  background-color: #f4f4f5;
+  color: #18181b;
+}
+
+/* Edit nested modifier sets popup modal (image copy 3.png) */
+.sq-nested-modal-card {
+  width: 540px;
+  max-width: 92vw;
+  border-radius: 24px;
+  padding: 24px 28px;
+  background-color: #ffffff;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.22);
+}
+
+.sq-nested-modal-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #18181b;
+  margin: 0 0 6px 0;
+  letter-spacing: -0.3px;
+}
+
+.sq-nested-modal-subtitle {
+  font-size: 14px;
+  color: #52525b;
+  margin: 0 0 18px 0;
+  line-height: 1.4;
+}
+
+.sq-nested-modal-create-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
+  gap: 14px;
+  padding: 6px 0;
+  cursor: pointer;
+  border-radius: 8px;
+  user-select: none;
+  transition: opacity 0.15s ease;
 }
 
-.sq-nested-mod-title-row {
+.sq-nested-modal-create-row:hover {
+  opacity: 0.8;
+}
+
+.sq-nested-modal-plus-box {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  background-color: #f4f4f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sq-nested-modal-create-label {
+  font-size: 15px;
+  font-weight: 600;
+  color: #18181b;
+}
+
+.sq-nested-quick-create-box {
   display: flex;
   align-items: center;
   gap: 10px;
-  flex: 1;
+  padding: 6px 0;
 }
 
-.sq-nested-mod-badge {
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  background-color: #e2e8f0;
-  color: #475569;
-  padding: 2px 6px;
-  border-radius: 4px;
-}
-
-.sq-nested-mod-name-input {
+.sq-nested-quick-input {
   flex: 1;
-  max-width: 300px;
-  height: 36px;
-  padding: 0 10px;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  font-size: 13px;
+  height: 42px;
+  padding: 0 14px;
+  border: 1px solid #d4d4d8;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #18181b;
   outline: none;
+  box-sizing: border-box;
 }
 
-.sq-btn-remove-nested {
-  background: none;
-  border: none;
-  color: #dc2626;
-  font-size: 12px;
+.sq-nested-quick-input:focus {
+  border-color: #18181b;
+}
+
+.sq-nested-quick-btn-group {
   display: flex;
-  align-items: center;
-  gap: 4px;
+  gap: 8px;
+}
+
+.sq-nested-quick-btn-cancel {
+  height: 38px;
+  padding: 0 14px;
+  background: none;
+  border: 1px solid #d4d4d8;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #52525b;
   cursor: pointer;
 }
 
-.sq-nested-mod-options-list {
+.sq-nested-quick-btn-submit {
+  height: 38px;
+  padding: 0 18px;
+  background-color: #18181b;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.sq-nested-quick-btn-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.sq-nested-modal-divider {
+  height: 1px;
+  background-color: #f4f4f5;
+  margin: 16px 0 6px 0;
+}
+
+.sq-nested-modal-list {
+  max-height: 360px;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 8px;
 }
 
-.sq-nested-mod-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.sq-nested-mod-indent {
-  color: #94a3b8;
+.sq-nested-modal-empty {
+  padding: 24px 0;
   font-size: 14px;
+  color: #71717a;
+  text-align: center;
 }
 
-.sq-nested-input-name {
-  flex: 1;
-  max-width: 250px;
-  height: 36px;
-  padding: 0 10px;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  font-size: 13px;
-}
-
-.sq-nested-input-price {
-  width: 80px;
-  height: 36px;
-  padding: 0 8px;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  font-size: 13px;
-}
-
-.sq-btn-delete-nested-row {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 4px;
-}
-
-.sq-btn-add-nested-option {
-  align-self: flex-start;
-  background: none;
-  border: 1px dashed #cbd5e1;
-  border-radius: 6px;
-  padding: 6px 12px;
-  font-size: 12px;
-  color: #475569;
+.sq-nested-modal-item-row {
   display: flex;
   align-items: center;
-  gap: 4px;
+  justify-content: space-between;
+  padding: 14px 4px;
   cursor: pointer;
-  margin-top: 4px;
+  border-bottom: 1px solid #f4f4f5;
+  transition: background-color 0.15s;
+  user-select: none;
+}
+
+.sq-nested-modal-item-row:last-child {
+  border-bottom: none;
+}
+
+.sq-nested-modal-item-row:hover {
+  background-color: #fafafa;
+}
+
+.sq-nested-modal-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-right: 16px;
+  overflow: hidden;
+}
+
+.sq-nested-modal-item-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #18181b;
+}
+
+.sq-nested-modal-item-desc {
+  font-size: 13px;
+  color: #71717a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sq-nested-modal-item-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.sq-nested-modal-item-location {
+  font-size: 14px;
+  font-weight: 500;
+  color: #18181b;
 }
 
 /* Selection Rules & Display Settings (image copy 2.png) */

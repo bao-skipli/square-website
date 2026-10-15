@@ -580,6 +580,17 @@ export class DashboardBase extends Component {
     this.setState((prev) => ({ isItemsOpen: !prev.isItemsOpen }));
   };
 
+  navigateToOnlineOrdering = () => {
+    if (this.props.router?.navigate) {
+      this.props.router.navigate("/dashboard/online/store-setup");
+    } else {
+      this.setState({
+        currentView: "online-ordering",
+        activeMenu: "online-ordering",
+      });
+    }
+  };
+
   handleMenuClick = (menuKey) => {
     if (menuKey === "home") {
       this.navigateToHome();
@@ -587,6 +598,8 @@ export class DashboardBase extends Component {
       this.navigateToItemLibrary();
     } else if (menuKey === "categories") {
       this.navigateToCategories();
+    } else if (menuKey === "online-ordering") {
+      this.navigateToOnlineOrdering();
     } else if (menuKey === "modifiers") {
       if (this.navigateToModifiers) {
         this.navigateToModifiers();

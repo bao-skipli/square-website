@@ -6,6 +6,7 @@ export default function ModifierRowMenu({
   onClose,
   onAddNested,
   onDelete,
+  hasNested = false,
 }) {
   const menuRef = useRef(null);
 
@@ -47,7 +48,9 @@ export default function ModifierRowMenu({
         <span className="sq-mod-row-menu-icon">
           <NestedArrowIcon size={16} />
         </span>
-        <span className="sq-mod-row-menu-label">Add nested modifier set</span>
+        <span className="sq-mod-row-menu-label">
+          {hasNested ? "Edit nested modifier sets" : "Add nested modifier set"}
+        </span>
       </button>
 
       <div className="sq-mod-row-menu-divider" />
