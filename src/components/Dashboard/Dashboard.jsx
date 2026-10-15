@@ -32,6 +32,7 @@ import {
   ModifierSetModal,
   ApplyToItemsModal,
 } from "@/features/dashboard/modifiers";
+import OnlineStoreSetupView from "@/features/dashboard/online/OnlineStoreSetupView";
 import HomeSkeleton from "./HomeSkeleton";
 import DashboardLoading from "./DashboardLoading";
 import "./Dashboard.css";
@@ -201,6 +202,13 @@ class Dashboard extends DashboardModifierController {
               selectedVsChip={selectedVsChip}
               selectedChecksChip={selectedChecksChip}
             />
+          ) : currentView === "online-ordering" || currentView === "online" ? (
+            <OnlineStoreSetupView
+              userId={this.state.userId}
+              categories={categories}
+              items={items}
+              locations={[{ id: "loc-skipli", name: "Skipli" }]}
+            />
           ) : (
             <GenericView title={this.getMenuLabel(currentView)} />
           )}
@@ -333,6 +341,7 @@ class Dashboard extends DashboardModifierController {
             editingModifierSetId={editingModifierSetId}
             initialData={editingModifierSet}
             locations={[{ id: "loc-skipli", name: "Skipli" }]}
+            modifierSets={modifierSets}
             onClose={this.handleCloseModifierSet}
             onSave={this.handleSaveModifierSet}
             onDelete={this.handleDeleteModifierSet}

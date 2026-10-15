@@ -41,6 +41,7 @@ export default function ModifierSetModal({
   editingModifierSetId = null,
   initialData = null,
   locations = [{ id: "loc-skipli", name: "Skipli" }],
+  modifierSets = [],
   onSave,
   onDelete,
 }) {
@@ -521,6 +522,9 @@ export default function ModifierSetModal({
                 onChange={setModifiers}
                 showAvailability={isSingleLocation}
                 validationErrors={rowErrors}
+                modifierSets={modifierSets}
+                currentModifierSetId={initialData?.id || editingModifierSetId}
+                locations={locations}
               />
 
               <div className="sq-divider-thick-block" />

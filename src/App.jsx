@@ -11,6 +11,7 @@ const BusinessMcc = lazy(() => import("@/components/Onboarding/BusinessMcc/Busin
 const EstimatedRevenue = lazy(() => import("@/components/Onboarding/EstimatedRevenue/EstimatedRevenue"));
 const SquareBanking = lazy(() => import("@/components/Onboarding/SquareBanking/SquareBanking"));
 const Dashboard = lazy(() => import("@/components/Dashboard/Dashboard"));
+const StorefrontPage = lazy(() => import("@/storefront/StorefrontPage"));
 
 export default class App extends Component {
   render() {
@@ -159,6 +160,14 @@ export default class App extends Component {
             element={
               <Suspense fallback={<DashboardLoading fullScreen message="Loading Square..." />}>
                 <Dashboard />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/store/:slug"
+            element={
+              <Suspense fallback={null}>
+                <StorefrontPage />
               </Suspense>
             }
           />

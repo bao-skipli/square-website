@@ -2,7 +2,7 @@ import React, { PureComponent } from "react";
 
 export default class UnsavedChangesModal extends PureComponent {
   render() {
-    const { isOpen, onDiscard, onResume } = this.props;
+    const { isOpen, onDiscard, onResume, onSave } = this.props;
 
     if (!isOpen) return null;
 
@@ -26,6 +26,15 @@ export default class UnsavedChangesModal extends PureComponent {
             >
               Discard
             </button>
+            {onSave && (
+              <button
+                type="button"
+                className="sq-btn-unsaved-save"
+                onClick={onSave}
+              >
+                Save
+              </button>
+            )}
             <button
               type="button"
               className="sq-btn-unsaved-resume"

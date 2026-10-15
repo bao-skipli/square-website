@@ -3271,6 +3271,23 @@
   opacity: 0.9;
 }
 
+.sq-btn-unsaved-save {
+  flex: 1;
+  height: 46px;
+  border-radius: 9999px;
+  border: none;
+  background-color: #111111;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.sq-btn-unsaved-save:hover {
+  opacity: 0.9;
+}
+
 /* ==========================================================================
    LOADING SPINNER (Custom pure-CSS / SVG vector spinner)
    ========================================================================== */
