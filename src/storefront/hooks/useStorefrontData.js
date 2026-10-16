@@ -1,14 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
 import { subscribeStorefrontData } from "../services/storefrontService";
 
-/**
- * Custom hook to load and listen to public storefront data.
- * @param {string} slug - The store URL slug
- * @returns {object} { status, loaded, store, categories, items, modifierSets, discounts, error, retry }
- */
 export function useStorefrontData(slug) {
   const [data, setData] = useState({
-    status: "loading", // 'loading' | 'ready' | 'notFound' | 'closed' | 'error'
+    status: "loading",
     loaded: {
       store: false,
       categories: false,

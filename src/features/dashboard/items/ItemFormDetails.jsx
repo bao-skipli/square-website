@@ -8,6 +8,7 @@ import {
   StarBadgeIcon,
   ChevronIcon,
 } from "@/components/ui/Icon";
+import { uploadImage } from "@/services/cloudinary";
 import ItemFormFulfillment from "./ItemFormFulfillment";
 import ItemModifiersSection from "./ItemModifiersSection";
 
@@ -20,9 +21,42 @@ export default class ItemFormDetails extends PureComponent {
   state = {
     isUnitDropdownOpen: false,
     unitSearchQuery: "",
+    isUploadingImage: false,
+    uploadError: "",
   };
 
   unitDropdownRef = React.createRef();
+  fileInputRef = React.createRef();
+
+  handleImageFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    this.setState({ isUploadingImage: true, uploadError: "" });
+    try {
+      const result = await uploadImage(file, { folder: "square_items" });
+      if (this.props.onImageUrlChange) {
+        this.props.onImageUrlChange(result.url);
+      }
+    } catch (err) {
+      console.error("Item image upload error:", err);
+      this.setState({
+        uploadError: err?.message || "Failed to upload image. Please try again.",
+      });
+    } finally {
+      this.setState({ isUploadingImage: false });
+      if (this.fileInputRef.current) {
+        this.fileInputRef.current.value = "";
+      }
+    }
+  };
+
+  handleRemoveImage = () => {
+    if (this.props.onImageUrlChange) {
+      this.props.onImageUrlChange("");
+    }
+    this.setState({ uploadError: "" });
+  };
 
   componentDidMount() {
     document.addEventListener("mousedown", this.handleClickOutside);
@@ -67,6 +101,8 @@ export default class ItemFormDetails extends PureComponent {
       onPriceUnitChange,
       formDescription,
       onDescriptionChange,
+      formImageUrl,
+      onImageUrlChange,
       nutritionalInfoOpen,
       onToggleNutritionalInfo,
       businessName,
@@ -84,7 +120,7 @@ export default class ItemFormDetails extends PureComponent {
       ...fulfillmentProps
     } = this.props;
 
-    const { isUnitDropdownOpen, unitSearchQuery } = this.state;
+    const { isUnitDropdownOpen, unitSearchQuery, isUploadingImage, uploadError } = this.state;
     const filteredUnits = AVAILABLE_PRICE_UNITS.filter((u) =>
       u.name.toLowerCase().includes(unitSearchQuery.toLowerCase()) ||
       u.code.toLowerCase().includes(unitSearchQuery.toLowerCase())
@@ -92,7 +128,6 @@ export default class ItemFormDetails extends PureComponent {
 
     return (
       <div className="sq-create-form-left">
-        {/* Item Type */}
         <div className="sq-item-type-box">
           <div className="sq-item-type-left">
             <div className="sq-item-type-icon-wrap">
@@ -106,7 +141,6 @@ export default class ItemFormDetails extends PureComponent {
           <ChevronIcon />
         </div>
 
-        {/* Name (required) */}
         <div className={`sq-form-box ${formError ? "is-error" : ""}`}>
           <input
             type="text"
@@ -123,7 +157,6 @@ export default class ItemFormDetails extends PureComponent {
         </div>
         {formError && <div className="sq-error-msg">{formError}</div>}
 
-        {/* Kitchen name */}
         <div className="sq-form-box">
           <input
             type="text"
@@ -137,7 +170,6 @@ export default class ItemFormDetails extends PureComponent {
           </span>
         </div>
 
-        {/* Price */}
         <div className="sq-form-box">
           <input
             type="text"
@@ -221,10 +253,8 @@ export default class ItemFormDetails extends PureComponent {
           </div>
         </div>
 
-        {/* Margin Chip */}
         <div className="sq-chip-margin">Add unit cost to see margins</div>
 
-        {/* Customer-facing description */}
         <textarea
           className="sq-textarea-desc"
           placeholder="Customer-facing description"
@@ -232,19 +262,87 @@ export default class ItemFormDetails extends PureComponent {
           onChange={onDescriptionChange}
         />
 
-        {/* Image Upload Dropzone */}
-        <div className="sq-upload-dropzone">
-          <div className="sq-upload-icon">
-            <UploadImageIcon />
-          </div>
-          <div className="sq-upload-text">
-            Drop images here,{" "}
-            <span className="sq-upload-link">browse files</span>, or{" "}
-            <span className="sq-upload-link">add from image library</span>
-          </div>
-        </div>
+        <input
+          type="file"
+          ref={this.fileInputRef}
+          style={{ display: "none" }}
+          accept="image/jpeg,image/png,image/webp,image/gif,image/avif"
+          onChange={this.handleImageFileChange}
+        />
 
-        {/* Taxes */}
+        {formImageUrl ? (
+          <div className="sq-item-image-preview-card">
+            <div className="sq-item-image-preview-thumb">
+              <img src={formImageUrl} alt={formName || "Item image"} />
+            </div>
+            <div className="sq-item-image-preview-info">
+              <div className="sq-item-image-actions">
+                <button
+                  type="button"
+                  className="sq-btn-pill-gray"
+                  disabled={isUploadingImage}
+                  onClick={() => this.fileInputRef.current?.click()}
+                >
+                  {isUploadingImage ? "Uploading..." : "Replace image"}
+                </button>
+                <button
+                  type="button"
+                  className="sq-btn-remove-image"
+                  onClick={this.handleRemoveImage}
+                >
+                  Remove
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div
+            className="sq-upload-dropzone"
+            onClick={() => !isUploadingImage && this.fileInputRef.current?.click()}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                this.fileInputRef.current?.click();
+              }
+            }}
+          >
+            {isUploadingImage ? (
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
+                <span className="sq-spinner" />
+                <span style={{ fontSize: "13.5px", fontWeight: 600, color: "#111" }}>
+                  Uploading image to Cloudinary...
+                </span>
+              </div>
+            ) : (
+              <>
+                <div className="sq-upload-icon">
+                  <UploadImageIcon />
+                </div>
+                <div className="sq-upload-text">
+                  Drop images here,{" "}
+                  <span className="sq-upload-link">browse files</span>, or upload from your device
+                </div>
+                <span style={{ fontSize: "11.5px", color: "#9ca3af" }}>
+                  JPEG, PNG, WebP (Max 5MB)
+                </span>
+              </>
+            )}
+          </div>
+        )}
+
+        {uploadError && (
+          <div className="sq-upload-error-box">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+            <span>{uploadError}</span>
+          </div>
+        )}
+
         <div className="sq-section-row">
           <div className="sq-section-row-info">
             <span className="sq-section-row-title">Taxes</span>
@@ -255,7 +353,6 @@ export default class ItemFormDetails extends PureComponent {
           </button>
         </div>
 
-        {/* Nutritional Information Accordion */}
         <button
           type="button"
           className="sq-accordion-header"
@@ -290,7 +387,6 @@ export default class ItemFormDetails extends PureComponent {
 
         <div className="sq-divider-thick-block" />
 
-        {/* Manage Inventory */}
         <div style={{ marginTop: "8px" }}>
           <h3 style={{ fontSize: "18px", fontWeight: 700, margin: "0 0 10px 0" }}>
             Manage inventory
@@ -318,7 +414,6 @@ export default class ItemFormDetails extends PureComponent {
           </table>
         </div>
 
-        {/* SKU and GTIN */}
         <div className="sq-two-inputs-row">
           <div className="sq-form-box" style={{ marginBottom: 0 }}>
             <input
@@ -351,7 +446,6 @@ export default class ItemFormDetails extends PureComponent {
 
         <div className="sq-divider-thick-block" />
 
-        {/* Modifiers Section */}
         <ItemModifiersSection
           itemId={editingItemId}
           itemName={formName}
@@ -365,7 +459,6 @@ export default class ItemFormDetails extends PureComponent {
 
         <div className="sq-divider-thick-block" />
 
-        {/* Variations */}
         <div className="sq-section-row">
           <div className="sq-section-row-info">
             <span className="sq-section-row-title">Variations</span>
@@ -378,7 +471,6 @@ export default class ItemFormDetails extends PureComponent {
           </button>
         </div>
 
-        {/* Units */}
         <div className="sq-section-row">
           <div className="sq-section-row-info">
             <span className="sq-section-row-title">
@@ -393,7 +485,6 @@ export default class ItemFormDetails extends PureComponent {
           </button>
         </div>
 
-        {/* Bundle */}
         <div className="sq-section-row">
           <div className="sq-section-row-info">
             <span className="sq-section-row-title">
@@ -408,7 +499,6 @@ export default class ItemFormDetails extends PureComponent {
           </button>
         </div>
 
-        {/* Custom attributes */}
         <div className="sq-section-row">
           <div className="sq-section-row-info">
             <span className="sq-section-row-title">Custom attributes</span>
@@ -426,7 +516,6 @@ export default class ItemFormDetails extends PureComponent {
 
         <div className="sq-divider-thick-block" />
 
-        {/* Fulfillment & Checkout Sections */}
         <ItemFormFulfillment {...fulfillmentProps} />
       </div>
     );

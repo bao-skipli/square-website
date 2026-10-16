@@ -25,8 +25,7 @@ export default class ItemFormSettings extends PureComponent {
 
     return (
       <div className="sq-create-cards-right">
-        {/* Card 1: Status */}
-        <div className="sq-create-card">
+<div className="sq-create-card">
           <div className="sq-create-card-header" style={{ marginBottom: 0 }}>
             <h3 className="sq-create-card-title">Status</h3>
             <div style={{ position: "relative" }}>
@@ -75,8 +74,7 @@ export default class ItemFormSettings extends PureComponent {
           </div>
         </div>
 
-        {/* Card 2: Categories */}
-        <div className="sq-create-card">
+<div className="sq-create-card">
           <h3 className="sq-create-card-title">Categories</h3>
           <p className="sq-create-card-desc">
             For printer routing and sales reporting.
@@ -95,8 +93,7 @@ export default class ItemFormSettings extends PureComponent {
           </div>
         </div>
 
-        {/* Card 3: Menus */}
-        <div className="sq-create-card">
+<div className="sq-create-card">
           <h3 className="sq-create-card-title">Menus</h3>
           <p className="sq-create-card-desc">
             For online ordering sites, delivery apps, kiosks, and any restaurant POS modes.
@@ -115,15 +112,13 @@ export default class ItemFormSettings extends PureComponent {
           </div>
         </div>
 
-        {/* Card 4: Locations and channels */}
-        <div className="sq-create-card">
+<div className="sq-create-card">
           <div className="sq-create-card-header">
             <h3 className="sq-create-card-title">Locations and channels</h3>
             <span className="sq-link-edit">Edit POS tile</span>
           </div>
 
-          {/* Location Row */}
-          <div className="sq-location-row">
+<div className="sq-location-row">
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
               <span style={{ color: "#111" }}>
                 <BankIcon />
@@ -152,8 +147,7 @@ export default class ItemFormSettings extends PureComponent {
             <span className="sq-link-edit">Edit</span>
           </div>
 
-          {/* Points of sale */}
-          <div className="sq-location-row">
+<div className="sq-location-row">
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
               <GlobeIcon />
               <span style={{ fontSize: "14px", fontWeight: 600 }}>Points of sale</span>
@@ -168,8 +162,7 @@ export default class ItemFormSettings extends PureComponent {
             </button>
           </div>
 
-          {/* Add channel */}
-          <button type="button" className="sq-btn-add-channel">
+<button type="button" className="sq-btn-add-channel">
             <PlusIcon />
             Add channel
           </button>

@@ -36,8 +36,7 @@ export default class ItemFilterDrawer extends PureComponent {
       <>
         <div className="sq-drawer-backdrop" onClick={onClose} />
         <aside className="sq-filter-drawer is-open" aria-label="Filter panel">
-          {/* Header */}
-          <div className="sq-drawer-header">
+<div className="sq-drawer-header">
             {filterDrawerView === "all" ? (
               <button
                 type="button"
@@ -95,10 +94,8 @@ export default class ItemFilterDrawer extends PureComponent {
             </div>
           </div>
 
-          {/* Drawer Body */}
-          <div className="sq-drawer-body">
-            {/* VIEW 1: CATEGORY */}
-            {filterDrawerView === "category" && (
+<div className="sq-drawer-body">
+{filterDrawerView === "category" && (
               <div>
                 <span className="sq-drawer-sublabel">Filter by</span>
                 <h2 className="sq-drawer-title">Category</h2>
@@ -152,8 +149,7 @@ export default class ItemFilterDrawer extends PureComponent {
               </div>
             )}
 
-            {/* VIEW 2: STATUS */}
-            {filterDrawerView === "status" && (
+{filterDrawerView === "status" && (
               <div>
                 <span className="sq-drawer-sublabel">Filter by</span>
                 <h2 className="sq-drawer-title">Status</h2>
@@ -210,8 +206,7 @@ export default class ItemFilterDrawer extends PureComponent {
               </div>
             )}
 
-            {/* VIEW 3: ALL FILTERS */}
-            {filterDrawerView === "all" && (
+{filterDrawerView === "all" && (
               <div>
                 <h2 className="sq-drawer-title" style={{ marginTop: "4px" }}>
                   Filter by

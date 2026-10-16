@@ -22,6 +22,8 @@ export function buildItemDetailsProps(comp) {
     onPriceUnitChange: (unit) => comp.setState({ formPriceUnit: unit }),
     formDescription: s.formDescription,
     onDescriptionChange: (e) => comp.setState({ formDescription: e.target.value }),
+    formImageUrl: s.formImageUrl,
+    onImageUrlChange: (url) => comp.setState({ formImageUrl: url }),
     nutritionalInfoOpen: s.nutritionalInfoOpen,
     onToggleNutritionalInfo: () =>
       comp.setState((prev) => ({ nutritionalInfoOpen: !prev.nutritionalInfoOpen })),

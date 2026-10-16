@@ -1,4 +1,4 @@
-/* Item Modifiers Section (image copy 9.png) */
+
 .sq-item-modifiers-section {
   padding: 8px 0 16px;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -29,7 +29,6 @@
   padding: 0;
 }
 
-/* Tabs */
 .sq-item-mods-tabs {
   display: flex;
   align-items: center;
@@ -68,7 +67,6 @@
   background-color: #18181b;
 }
 
-/* List of applied sets */
 .sq-item-mods-list {
   display: flex;
   flex-direction: column;
@@ -183,7 +181,6 @@
   background-color: #fef2f2;
 }
 
-/* Kitchen placeholder */
 .sq-item-mods-kitchen-placeholder {
   padding: 24px 16px;
   text-align: center;
@@ -198,7 +195,6 @@
   margin: 0;
 }
 
-/* Checklist popup modal */
 .sq-item-mods-checklist-card {
   max-width: 480px;
 }

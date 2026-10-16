@@ -1,4 +1,5 @@
 import { DashboardItemController } from "./DashboardItemController";
+import { categoryToFormState } from "./dashboardViews";
 import {
   saveCategoryToFirebase,
   deleteCategoryFromFirebase,
@@ -27,10 +28,6 @@ export class DashboardCategoryController extends DashboardItemController {
   };
 
   openEditCategory = (cat, updateUrl = true) => {
-    const assignedItems = this.state.items
-      .filter((i) => i.category && i.category.toLowerCase() === cat.name.toLowerCase())
-      .map((i) => i.id);
-
     this.setState({
       currentView: "categories",
       activeMenu: "categories",
@@ -38,15 +35,7 @@ export class DashboardCategoryController extends DashboardItemController {
       isItemsOpen: true,
       isCreateCategoryOpen: true,
       editingCategoryId: cat.id,
-      categoryFormName: cat.name,
-      categoryFormParentId: cat.parentId || null,
-      categoryFormItems: assignedItems,
-      categoryFormPointsOfSale: cat.pointsOfSale !== false,
-      categoryFormInitial: {
-        name: cat.name,
-        parentId: cat.parentId || null,
-        items: [...assignedItems],
-      },
+      ...categoryToFormState(cat, this.state.items),
       categoryFormError: "",
       isCategoryActionsOpen: false,
     });
@@ -63,19 +52,14 @@ export class DashboardCategoryController extends DashboardItemController {
       categoryFormInitial,
     } = this.state;
 
-    let hasChanges = false;
-    if (categoryFormInitial) {
-      hasChanges =
-        categoryFormName !== categoryFormInitial.name ||
-        categoryFormParentId !== categoryFormInitial.parentId ||
-        categoryFormItems.length !== categoryFormInitial.items.length ||
-        categoryFormItems.some((id) => !categoryFormInitial.items.includes(id));
-    } else {
-      hasChanges =
-        categoryFormName.trim() !== "" ||
-        categoryFormParentId !== null ||
-        categoryFormItems.length > 0;
-    }
+    const hasChanges = categoryFormInitial
+      ? categoryFormName !== categoryFormInitial.name ||
+      categoryFormParentId !== categoryFormInitial.parentId ||
+      categoryFormItems.length !== categoryFormInitial.items.length ||
+      categoryFormItems.some((id) => !categoryFormInitial.items.includes(id))
+      : categoryFormName.trim() !== "" ||
+      categoryFormParentId !== null ||
+      categoryFormItems.length > 0;
 
     if (hasChanges) {
       this.setState({

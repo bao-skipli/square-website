@@ -24,9 +24,6 @@ function saveCartToStorage(slug, items) {
   }
 }
 
-/**
- * Determine if two cart lines have identical configuration (same item, variation, modifiers, text).
- */
 function areLinesIdentical(a, b) {
   if (a.itemId !== b.itemId) return false;
   if ((a.variation?.id || null) !== (b.variation?.id || null)) return false;
@@ -114,12 +111,10 @@ function cartReducer(state, action) {
 export function CartProvider({ slug, children }) {
   const [items, dispatch] = useReducer(cartReducer, slug, loadInitialCart);
 
-  // Sync with localStorage on change
   useEffect(() => {
     saveCartToStorage(slug, items);
   }, [slug, items]);
 
-  // When slug changes, reload matching cart
   useEffect(() => {
     dispatch({ type: "SET_CART", payload: loadInitialCart(slug) });
   }, [slug]);

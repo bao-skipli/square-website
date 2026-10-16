@@ -4,16 +4,13 @@ export default class HomeSkeleton extends PureComponent {
   render() {
     return (
       <div className="sq-home-skeleton" aria-label="Loading home dashboard...">
-        {/* 1. Header Skeleton */}
-        <div className="sq-dashboard-header">
+<div className="sq-dashboard-header">
           <div className="sq-skel-line sq-skel-title" />
           <div className="sq-skel-line sq-skel-subtitle" />
         </div>
 
-        {/* 2. Onboarding Cards Grid Skeleton */}
-        <section className="sq-onboarding-grid" aria-hidden="true">
-          {/* Card 1: Promo card skeleton */}
-          <div className="sq-card-standard sq-skel-card">
+<section className="sq-onboarding-grid" aria-hidden="true">
+<div className="sq-card-standard sq-skel-card">
             <div>
               <div className="sq-skel-line sq-skel-badge" />
               <div className="sq-skel-line sq-skel-promo-text-1" />
@@ -21,8 +18,7 @@ export default class HomeSkeleton extends PureComponent {
             </div>
           </div>
 
-          {/* Card 2: POS Demo */}
-          <div className="sq-card-standard sq-skel-card">
+<div className="sq-card-standard sq-skel-card">
             <div>
               <div className="sq-skel-icon" />
               <div className="sq-skel-line sq-skel-card-title" />
@@ -34,8 +30,7 @@ export default class HomeSkeleton extends PureComponent {
             </div>
           </div>
 
-          {/* Card 3: Payments Approval */}
-          <div className="sq-card-standard sq-skel-card">
+<div className="sq-card-standard sq-skel-card">
             <div>
               <div className="sq-skel-icon" />
               <div className="sq-skel-line sq-skel-card-title" />
@@ -46,8 +41,7 @@ export default class HomeSkeleton extends PureComponent {
             </div>
           </div>
 
-          {/* Card 4: Hardware */}
-          <div className="sq-card-standard sq-skel-card">
+<div className="sq-card-standard sq-skel-card">
             <div>
               <div className="sq-skel-icon" />
               <div className="sq-skel-line sq-skel-card-title" />
@@ -59,8 +53,7 @@ export default class HomeSkeleton extends PureComponent {
             </div>
           </div>
 
-          {/* Card 5: First Payment */}
-          <div className="sq-card-standard sq-skel-card">
+<div className="sq-card-standard sq-skel-card">
             <div>
               <div className="sq-skel-icon" />
               <div className="sq-skel-line sq-skel-card-title" />
@@ -71,22 +64,17 @@ export default class HomeSkeleton extends PureComponent {
             </div>
           </div>
 
-          {/* Card 6: Empty slot */}
-          <div className="sq-card-empty" />
+<div className="sq-card-empty" />
         </section>
 
-        {/* 3. Two-Column Main Layout Skeleton */}
-        <section className="sq-dashboard-columns" aria-hidden="true">
-          {/* Left Column (~70%) */}
-          <div className="sq-col-left">
-            {/* AI Chat Prompt Skeleton */}
-            <div className="sq-ai-input-card sq-skel-ai-card">
+<section className="sq-dashboard-columns" aria-hidden="true">
+<div className="sq-col-left">
+<div className="sq-ai-input-card sq-skel-ai-card">
               <div className="sq-skel-line sq-skel-ai-placeholder" />
               <div className="sq-skel-circle-btn" />
             </div>
 
-            {/* Order Volume Card Skeleton */}
-            <div className="sq-order-volume-card sq-skel-card">
+<div className="sq-order-volume-card sq-skel-card">
               <div className="sq-ov-header">
                 <div>
                   <div className="sq-skel-line sq-skel-section-title" />
@@ -120,19 +108,16 @@ export default class HomeSkeleton extends PureComponent {
               </div>
             </div>
 
-            {/* Performance Card Skeleton */}
-            <div className="sq-performance-card sq-skel-card">
+<div className="sq-performance-card sq-skel-card">
               <div className="sq-skel-line sq-skel-section-title" />
 
-              {/* 3 Filter Chips */}
-              <div className="sq-perf-filters">
+<div className="sq-perf-filters">
                 <div className="sq-skel-chip" />
                 <div className="sq-skel-chip" />
                 <div className="sq-skel-chip" />
               </div>
 
-              {/* Main Net Sales & Chart Row */}
-              <div className="sq-perf-main-row">
+<div className="sq-perf-main-row">
                 <div className="sq-net-sales-block">
                   <div>
                     <div className="sq-skel-line" style={{ width: "65px", height: "12px", marginBottom: "8px" }} />
@@ -166,8 +151,7 @@ export default class HomeSkeleton extends PureComponent {
 
               <hr className="sq-perf-divider" />
 
-              {/* Metrics Grid */}
-              <div className="sq-metrics-grid">
+<div className="sq-metrics-grid">
                 {[1, 2, 3, 4, 5, 6].map((idx) => (
                   <div key={idx} className="sq-metric-item">
                     <div className="sq-metric-info" style={{ width: "70%" }}>
@@ -181,10 +165,8 @@ export default class HomeSkeleton extends PureComponent {
             </div>
           </div>
 
-          {/* Right Column (~30%) */}
-          <div className="sq-col-right">
-            {/* Banking Card Skeleton */}
-            <div className="sq-banking-card sq-skel-card">
+<div className="sq-col-right">
+<div className="sq-banking-card sq-skel-card">
               <div className="sq-skel-line sq-skel-section-title" />
               <div className="sq-banking-row" style={{ marginTop: "16px" }}>
                 <div className="sq-skel-line" style={{ width: "60px", height: "14px" }} />
@@ -192,8 +174,7 @@ export default class HomeSkeleton extends PureComponent {
               </div>
             </div>
 
-            {/* Quick Actions Card Skeleton */}
-            <div className="sq-quick-actions-card sq-skel-card">
+<div className="sq-quick-actions-card sq-skel-card">
               <div className="sq-skel-line sq-skel-section-title" style={{ marginBottom: "16px" }} />
               <ul className="sq-qa-list">
                 {[1, 2, 3, 4].map((i) => (

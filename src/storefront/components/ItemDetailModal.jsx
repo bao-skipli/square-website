@@ -23,7 +23,6 @@ export default function ItemDetailModal({
   const scrollContainerRef = useRef(null);
   const setRefs = useRef({});
 
-  // 1. Variations resolution
   const variations = useMemo(() => {
     if (!item?.variations) return [];
     if (Array.isArray(item.variations)) return item.variations;
@@ -42,7 +41,6 @@ export default function ItemDetailModal({
     return variations.find((v) => (v.id || v.name) === selectedVariationId) || variations[0];
   }, [variations, selectedVariationId]);
 
-  // Base price in cents
   const basePriceCents = useMemo(() => {
     if (selectedVariation) {
       return parsePriceToCents(selectedVariation.priceCents ?? selectedVariation.price ?? 0);
@@ -50,34 +48,56 @@ export default function ItemDetailModal({
     return parsePriceToCents(item?.priceCents ?? item?.price ?? 0);
   }, [selectedVariation, item]);
 
-  // Active discount
   const activeDiscount = useMemo(() => {
     return findBestDiscount(basePriceCents, discounts, item?.id);
   }, [basePriceCents, discounts, item?.id]);
 
-  // 2. Effective Modifier Sets sorted by order
   const effectiveSets = useMemo(() => {
     if (!item || !modifierSets) return [];
 
-    const itemModConfig = item.modifierSets || {};
-    const setIds = Object.keys(itemModConfig);
+    const setsMap = {};
+    if (Array.isArray(modifierSets)) {
+      modifierSets.forEach((s) => {
+        if (s && s.id) setsMap[s.id] = s;
+      });
+    } else if (typeof modifierSets === 'object') {
+      Object.entries(modifierSets).forEach(([key, val]) => {
+        if (val) setsMap[val.id || key] = val;
+      });
+    }
 
-    // Sort by order assigned on item
-    setIds.sort((a, b) => {
-      const orderA = itemModConfig[a]?.order ?? 999;
-      const orderB = itemModConfig[b]?.order ?? 999;
-      return orderA - orderB;
-    });
+    let itemModEntries = [];
+    if (item.modifierSets) {
+      if (Array.isArray(item.modifierSets)) {
+        itemModEntries = item.modifierSets.map((entry, idx) => {
+          if (typeof entry === 'string') {
+            return { setId: entry, order: idx, overrides: null };
+          }
+          return {
+            setId: entry?.id || entry?.setId || String(idx),
+            order: entry?.order ?? idx,
+            overrides: entry?.overrides || null,
+          };
+        });
+      } else if (typeof item.modifierSets === 'object') {
+        itemModEntries = Object.entries(item.modifierSets).map(([setId, config]) => ({
+          setId,
+          order: config?.order ?? 999,
+          overrides: config?.overrides || null,
+        }));
+      }
+    }
+
+    itemModEntries.sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
 
     const list = [];
-    for (const setId of setIds) {
-      const rawSet = modifierSets[setId];
-      if (!rawSet) continue; // Skip orphaned references cleanly
+    for (const { setId, overrides } of itemModEntries) {
+      const rawSet = setsMap[setId];
+      if (!rawSet) continue;
 
-      const overrides = itemModConfig[setId]?.overrides || null;
       const effective = getEffectiveSettings(rawSet, overrides);
+      if (!effective) continue;
 
-      // Skip empty list sets (no modifiers)
       if (effective.type !== 'text' && (!effective.modifiers || effective.modifiers.length === 0)) {
         continue;
       }
@@ -87,7 +107,7 @@ export default function ItemDetailModal({
     return list;
   }, [item, modifierSets]);
 
-  // 3. Selection state for list & text modifiers
+
   const [selectedModifiers, setSelectedModifiers] = useState({});
   const [textValues, setTextValues] = useState({});
   const [qty, setQty] = useState(1);
@@ -95,7 +115,6 @@ export default function ItemDetailModal({
   const [errorMessages, setErrorMessages] = useState({});
   const [imgLoaded, setImgLoaded] = useState(false);
 
-  // Initialize pre-selections when item or effective sets change
   useEffect(() => {
     const initialMods = {};
     const initialTexts = {};
@@ -121,7 +140,6 @@ export default function ItemDetailModal({
     setErrorMessages({});
   }, [item?.id, effectiveSets]);
 
-  // Body scroll lock & Focus trap & ESC to close
   useEffect(() => {
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
@@ -156,7 +174,6 @@ export default function ItemDetailModal({
     };
   }, [onClose]);
 
-  // Selection handlers
   const handleSelectModifier = (set, mod) => {
     if (!mod.inStock) return;
 
@@ -175,11 +192,11 @@ export default function ItemDetailModal({
       const currentlyChecked = Boolean(currentSetSelection[mod.id]);
 
       if (isMultiple) {
-        // Checkbox: toggle
+
         if (currentlyChecked) {
           delete currentSetSelection[mod.id];
         } else {
-          // Check max limit if defined
+
           const currentCount = Object.keys(currentSetSelection).length;
           if (set.selectionRules?.max && currentCount >= set.selectionRules.max) {
             return prev;
@@ -187,14 +204,14 @@ export default function ItemDetailModal({
           currentSetSelection[mod.id] = true;
         }
       } else {
-        // Radio
+
         if (currentlyChecked) {
-          // If NOT required: allow unchecking!
+
           if (!isRequired) {
             delete currentSetSelection[mod.id];
           }
         } else {
-          // Radio can only have 1 selected
+
           return {
             ...prev,
             [set.id]: { [mod.id]: true },
@@ -223,7 +240,6 @@ export default function ItemDetailModal({
     }));
   };
 
-  // Flatten selected modifier objects for pricing calculation
   const selectedModifierObjects = useMemo(() => {
     const list = [];
     effectiveSets.forEach((set) => {
@@ -244,7 +260,6 @@ export default function ItemDetailModal({
     return list;
   }, [effectiveSets, selectedModifiers]);
 
-  // Line total calculation
   const lineCalculation = useMemo(() => {
     return calcLineTotal({
       baseCents: basePriceCents,
@@ -254,14 +269,12 @@ export default function ItemDetailModal({
     });
   }, [basePriceCents, selectedModifierObjects, activeDiscount, qty]);
 
-  // Add Item to Cart with validation
   const handleAddToCart = () => {
     const validation = validateSelection(effectiveSets, selectedModifiers, textValues);
     if (!validation.isValid) {
       setErrorSetId(validation.firstErrorSetId);
       setErrorMessages(validation.errors);
 
-      // Smooth scroll to the first error modifier set
       const errorEl = setRefs.current[validation.firstErrorSetId];
       if (errorEl) {
         errorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -269,7 +282,6 @@ export default function ItemDetailModal({
       return;
     }
 
-    // Build text instruction array
     const textSnapshot = [];
     effectiveSets.forEach((set) => {
       if (set.type === 'text') {
@@ -290,10 +302,10 @@ export default function ItemDetailModal({
       itemName: item.name,
       variation: selectedVariation
         ? {
-            id: selectedVariation.id || selectedVariation.name,
-            name: selectedVariation.name,
-            priceCents: basePriceCents,
-          }
+          id: selectedVariation.id || selectedVariation.name,
+          name: selectedVariation.name,
+          priceCents: basePriceCents,
+        }
         : null,
       qty,
       baseUnitCents: lineCalculation.baseCents,
@@ -325,7 +337,6 @@ export default function ItemDetailModal({
       ref={modalRef}
     >
       <div className="sf-modal-card">
-        {/* Close Button top-right */}
         <button
           type="button"
           className="sf-modal-close-btn"
@@ -335,13 +346,11 @@ export default function ItemDetailModal({
           <CloseIcon />
         </button>
 
-        {/* 2-Column Container */}
         <div className="sf-modal-body">
-          {/* LEFT COLUMN: Large image, illustration notice, title, discount badge, description */}
           <div className="sf-modal-col-left">
-            <div className="sf-modal-image-wrapper">
-              {hasImage ? (
-                <>
+            {hasImage && (
+              <>
+                <div className="sf-modal-image-wrapper">
                   {!imgLoaded && <ImageSkeleton className="sf-modal-img-skeleton" />}
                   <img
                     src={imageSrc}
@@ -349,27 +358,25 @@ export default function ItemDetailModal({
                     className={`sf-modal-img ${imgLoaded ? 'sf-modal-img--loaded' : 'sf-modal-img--hidden'}`}
                     onLoad={() => setImgLoaded(true)}
                   />
-                </>
-              ) : (
-                <div className="sf-modal-image-placeholder" aria-hidden="true" />
-              )}
-            </div>
-
-            <p className="sf-modal-illustration-notice">
-              * Image shown is for illustration purposes only
-            </p>
+                </div>
+                <p className="sf-modal-illustration-notice">
+                  * Image shown is for illustration purposes only
+                </p>
+              </>
+            )}
 
             <div className="sf-modal-item-info">
               <div className="sf-modal-title-row">
                 <h1 id="sf-item-modal-title" className="sf-modal-item-title">
                   {item.name}
                 </h1>
-                {activeDiscount && (
+                {activeDiscount && lineCalculation?.hasDiscount && (
                   <span className="sf-badge-discount sf-badge-discount--modal">
                     {activeDiscount.badgeText}
                   </span>
                 )}
               </div>
+
 
               {item.description && (
                 <p className="sf-modal-item-desc">{item.description}</p>
@@ -381,10 +388,8 @@ export default function ItemDetailModal({
             </div>
           </div>
 
-          {/* RIGHT COLUMN: Scrollable modifier options + sticky footer */}
           <div className="sf-modal-col-right" ref={scrollContainerRef}>
             <div className="sf-modal-modifiers-scroll">
-              {/* Optional Variations Selector */}
               {variations.length > 1 && (
                 <div className="sf-mod-set-block">
                   <div className="sf-mod-set-header">
@@ -423,7 +428,6 @@ export default function ItemDetailModal({
                 </div>
               )}
 
-              {/* Modifier Sets */}
               {effectiveSets.map((set) => {
                 const isError = errorSetId === set.id;
                 const setSelection = selectedModifiers[set.id] || {};
@@ -474,7 +478,6 @@ export default function ItemDetailModal({
                   );
                 }
 
-                // List modifier set
                 const isRequired = Boolean(set.selectionRules?.required);
                 const isMultiple = Boolean(set.selectionRules?.allowMultiple);
                 const subLabel = isRequired
@@ -515,9 +518,8 @@ export default function ItemDetailModal({
                             aria-checked={isSelected}
                             aria-disabled={isSoldOut}
                             disabled={isSoldOut}
-                            className={`sf-mod-row ${isSelected ? 'sf-mod-row--selected' : ''} ${
-                              isSoldOut ? 'sf-mod-row--soldout' : ''
-                            }`}
+                            className={`sf-mod-row ${isSelected ? 'sf-mod-row--selected' : ''} ${isSoldOut ? 'sf-mod-row--soldout' : ''
+                              }`}
                             onClick={() => handleSelectModifier(set, mod)}
                           >
                             <div className="sf-mod-indicator-wrapper">
@@ -561,9 +563,7 @@ export default function ItemDetailModal({
               })}
             </div>
 
-            {/* STICKY FOOTER */}
             <div className="sf-modal-footer">
-              {/* Quantity selector: - qty + */}
               <div className="sf-modal-qty-control" role="group" aria-label="Item quantity">
                 <button
                   type="button"
@@ -588,7 +588,6 @@ export default function ItemDetailModal({
                 </button>
               </div>
 
-              {/* Add Item Button + dynamic price */}
               <button
                 type="button"
                 className="sf-modal-add-btn"

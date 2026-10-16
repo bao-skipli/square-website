@@ -1,13 +1,13 @@
 export const DEFAULT_CATEGORIES = [
-  "Uncategorized",
-  "Desserts",
-  "Food",
-  "Beverage",
-  "Liquor",
-  "Beer",
-  "Wine",
-  "Coffee & Tea",
-  "Pho",
+  // "Uncategorized",
+  // "Desserts",
+  // "Food",
+  // "Beverage",
+  // "Liquor",
+  // "Beer",
+  // "Wine",
+  // "Coffee & Tea",
+  // "Pho",
 ];
 
 export const INITIAL_CATEGORIES = [];

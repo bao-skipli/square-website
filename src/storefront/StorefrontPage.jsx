@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import useStorefrontData from './hooks/useStorefrontData';
 import { CartProvider } from './context/CartContext';
@@ -6,12 +6,12 @@ import StoreHeader from './components/StoreHeader';
 import CategoryTabs from './components/CategoryTabs';
 import MenuSection from './components/MenuSection';
 import ItemDetailModal from './components/ItemDetailModal';
-import {
-  HeaderSkeleton,
-  CategoryTabsSkeleton,
-  MenuSkeleton,
-} from './components/skeletons';
+import { HeaderSkeleton, CategoryTabsSkeleton, MenuSkeleton } from './components/skeletons';
+import { getThemeColorTokens } from '@/shared/themeTokens';
 import './styles/Storefront.css';
+
+
+
 
 function StorefrontContent() {
   const { slug } = useParams();
@@ -26,16 +26,19 @@ function StorefrontContent() {
     retry,
   } = useStorefrontData(slug);
 
+  const themeStyles = useMemo(() => {
+    return getThemeColorTokens(store?.themeColor || '#E53E3E');
+  }, [store?.themeColor]);
+
   const [activeCategoryId, setActiveCategoryId] = useState(null);
+
   const [selectedItem, setSelectedItem] = useState(null);
   const isProgrammaticScrollRef = useRef(false);
   const scrollTimeoutRef = useRef(null);
 
-  // Filter categories: must be visible on store and have >= 1 item
   const visibleCategoriesWithItems = useMemo(() => {
     if (!categories || categories.length === 0 || !items) return [];
 
-    // Group items by category (support name or id matching)
     const itemsByCat = {};
     items.forEach((item) => {
       const catKey = item.categoryId || item.category;
@@ -50,7 +53,6 @@ function StorefrontContent() {
     });
   }, [categories, items]);
 
-  // Map category ID to its items
   const categoryItemsMap = useMemo(() => {
     if (!items) return {};
     const map = {};
@@ -63,14 +65,12 @@ function StorefrontContent() {
     return map;
   }, [items]);
 
-  // Set initial active category once visible categories load
   useEffect(() => {
     if (visibleCategoriesWithItems.length > 0 && !activeCategoryId) {
       setActiveCategoryId(visibleCategoriesWithItems[0].id);
     }
   }, [visibleCategoriesWithItems, activeCategoryId]);
 
-  // IntersectionObserver for Scroll-Spy
   useEffect(() => {
     if (!loaded.items || visibleCategoriesWithItems.length === 0) return;
 
@@ -78,10 +78,9 @@ function StorefrontContent() {
       (entries) => {
         if (isProgrammaticScrollRef.current) return;
 
-        // Find intersecting entries
         const visibleEntries = entries.filter((entry) => entry.isIntersecting);
         if (visibleEntries.length > 0) {
-          // Sort by top offset to find the uppermost visible section
+
           visibleEntries.sort(
             (a, b) => a.boundingClientRect.top - b.boundingClientRect.top
           );
@@ -92,7 +91,7 @@ function StorefrontContent() {
         }
       },
       {
-        // Margin offsets sticky header (64px) + sticky tabs (48px)
+
         rootMargin: '-120px 0px -60% 0px',
         threshold: [0, 0.2, 0.5],
       }
@@ -106,7 +105,6 @@ function StorefrontContent() {
     return () => observer.disconnect();
   }, [loaded.items, visibleCategoriesWithItems]);
 
-  // Scroll to category smoothly when clicking a tab
   const handleSelectCategory = useCallback((catId) => {
     setActiveCategoryId(catId);
     isProgrammaticScrollRef.current = true;
@@ -122,7 +120,6 @@ function StorefrontContent() {
     }
   }, []);
 
-  // Update selected item in realtime if items list changes
   useEffect(() => {
     if (selectedItem && items) {
       const updated = items.find((i) => i.id === selectedItem.id);
@@ -132,7 +129,6 @@ function StorefrontContent() {
     }
   }, [items, selectedItem]);
 
-  // 1. Not Found Screen
   if (status === 'notFound') {
     return (
       <div className="sf-page-root">
@@ -146,7 +142,6 @@ function StorefrontContent() {
     );
   }
 
-  // 2. Closed Screen
   if (status === 'closed') {
     return (
       <div className="sf-page-root">
@@ -160,7 +155,6 @@ function StorefrontContent() {
     );
   }
 
-  // 3. Error Screen
   if (status === 'error') {
     return (
       <div className="sf-page-root">
@@ -178,10 +172,10 @@ function StorefrontContent() {
   }
 
   return (
-    <div className="sf-page-root">
-      {/* 1. Header (Skeleton until store loaded) */}
+    <div className="sf-page-root" style={themeStyles}>
       {!loaded.store ? (
         <HeaderSkeleton />
+
       ) : (
         <StoreHeader
           store={store}
@@ -191,7 +185,6 @@ function StorefrontContent() {
         />
       )}
 
-      {/* 2. Category Tabs (Skeleton until categories loaded) */}
       {!loaded.categories ? (
         <CategoryTabsSkeleton />
       ) : (
@@ -202,7 +195,6 @@ function StorefrontContent() {
         />
       )}
 
-      {/* 3. Main Menu Content */}
       <main className="sf-menu-content-container">
         {!loaded.items ? (
           <MenuSkeleton />
@@ -227,7 +219,6 @@ function StorefrontContent() {
         )}
       </main>
 
-      {/* 4. Item Detail Modal with Modifiers */}
       {selectedItem && (
         <ItemDetailModal
           item={selectedItem}

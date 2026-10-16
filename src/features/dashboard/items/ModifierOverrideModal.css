@@ -1,4 +1,4 @@
-/* Modifier Override Modal (image copy 10.png) */
+
 .sq-override-modal-overlay {
   position: fixed;
   inset: 0;
@@ -85,7 +85,6 @@
   margin: 0 0 16px;
 }
 
-/* Overrides table */
 .sq-override-table {
   width: 100%;
   border-collapse: collapse;

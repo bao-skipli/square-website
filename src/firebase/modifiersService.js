@@ -4,9 +4,6 @@ import { database } from "./firebaseConfig";
 const LOCAL_STORAGE_MODIFIER_SETS_KEY = "sq_dashboard_modifier_sets";
 const LOCAL_STORAGE_MODIFIER_SET_ITEMS_KEY = "sq_dashboard_modifier_set_items";
 
-/**
- * Local storage fallback helpers for guest / offline mode
- */
 export function getLocalModifierSets() {
   try {
     const raw = localStorage.getItem(LOCAL_STORAGE_MODIFIER_SETS_KEY);
@@ -51,10 +48,6 @@ function toList(val) {
   return Object.values(val);
 }
 
-/**
- * Realtime listener for Modifier Sets.
- * Returns { unsubscribe, firstPromise }
- */
 export function subscribeModifierSets(userId, callback, onFirstSnapshot) {
   let isFirst = true;
   let firstResolve;
@@ -88,7 +81,7 @@ export function subscribeModifierSets(userId, callback, onFirstSnapshot) {
       if (snapshot.exists()) {
         const val = snapshot.val();
         const list = toList(val);
-        // Sort by order ascending
+
         list.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
         if (callback) callback(list);
         notifyFirst(list);
@@ -108,10 +101,6 @@ export function subscribeModifierSets(userId, callback, onFirstSnapshot) {
   return { unsubscribe, firstPromise };
 }
 
-/**
- * Realtime listener for ModifierSetItems reverse index map.
- * Returns { unsubscribe, firstPromise }
- */
 export function subscribeModifierSetItems(userId, callback) {
   if (!userId) {
     const local = getLocalModifierSetItems();
@@ -137,15 +126,11 @@ export function subscribeModifierSetItems(userId, callback) {
   return unsubscribe;
 }
 
-/**
- * Normalizes a modifier set payload before saving
- */
 export function normalizeModifierSetPayload(setData, currentSetsCount = 0) {
   const isText = setData.type === "text";
   const now = Date.now();
   const id = setData.id || `modset_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
 
-  // Clean modifiers list if list modifier
   const cleanModifiers = {};
   if (!isText && setData.modifiers) {
     const rawList = Array.isArray(setData.modifiers)
@@ -154,7 +139,7 @@ export function normalizeModifierSetPayload(setData, currentSetsCount = 0) {
 
     let idx = 0;
     rawList.forEach((m) => {
-      if (!m || !m.name || !m.name.trim()) return; // Skip empty rows (including placeholder)
+      if (!m || !m.name || !m.name.trim()) return;
       const modId = m.id || `mod_${Date.now()}_${idx}_${Math.random().toString(36).substr(2, 5)}`;
       cleanModifiers[modId] = {
         id: modId,
@@ -205,9 +190,6 @@ export function normalizeModifierSetPayload(setData, currentSetsCount = 0) {
   };
 }
 
-/**
- * Create or Edit Modifier Set in Firebase Realtime Database
- */
 export async function saveModifierSet(userId, setData, currentSetsCount = 0) {
   const normalized = normalizeModifierSetPayload(setData, currentSetsCount);
 
@@ -215,7 +197,6 @@ export async function saveModifierSet(userId, setData, currentSetsCount = 0) {
     const updates = {};
     updates[`users/${userId}/modifierSets/${normalized.id}`] = normalized;
 
-    // If editing and deleted some modifier options, we clean orphan overrides in items
     if (setData.id && normalized.type === "list") {
       try {
         const indexSnap = await get(ref(database, `users/${userId}/modifierSetItems/${normalized.id}`));
@@ -245,7 +226,6 @@ export async function saveModifierSet(userId, setData, currentSetsCount = 0) {
     return normalized;
   }
 
-  // Guest fallback
   const currentSets = getLocalModifierSets();
   const exists = currentSets.some((s) => s.id === normalized.id);
   let updated;
@@ -258,9 +238,6 @@ export async function saveModifierSet(userId, setData, currentSetsCount = 0) {
   return normalized;
 }
 
-/**
- * Delete Modifier Set atomically across all nodes
- */
 export async function deleteModifierSet(userId, setId) {
   if (userId) {
     const updates = {};
@@ -283,7 +260,6 @@ export async function deleteModifierSet(userId, setId) {
     return true;
   }
 
-  // Guest fallback
   const currentSets = getLocalModifierSets().filter((s) => s.id !== setId);
   setLocalModifierSets(currentSets);
 
@@ -293,9 +269,6 @@ export async function deleteModifierSet(userId, setId) {
   return true;
 }
 
-/**
- * Reorder Modifier Sets
- */
 export async function reorderModifierSets(userId, sets) {
   if (userId) {
     const updates = {};
@@ -311,11 +284,6 @@ export async function reorderModifierSets(userId, sets) {
   return true;
 }
 
-/**
- * Apply Modifier Set to multiple items atomically
- * toAdd: items newly selected
- * toRemove: items unselected
- */
 export async function applyModifierSetToItems(userId, setId, selectedItemIds = [], currentItemIds = []) {
   const toAdd = selectedItemIds.filter((id) => !currentItemIds.includes(id));
   const toRemove = currentItemIds.filter((id) => !selectedItemIds.includes(id));
@@ -342,7 +310,6 @@ export async function applyModifierSetToItems(userId, setId, selectedItemIds = [
     return true;
   }
 
-  // Guest fallback
   const localIndex = getLocalModifierSetItems();
   const setMap = localIndex[setId] || {};
   toAdd.forEach((id) => {
@@ -353,12 +320,35 @@ export async function applyModifierSetToItems(userId, setId, selectedItemIds = [
   });
   localIndex[setId] = setMap;
   setLocalModifierSetItems(localIndex);
+
+  try {
+    const rawItems = localStorage.getItem("sq_dashboard_items");
+    if (rawItems) {
+      const items = JSON.parse(rawItems);
+      let changed = false;
+      items.forEach((item) => {
+        if (toAdd.includes(item.id)) {
+          if (!item.modifierSets) item.modifierSets = {};
+          item.modifierSets[setId] = { order: Date.now(), overrides: null };
+          changed = true;
+        }
+        if (toRemove.includes(item.id) && item.modifierSets && item.modifierSets[setId]) {
+          delete item.modifierSets[setId];
+          changed = true;
+        }
+      });
+      if (changed) {
+        localStorage.setItem("sq_dashboard_items", JSON.stringify(items));
+        window.dispatchEvent(new CustomEvent("sq_items_updated", { detail: items }));
+      }
+    }
+  } catch (e) {
+    console.warn("Could not sync local items modifierSets:", e);
+  }
+
   return true;
 }
 
-/**
- * Unlink single Modifier Set from an Item atomically
- */
 export async function removeModifierSetFromItem(userId, itemId, setId) {
   if (userId) {
     const updates = {};
@@ -373,12 +363,26 @@ export async function removeModifierSetFromItem(userId, itemId, setId) {
     delete localIndex[setId][itemId];
     setLocalModifierSetItems(localIndex);
   }
+
+  try {
+    const rawItems = localStorage.getItem("sq_dashboard_items");
+    if (rawItems) {
+      const items = JSON.parse(rawItems);
+      const target = items.find((i) => i.id === itemId);
+      if (target && target.modifierSets && target.modifierSets[setId]) {
+        delete target.modifierSets[setId];
+        localStorage.setItem("sq_dashboard_items", JSON.stringify(items));
+        window.dispatchEvent(new CustomEvent("sq_items_updated", { detail: items }));
+      }
+    }
+  } catch (e) {
+    console.warn("Could not remove modifierSet from local item:", e);
+  }
+
   return true;
 }
 
-/**
- * Save Overrides for a modifier set on a specific item
- */
+
 export async function saveItemModifierOverrides(userId, itemId, setId, overrides) {
   if (userId) {
     const targetRef = ref(database, `users/${userId}/items/${itemId}/modifierSets/${setId}/overrides`);
@@ -388,9 +392,6 @@ export async function saveItemModifierOverrides(userId, itemId, setId, overrides
   return true;
 }
 
-/**
- * Reorder modifier sets within an item
- */
 export async function reorderItemModifierSets(userId, itemId, orderedSetIds = []) {
   if (userId) {
     const updates = {};

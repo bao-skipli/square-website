@@ -5,10 +5,13 @@ import {
   generateSlug,
   checkSlugAvailability,
 } from "@/services/onlineStoreService";
+import { uploadImage } from "@/services/cloudinary";
+import { PRESET_THEME_COLORS } from "@/shared/themeTokens";
+
 import { UnsavedChangesModal } from "@/features/dashboard/common";
+
 import "./OnlineStoreSetupView.css";
 
-// SVG Icons
 function GripIcon() {
   return (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
@@ -69,23 +72,23 @@ export default function OnlineStoreSetupView({
   const [toast, setToast] = useState(null);
   const [isDiscardModalOpen, setIsDiscardModalOpen] = useState(false);
 
-  // Store form state
   const [storeId, setStoreId] = useState(`store_${userId || "guest"}`);
   const [enabled, setEnabled] = useState(false);
   const [name, setName] = useState("Skipli");
   const [logoUrl, setLogoUrl] = useState(null);
+  const [themeColor, setThemeColor] = useState("#E53E3E");
   const [slug, setSlug] = useState("skipli");
   const [originalSlug, setOriginalSlug] = useState("skipli");
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
   const [slugError, setSlugError] = useState("");
   const [locationId, setLocationId] = useState("loc-skipli");
   const [categoryConfigs, setCategoryConfigs] = useState([]);
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
 
   const fileInputRef = useRef(null);
   const dragItemIndex = useRef(null);
   const dragOverItemIndex = useRef(null);
 
-  // Count items per category
   const getItemCount = useCallback(
     (cat) => {
       if (!items) return 0;
@@ -96,7 +99,6 @@ export default function OnlineStoreSetupView({
     [items]
   );
 
-  // 1. Subscribe to online store data from Firebase / local storage
   useEffect(() => {
     let mounted = true;
     const { unsubscribe, firstPromise } = subscribeOnlineStore(
@@ -107,11 +109,12 @@ export default function OnlineStoreSetupView({
         setEnabled(Boolean(storeData.enabled));
         setName(storeData.name || "Skipli");
         setLogoUrl(storeData.logoUrl || null);
+        setThemeColor(storeData.themeColor || "#E53E3E");
         setSlug(storeData.slug || "skipli");
         setOriginalSlug(storeData.slug || "skipli");
         setLocationId(storeData.locationId || "loc-skipli");
 
-        // Merge categories with saved menu.categories
+
         const savedCatConfig = storeData.menu?.categories || {};
         const merged = (categories || []).map((cat, idx) => {
           const saved = savedCatConfig[cat.id];
@@ -124,7 +127,6 @@ export default function OnlineStoreSetupView({
           };
         });
 
-        // Sort by configured order
         merged.sort((a, b) => a.order - b.order);
         setCategoryConfigs(merged);
       },
@@ -143,7 +145,6 @@ export default function OnlineStoreSetupView({
     };
   }, [userId, categories, getItemCount]);
 
-  // Warn on page reload if dirty
   useEffect(() => {
     const handleBeforeUnload = (e) => {
       if (isDirty) {
@@ -155,7 +156,6 @@ export default function OnlineStoreSetupView({
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [isDirty]);
 
-  // Auto-dismiss toast
   useEffect(() => {
     if (toast) {
       const timer = setTimeout(() => setToast(null), 3500);
@@ -163,7 +163,6 @@ export default function OnlineStoreSetupView({
     }
   }, [toast]);
 
-  // Handle Name Change
   const handleNameChange = (val) => {
     setName(val);
     setIsDirty(true);
@@ -174,7 +173,6 @@ export default function OnlineStoreSetupView({
     }
   };
 
-  // Handle Slug Change
   const handleSlugChange = (rawVal) => {
     const cleaned = rawVal.toLowerCase().replace(/[^a-z0-9-]/g, "");
     setSlug(cleaned);
@@ -196,45 +194,63 @@ export default function OnlineStoreSetupView({
     }
   };
 
-  // Handle Logo Upload & Resizing via HTML5 Canvas
-  const handleLogoUpload = (e) => {
+  const handleLogoUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = (loadEvt) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        const MAX_SIZE = 300;
-        let w = img.width;
-        let h = img.height;
+    try {
+      setIsUploadingLogo(true);
+      const result = await uploadImage(file, { folder: "square_store_logos" });
+      setLogoUrl(result.url);
+      setIsDirty(true);
+      setToast({ message: "Store logo uploaded successfully to Cloudinary!", type: "success" });
+    } catch (err) {
+      console.warn("Cloudinary upload failed, using local canvas fallback:", err);
+      const reader = new FileReader();
+      reader.onload = (loadEvt) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          const MAX_SIZE = 300;
+          let w = img.width;
+          let h = img.height;
 
-        if (w > h) {
-          if (w > MAX_SIZE) {
-            h = Math.round((h * MAX_SIZE) / w);
-            w = MAX_SIZE;
+          if (w > h) {
+            if (w > MAX_SIZE) {
+              h = Math.round((h * MAX_SIZE) / w);
+              w = MAX_SIZE;
+            }
+          } else {
+            if (h > MAX_SIZE) {
+              w = Math.round((w * MAX_SIZE) / h);
+              h = MAX_SIZE;
+            }
           }
-        } else {
-          if (h > MAX_SIZE) {
-            w = Math.round((w * MAX_SIZE) / h);
-            h = MAX_SIZE;
-          }
-        }
 
-        canvas.width = w;
-        canvas.height = h;
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0, w, h);
-        const dataUrl = canvas.toDataURL("image/png");
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, w, h);
+          const dataUrl = canvas.toDataURL("image/png");
 
-        setLogoUrl(dataUrl);
-        setIsDirty(true);
+          setLogoUrl(dataUrl);
+          setIsDirty(true);
+        };
+        img.src = loadEvt.target.result;
       };
-      img.src = loadEvt.target.result;
-    };
-    reader.readAsDataURL(file);
-    e.target.value = null;
+      reader.readAsDataURL(file);
+
+      const isPresetErr = err?.message && err.message.includes("Unsigned");
+      setToast({
+        message: isPresetErr
+          ? err.message
+          : "Cloudinary upload error. Saved locally instead.",
+        type: "error",
+      });
+    } finally {
+      setIsUploadingLogo(false);
+      e.target.value = null;
+    }
   };
 
   const handleRemoveLogo = () => {
@@ -242,7 +258,6 @@ export default function OnlineStoreSetupView({
     setIsDirty(true);
   };
 
-  // Copy Link
   const handleCopyLink = () => {
     const url = `${window.location.origin}/store/${slug}`;
     navigator.clipboard.writeText(url).then(
@@ -251,13 +266,11 @@ export default function OnlineStoreSetupView({
     );
   };
 
-  // Preview Store in New Tab
   const handlePreviewStore = () => {
     const url = `${window.location.origin}/store/${slug}`;
     window.open(url, "_blank");
   };
 
-  // Category Toggle Visibility
   const handleToggleCategoryVisible = (catId) => {
     setCategoryConfigs((prev) =>
       prev.map((c) => (c.id === catId ? { ...c, visible: !c.visible } : c))
@@ -265,7 +278,6 @@ export default function OnlineStoreSetupView({
     setIsDirty(true);
   };
 
-  // Category Move Up / Down
   const handleMoveCategory = (index, direction) => {
     const targetIndex = index + direction;
     if (targetIndex < 0 || targetIndex >= categoryConfigs.length) return;
@@ -274,13 +286,11 @@ export default function OnlineStoreSetupView({
     const [moved] = updated.splice(index, 1);
     updated.splice(targetIndex, 0, moved);
 
-    // Update order values
     const reordered = updated.map((c, i) => ({ ...c, order: i }));
     setCategoryConfigs(reordered);
     setIsDirty(true);
   };
 
-  // Drag and drop reordering
   const handleDragStart = (e, index) => {
     dragItemIndex.current = index;
     e.dataTransfer.effectAllowed = "move";
@@ -309,7 +319,6 @@ export default function OnlineStoreSetupView({
     dragOverItemIndex.current = null;
   };
 
-  // Save Settings
   const handleSave = async () => {
     if (isSaving) return;
 
@@ -327,7 +336,7 @@ export default function OnlineStoreSetupView({
     setIsSaving(true);
 
     try {
-      // Re-verify slug uniqueness
+
       const avail = await checkSlugAvailability(cleanSlug, storeId);
       if (!avail.available) {
         setSlugError(avail.reason);
@@ -336,7 +345,6 @@ export default function OnlineStoreSetupView({
         return;
       }
 
-      // Convert category configs into menu.categories map
       const categoriesMap = {};
       categoryConfigs.forEach((c, idx) => {
         categoriesMap[c.id] = {
@@ -350,12 +358,14 @@ export default function OnlineStoreSetupView({
         name: name.trim(),
         slug: cleanSlug,
         logoUrl,
+        themeColor: themeColor || "#E53E3E",
         locationId,
         enabled,
         menu: {
           categories: categoriesMap,
         },
       };
+
 
       await saveOnlineStore(userId, payload, originalSlug);
 
@@ -370,7 +380,6 @@ export default function OnlineStoreSetupView({
     }
   };
 
-  // Render Realtime Skeleton while fetching initial store snapshot
   if (isLoading) {
     return (
       <div className="sq-store-setup-container">
@@ -383,7 +392,6 @@ export default function OnlineStoreSetupView({
 
   return (
     <div className="sq-store-setup-container">
-      {/* Header Bar */}
       <div className="sq-store-setup-header">
         <div className="sq-store-setup-header-left">
           <h1 className="sq-store-setup-title">Store setup</h1>
@@ -402,7 +410,6 @@ export default function OnlineStoreSetupView({
         </button>
       </div>
 
-      {/* SECTION 1: Store Status */}
       <div className="sq-store-setup-card">
         <h2 className="sq-setup-section-title">Store status</h2>
         <p className="sq-setup-section-desc">
@@ -433,14 +440,12 @@ export default function OnlineStoreSetupView({
         </div>
       </div>
 
-      {/* SECTION 2: Store Info */}
       <div className="sq-store-setup-card">
         <h2 className="sq-setup-section-title">Store info</h2>
         <p className="sq-setup-section-desc">
           Set up your branding, link URL, and order location.
         </p>
 
-        {/* Store Name */}
         <div className="sq-setup-field-group">
           <label className="sq-setup-label" htmlFor="sq-store-name-input">
             Store name <span className="sq-setup-label-req">*</span>
@@ -456,7 +461,6 @@ export default function OnlineStoreSetupView({
           />
         </div>
 
-        {/* Logo */}
         <div className="sq-setup-field-group">
           <label className="sq-setup-label">Logo</label>
           <div className="sq-logo-upload-box">
@@ -479,9 +483,10 @@ export default function OnlineStoreSetupView({
               <button
                 type="button"
                 className="sq-btn-upload"
+                disabled={isUploadingLogo}
                 onClick={() => fileInputRef.current?.click()}
               >
-                {logoUrl ? "Change logo" : "Upload logo"}
+                {isUploadingLogo ? "Uploading..." : logoUrl ? "Change logo" : "Upload logo"}
               </button>
               {logoUrl && (
                 <button
@@ -499,7 +504,6 @@ export default function OnlineStoreSetupView({
           </p>
         </div>
 
-        {/* Store Link (slug) */}
         <div className="sq-setup-field-group">
           <label className="sq-setup-label" htmlFor="sq-store-slug-input">
             Store link (slug) <span className="sq-setup-label-req">*</span>
@@ -541,7 +545,6 @@ export default function OnlineStoreSetupView({
           </p>
         </div>
 
-        {/* Location Dropdown */}
         <div className="sq-setup-field-group">
           <label className="sq-setup-label" htmlFor="sq-store-location-select">
             Location
@@ -567,9 +570,107 @@ export default function OnlineStoreSetupView({
         </div>
       </div>
 
-      {/* SECTION 3: Menu Display */}
+      <div className="sq-store-setup-card">
+        <h2 className="sq-setup-section-title">Store theme & colors</h2>
+        <p className="sq-setup-section-desc">
+          Choose a primary brand color for your storefront. We will automatically blend complementary shades into your buttons, active tabs, badges, and drawers.
+        </p>
+
+        <div className="sq-setup-theme-section">
+          <div className="sq-theme-presets-grid">
+            {PRESET_THEME_COLORS.map((preset) => {
+              const isSelected = (themeColor || "").toLowerCase() === preset.hex.toLowerCase();
+              return (
+                <button
+                  key={preset.id}
+                  type="button"
+                  className={`sq-theme-preset-btn ${isSelected ? "sq-theme-preset-btn--active" : ""}`}
+                  onClick={() => {
+                    setThemeColor(preset.hex);
+                    setIsDirty(true);
+                  }}
+                  title={preset.name}
+                >
+                  <span
+                    className="sq-theme-color-circle"
+                    style={{ backgroundColor: preset.hex }}
+                  >
+                    {isSelected && (
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                    )}
+                  </span>
+                  <span className="sq-theme-preset-name">{preset.name}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="sq-theme-custom-row">
+            <div className="sq-theme-picker-group">
+              <label className="sq-setup-label" htmlFor="sq-theme-custom-color">Custom color</label>
+              <div className="sq-theme-color-inputs">
+                <input
+                  id="sq-theme-custom-color"
+                  type="color"
+                  className="sq-theme-color-picker"
+                  value={themeColor}
+                  onChange={(e) => {
+                    setThemeColor(e.target.value);
+                    setIsDirty(true);
+                  }}
+                />
+                <input
+                  type="text"
+                  className="sq-theme-hex-input"
+                  value={themeColor.toUpperCase()}
+                  onChange={(e) => {
+                    setThemeColor(e.target.value);
+                    setIsDirty(true);
+                  }}
+                  maxLength={7}
+                  placeholder="#E53E3E"
+                />
+              </div>
+            </div>
+
+            <div className="sq-theme-preview-card" style={{ "--preview-color": themeColor }}>
+              <div className="sq-theme-preview-label">Live Preview</div>
+              <div className="sq-theme-preview-content">
+                <div className="sq-theme-preview-header">
+                  <div className="sq-theme-preview-brand" style={{ color: themeColor }}>
+                    <span className="sq-theme-preview-square" style={{ borderColor: themeColor }} />
+                    <span style={{ fontWeight: 800 }}>{(name || "SKIPLI").toUpperCase()}</span>
+                  </div>
+                  <div className="sq-theme-preview-badge" style={{ backgroundColor: `${themeColor}1a`, color: themeColor }}>
+                    10% OFF
+                  </div>
+                </div>
+                <div className="sq-theme-preview-tabs">
+                  <span
+                    className="sq-theme-preview-tab sq-theme-preview-tab--active"
+                    style={{ color: themeColor, borderColor: themeColor, backgroundColor: `${themeColor}14` }}
+                  >
+                    Appetizers
+                  </span>
+                  <span className="sq-theme-preview-tab">Entrees</span>
+                  <span className="sq-theme-preview-tab">Drinks</span>
+                </div>
+                <div className="sq-theme-preview-actions">
+                  <button type="button" className="sq-theme-preview-btn" style={{ backgroundColor: themeColor }}>
+                    Add Item • $12.00
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="sq-store-setup-card">
         <h2 className="sq-setup-section-title">Menu display</h2>
+
         <p className="sq-setup-section-desc">
           Choose which categories are shown on your online storefront and drag to reorder their tabs.
         </p>
@@ -640,14 +741,12 @@ export default function OnlineStoreSetupView({
         )}
       </div>
 
-      {/* Toast Notification */}
       {toast && (
         <div className={`sq-toast sq-toast--${toast.type}`} role="status">
           {toast.message}
         </div>
       )}
 
-      {/* Unsaved Changes Confirmation Modal */}
       <UnsavedChangesModal
         isOpen={isDiscardModalOpen}
         onDiscard={() => {

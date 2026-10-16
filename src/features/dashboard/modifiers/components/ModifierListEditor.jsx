@@ -28,7 +28,6 @@ export default function ModifierListEditor({
 
   const placeholderRowIdRef = useRef(`mod_placeholder_${Date.now()}`);
 
-  // Purely derive rows to display: real modifiers + one trailing placeholder row
   const realModifiers = modifiers.filter((m) => !m.isPlaceholder);
   const placeholderRow = {
     id: placeholderRowIdRef.current,
@@ -44,7 +43,6 @@ export default function ModifierListEditor({
   };
   const rows = [...realModifiers, placeholderRow];
 
-  // Resolve modifier library
   const allSets =
     modifierSets && modifierSets.length > 0
       ? modifierSets
@@ -102,7 +100,7 @@ export default function ModifierListEditor({
   const handleNameChange = (rowId, val) => {
     if (rowId === placeholderRowIdRef.current) {
       if (val.length > 0) {
-        // User typed into the placeholder row -> promote it to a real modifier item
+
         const newId = `mod_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
         const newRow = {
           id: newId,
@@ -222,7 +220,7 @@ export default function ModifierListEditor({
     reader.onload = (loadEvent) => {
       const img = new Image();
       img.onload = () => {
-        // Resize to maximum 120x120 thumbnail for smooth local RTDB storage
+
         const canvas = document.createElement("canvas");
         const maxDim = 120;
         let width = img.width;
@@ -296,8 +294,7 @@ export default function ModifierListEditor({
                       hasNested ? "has-nested" : ""
                     }`}
                   >
-                    {/* Image cell with drag handle */}
-                    <td className="sq-mod-col-photo">
+<td className="sq-mod-col-photo">
                       <div className="sq-mod-photo-drag-wrapper">
                         {!isPlaceholder && (
                           <span
@@ -334,8 +331,7 @@ export default function ModifierListEditor({
                       </div>
                     </td>
 
-                    {/* Name cell */}
-                    <td className="sq-mod-col-name">
+<td className="sq-mod-col-name">
                       <div className="sq-mod-name-input-wrapper">
                         <input
                           ref={(el) => (inputRefs.current[row.id] = el)}
@@ -359,8 +355,7 @@ export default function ModifierListEditor({
                       </div>
                     </td>
 
-                    {/* Appearance cell */}
-                    <td className="sq-mod-col-appearance">
+<td className="sq-mod-col-appearance">
                       <div className="sq-appearance-wrapper">
                         <button
                           type="button"
@@ -391,8 +386,7 @@ export default function ModifierListEditor({
                       </div>
                     </td>
 
-                    {/* Price cell */}
-                    <td className="sq-mod-col-price">
+<td className="sq-mod-col-price">
                       <input
                         type="text"
                         className="sq-mod-price-input"
@@ -406,8 +400,7 @@ export default function ModifierListEditor({
                       />
                     </td>
 
-                    {/* Pre-select cell */}
-                    <td className="sq-mod-col-preselect">
+<td className="sq-mod-col-preselect">
                       <input
                         type="checkbox"
                         className="sq-mod-preselect-checkbox"
@@ -420,8 +413,7 @@ export default function ModifierListEditor({
                       />
                     </td>
 
-                    {/* Availability cell */}
-                    {showAvailability && (
+{showAvailability && (
                       <td className="sq-mod-col-avail">
                         <div className="sq-mod-avail-wrap">
                           <Toggle
@@ -436,8 +428,7 @@ export default function ModifierListEditor({
                       </td>
                     )}
 
-                    {/* More actions cell */}
-                    <td className="sq-mod-col-more">
+<td className="sq-mod-col-more">
                       {!isPlaceholder && (
                         <div className="sq-mod-more-wrapper">
                           <button
@@ -464,8 +455,7 @@ export default function ModifierListEditor({
                     </td>
                   </tr>
 
-                  {/* Attached nested modifier sets (displayed directly underneath modifier, image copy 4.png) */}
-                  {attachedSets.map((nested) => {
+{attachedSets.map((nested) => {
                     const liveSet =
                       allSets.find((s) => s.id === nested.id) || nested;
                     return (
@@ -518,8 +508,7 @@ export default function ModifierListEditor({
         </table>
       </div>
 
-      {/* Nested Modifier Sets Selection Popup Modal (image copy 3.png) */}
-      {nestedEditorRowId && (
+{nestedEditorRowId && (
         <NestedModifierEditor
           isOpen={Boolean(nestedEditorRowId)}
           onClose={() => setNestedEditorRowId(null)}

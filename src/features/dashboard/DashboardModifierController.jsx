@@ -1,4 +1,5 @@
 import { DashboardCategoryController } from "./DashboardCategoryController";
+import { modifierSetToFormState } from "./dashboardViews";
 import {
   subscribeModifierSets,
   subscribeModifierSetItems,
@@ -31,7 +32,6 @@ export class DashboardModifierController extends DashboardCategoryController {
       editingModifierSet: initialModifierSet,
       isApplyToItemsOpen: false,
       applyToItemsSet: null,
-      hasLoadedModifiers: false,
     };
 
     this.unsubscribeModifierSets = null;
@@ -48,7 +48,7 @@ export class DashboardModifierController extends DashboardCategoryController {
     if (this.unsubscribeModifierSets) this.unsubscribeModifierSets();
     if (this.unsubscribeModifierSetItems) this.unsubscribeModifierSetItems();
 
-    const { unsubscribe, firstPromise } = subscribeModifierSets(
+    const { unsubscribe } = subscribeModifierSets(
       userId,
       (sets) => {
         if (this._isMounted) {
@@ -104,20 +104,7 @@ export class DashboardModifierController extends DashboardCategoryController {
   }
 
   navigateToModifiers = () => {
-    if (this.state.currentView !== "modifiers") {
-      this.startViewLoading("modifiers");
-    }
-    if (this.props.router?.navigate) {
-      this.props.router.navigate("/dashboard/items/modifiers");
-    } else {
-      this.setState({
-        currentView: "modifiers",
-        activeMenu: "modifiers",
-        isItemsMenusOpen: true,
-        isItemsOpen: true,
-        isCreateModifierOpen: false,
-      });
-    }
+    this.navigateTo("modifiers");
   };
 
   openCreateModifierSet = (updateUrl = true) => {
@@ -143,7 +130,7 @@ export class DashboardModifierController extends DashboardCategoryController {
       isItemsOpen: true,
       isCreateModifierOpen: true,
       editingModifierSetId: set.id,
-      editingModifierSet: set,
+      ...modifierSetToFormState(set),
     });
     if (updateUrl && this.props.router?.navigate) {
       this.props.router.navigate(`/dashboard/items/modifiers/${set.id}`);
@@ -213,12 +200,10 @@ export class DashboardModifierController extends DashboardCategoryController {
     await applyModifierSetToItems(userId, setId, targetItemIds, currentItemIds);
   };
 
-  // Item-level Modifier Section Handlers
   handleApplyItemModifierSets = async (nextSetIds, currentSetIds) => {
     const { userId, editingItemId } = this.state;
     if (!editingItemId) return;
 
-    // For each set that was added:
     const toAdd = nextSetIds.filter((id) => !currentSetIds.includes(id));
     const toRemove = currentSetIds.filter((id) => !nextSetIds.includes(id));
 

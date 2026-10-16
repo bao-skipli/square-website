@@ -7,8 +7,7 @@ export default class DashboardSidebarHeader extends PureComponent {
 
     return (
       <div className="sq-sidebar-header">
-        {/* 1. Account Card */}
-        <div className="sq-account-card">
+<div className="sq-account-card">
           <div className="sq-account-user-row">
             <span className="sq-account-avatar-icon">
               <UserIcon />
@@ -20,8 +19,7 @@ export default class DashboardSidebarHeader extends PureComponent {
           </button>
         </div>
 
-        {/* 2. Setup Progress Bar */}
-        <div className="sq-progress-section">
+<div className="sq-progress-section">
           <div className="sq-progress-bar-track">
             <div className="sq-progress-bar-fill" style={{ width: "17%" }} />
           </div>
@@ -31,8 +29,7 @@ export default class DashboardSidebarHeader extends PureComponent {
           </div>
         </div>
 
-        {/* 3. Search Bar */}
-        <div className="sq-search-wrapper">
+<div className="sq-search-wrapper">
           <span className="sq-search-icon">
             <SearchIcon />
           </span>

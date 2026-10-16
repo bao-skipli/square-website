@@ -16,8 +16,6 @@
   align-items: start;
 }
 
-/* ================= LEFT COLUMN ================= */
-
 .pos-left-column {
   display: flex;
   flex-direction: column;
@@ -180,8 +178,6 @@
   background-color: var(--color-border, #e5e5e5);
 }
 
-/* ================= RIGHT COLUMN ================= */
-
 .pos-right-column {
   position: relative;
   width: 100%;
@@ -299,7 +295,6 @@
   }
 }
 
-/* ================= FALLBACK FOR BROWSERS WITHOUT SCROLL TIMELINE ================= */
 @supports not (animation-timeline: scroll()) {
   .pos-accordion-wrapper {
     opacity: 1;

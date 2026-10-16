@@ -50,8 +50,7 @@ export default class DashboardSidebarNav extends PureComponent {
     return (
       <div className="sq-sidebar-menu-scroll">
         <ul className="sq-nav-list">
-          {/* Home */}
-          <li className="sq-nav-item">
+<li className="sq-nav-item">
             <button
               type="button"
               className={`sq-nav-btn ${activeMenu === "home" && currentView === "home" ? "is-active" : ""}`}
@@ -64,8 +63,7 @@ export default class DashboardSidebarNav extends PureComponent {
             </button>
           </li>
 
-          {/* Items & menus (Accordion Level 1) */}
-          <li className="sq-nav-item">
+<li className="sq-nav-item">
             <button
               type="button"
               className={`sq-nav-btn sq-nav-btn-accordion ${
@@ -81,15 +79,13 @@ export default class DashboardSidebarNav extends PureComponent {
               <ChevronIcon rotated={isItemsMenusOpen} />
             </button>
 
-            {/* Smooth Level 1 Accordion Collapse */}
-            <div
+<div
               className={`sq-subnav-collapse ${isItemsMenusOpen ? "is-open" : ""}`}
               aria-hidden={!isItemsMenusOpen}
             >
               <div className="sq-subnav-collapse-inner">
                 <ul className="sq-subnav-list">
-                  {/* Level 2: Items (Accordion) */}
-                  <li className="sq-subitem">
+<li className="sq-subitem">
                     <button
                       type="button"
                       className={`sq-subitem-btn sq-subitem-btn-accordion ${
@@ -102,8 +98,7 @@ export default class DashboardSidebarNav extends PureComponent {
                       <ChevronIcon rotated={isItemsOpen} />
                     </button>
 
-                    {/* Smooth Level 2 Accordion Collapse */}
-                    <div
+<div
                       className={`sq-subsubnav-collapse ${isItemsOpen ? "is-open" : ""}`}
                       aria-hidden={!isItemsOpen}
                     >
@@ -223,8 +218,7 @@ export default class DashboardSidebarNav extends PureComponent {
             </div>
           </li>
 
-          {/* Primary Nav Items */}
-          {PRIMARY_NAV_ITEMS.map(({ key, label, Icon }) => (
+{PRIMARY_NAV_ITEMS.map(({ key, label, Icon }) => (
             <li key={key} className="sq-nav-item">
               <button
                 type="button"
@@ -242,8 +236,7 @@ export default class DashboardSidebarNav extends PureComponent {
 
         <hr className="sq-sidebar-divider" />
 
-        {/* Secondary Nav Items (Channels & Online ordering) */}
-        <ul className="sq-nav-list">
+<ul className="sq-nav-list">
           {SECONDARY_NAV_ITEMS.map(({ key, label, Icon }) => (
             <li key={key} className="sq-nav-item">
               <button

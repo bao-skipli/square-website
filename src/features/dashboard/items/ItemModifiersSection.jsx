@@ -116,21 +116,19 @@ export default function ItemModifiersSection({
   onSaveItemModifierOverrides,
   onReorderItemModifierSets,
 }) {
-  const [activeTab, setActiveTab] = useState("default"); // "default" | "kitchen"
+  const [activeTab, setActiveTab] = useState("default");
   const [isChecklistModalOpen, setIsChecklistModalOpen] = useState(false);
   const [overrideModalSet, setOverrideModalSet] = useState(null);
   const [draggedIndex, setDraggedIndex] = useState(null);
   const [setToRemove, setSetToRemove] = useState(null);
 
-  // Applied sets with their overrides and order
   const appliedSetIds = Object.keys(itemModifierSetsMap || {});
 
-  // Match with catalog modifierSets
   const appliedSetsList = appliedSetIds
     .map((setId) => {
       const setMeta = itemModifierSetsMap[setId] || {};
       const catalogSet = allModifierSets.find((s) => s.id === setId);
-      if (!catalogSet) return null; // Orphaned reference
+      if (!catalogSet) return null;
       return {
         ...catalogSet,
         itemMeta: setMeta,
@@ -192,8 +190,7 @@ export default function ItemModifiersSection({
 
   return (
     <div className="sq-item-modifiers-section">
-      {/* Header */}
-      <div className="sq-item-mods-header">
+<div className="sq-item-mods-header">
         <h3 className="sq-item-mods-title">Modifiers</h3>
         <button
           type="button"
@@ -204,8 +201,7 @@ export default function ItemModifiersSection({
         </button>
       </div>
 
-      {/* Tabs */}
-      <div className="sq-item-mods-tabs">
+<div className="sq-item-mods-tabs">
         <button
           type="button"
           className={`sq-item-mods-tab-btn ${activeTab === "default" ? "is-active" : ""}`}
@@ -222,8 +218,7 @@ export default function ItemModifiersSection({
         </button>
       </div>
 
-      {/* Tab Content */}
-      {activeTab === "default" ? (
+{activeTab === "default" ? (
         <div className="sq-item-mods-list">
           {appliedSetsList.length === 0 ? (
             <div className="sq-item-mods-empty-state">
@@ -276,7 +271,7 @@ export default function ItemModifiersSection({
           )}
         </div>
       ) : (
-        /* Kitchen Override Placeholder Tab */
+
         <div className="sq-item-mods-kitchen-placeholder">
           <p className="sq-kitchen-placeholder-text">
             Kitchen overrides allow custom printing rules and station routing for this item.
@@ -284,8 +279,7 @@ export default function ItemModifiersSection({
         </div>
       )}
 
-      {/* Checklist popup modal */}
-      <ItemModifiersChecklistModal
+<ItemModifiersChecklistModal
         isOpen={isChecklistModalOpen}
         onClose={() => setIsChecklistModalOpen(false)}
         allModifierSets={allModifierSets}
@@ -293,8 +287,7 @@ export default function ItemModifiersSection({
         onApply={(nextIds) => onApplyItemModifierSets(nextIds, appliedSetIds)}
       />
 
-      {/* Override Fullscreen Modal */}
-      {overrideModalSet && (
+{overrideModalSet && (
         <ModifierOverrideModal
           isOpen={Boolean(overrideModalSet)}
           onClose={() => setOverrideModalSet(null)}
@@ -307,8 +300,7 @@ export default function ItemModifiersSection({
         />
       )}
 
-      {/* Remove Modifier Set Confirmation Modal */}
-      {setToRemove && (
+{setToRemove && (
         <div className="sq-popup-modal-backdrop" style={{ zIndex: 99999 }}>
           <div
             className="sq-unsaved-changes-modal"

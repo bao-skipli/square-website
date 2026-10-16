@@ -73,7 +73,7 @@ export default class EstimatedRevenue extends Component {
           title: tier.title,
         },
       });
-      // Short delay for subtle tactile transition
+
       setTimeout(() => {
         this.setState({ loading: false, redirectToNext: true });
       }, 150);

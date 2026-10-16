@@ -29,11 +29,9 @@ export default class ItemLibraryView extends PureComponent {
 
     return (
       <section className="sq-item-library-view" aria-label="Item Library">
-        {/* Toolbar */}
-        <div className="sq-library-toolbar">
+<div className="sq-library-toolbar">
           <div className="sq-toolbar-left">
-            {/* Search pill */}
-            <div className="sq-search-wrapper" style={{ marginBottom: 0, width: "230px" }}>
+<div className="sq-search-wrapper" style={{ marginBottom: 0, width: "230px" }}>
               <span className="sq-search-icon">
                 <SearchIcon />
               </span>
@@ -47,8 +45,7 @@ export default class ItemLibraryView extends PureComponent {
               />
             </div>
 
-            {/* Filter Chips */}
-            <button
+<button
               type="button"
               className={`sq-chip-btn ${appliedCategories.length > 0 ? "is-filtered" : ""}`}
               onClick={onOpenCategoryFilter}
@@ -85,8 +82,7 @@ export default class ItemLibraryView extends PureComponent {
           </div>
 
           <div className="sq-toolbar-right">
-            {/* Actions button & dropdown menu */}
-            <div className="sq-actions-dropdown-wrap" ref={actionsRef}>
+<div className="sq-actions-dropdown-wrap" ref={actionsRef}>
               <button
                 type="button"
                 className={`sq-btn-actions ${isActionsOpen ? "is-open" : ""}`}
@@ -142,8 +138,7 @@ export default class ItemLibraryView extends PureComponent {
           </div>
         </div>
 
-        {/* Items Table */}
-        <div className="sq-table-container">
+<div className="sq-table-container">
           <table className="sq-item-table">
             <thead>
               <tr>
@@ -162,8 +157,7 @@ export default class ItemLibraryView extends PureComponent {
               </tr>
             </thead>
             <tbody>
-              {/* Quick create row */}
-              <tr>
+<tr>
                 <td colSpan="6" style={{ padding: 0 }}>
                   <div
                     className="sq-quick-create-row"
@@ -175,8 +169,7 @@ export default class ItemLibraryView extends PureComponent {
                 </td>
               </tr>
 
-              {/* Empty State vs Item List */}
-              {filteredItems.length === 0 ? (
+{filteredItems.length === 0 ? (
                 <tr>
                   <td colSpan="6" className="sq-empty-state-box">
                     {librarySearchQuery || appliedCategories.length > 0 || (appliedStatuses.length > 0 && appliedStatuses.length < 2) ? (
@@ -201,9 +194,27 @@ export default class ItemLibraryView extends PureComponent {
                     </td>
                     <td>
                       <div className="sq-table-item-cell">
-                        <div className="sq-item-thumb-placeholder">
-                          <TablePlaceholderThumbIcon />
-                        </div>
+                        {item.imageUrl || item.image || item.photo ? (
+                          <div className="sq-item-thumb-img-wrap">
+                            <img
+                              src={item.imageUrl || item.image || item.photo}
+                              alt={item.name}
+                              className="sq-item-thumb-img"
+                              onError={(e) => {
+                                e.currentTarget.style.display = "none";
+                                const fallback = e.currentTarget.parentElement?.querySelector(".sq-item-thumb-placeholder");
+                                if (fallback) fallback.style.display = "flex";
+                              }}
+                            />
+                            <div className="sq-item-thumb-placeholder" style={{ display: "none" }}>
+                              <TablePlaceholderThumbIcon />
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="sq-item-thumb-placeholder">
+                            <TablePlaceholderThumbIcon />
+                          </div>
+                        )}
                         <span className="sq-item-cell-name">{item.name}</span>
                       </div>
                     </td>

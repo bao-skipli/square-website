@@ -31,8 +31,7 @@ export default class ParentCategoryModal extends PureComponent {
           aria-modal="true"
           aria-label="Parent category"
         >
-          {/* Header */}
-          <div className="sq-popup-modal-header">
+<div className="sq-popup-modal-header">
             <button
               type="button"
               className="sq-modal-circle-close"
@@ -55,8 +54,7 @@ export default class ParentCategoryModal extends PureComponent {
             Select a parent category to nest this category underneath it.
           </p>
 
-          {/* Search */}
-          <div className="sq-modal-search-wrapper">
+<div className="sq-modal-search-wrapper">
             <span className="sq-modal-search-icon">
               <SearchIcon />
             </span>
@@ -70,10 +68,8 @@ export default class ParentCategoryModal extends PureComponent {
             />
           </div>
 
-          {/* List */}
-          <div className="sq-parent-cat-list">
-            {/* Option: None */}
-            <label className="sq-parent-cat-item">
+<div className="sq-parent-cat-list">
+<label className="sq-parent-cat-item">
               <div className="sq-parent-cat-item-left">
                 <div className="sq-parent-cat-icon-wrap">
                   <SlashCircleIcon />
@@ -89,11 +85,10 @@ export default class ParentCategoryModal extends PureComponent {
               />
             </label>
 
-            {/* Available categories list (only root categories can be parents) */}
-            {categories
+{categories
               .filter((c) => {
                 if (editingCategoryId && c.id === editingCategoryId) return false;
-                if (c.parentId) return false; // cannot select a subcategory as a parent
+                if (c.parentId) return false;
                 if (!parentCategorySearch.trim()) return true;
                 return c.name
                   .toLowerCase()

@@ -202,7 +202,7 @@ class Dashboard extends DashboardModifierController {
               selectedVsChip={selectedVsChip}
               selectedChecksChip={selectedChecksChip}
             />
-          ) : currentView === "online-ordering" || currentView === "online" ? (
+          ) : currentView === "online-ordering" || currentView === "online" || currentView === "store-setup" ? (
             <OnlineStoreSetupView
               userId={this.state.userId}
               categories={categories}
@@ -214,7 +214,6 @@ class Dashboard extends DashboardModifierController {
           )}
         </DashboardLayout>
 
-        {/* Create / Edit Item Fullscreen Modal */}
         <ItemFormModal
           isOpen={isCreateItemOpen}
           onScroll={this.handleCreateItemScroll}
@@ -233,7 +232,6 @@ class Dashboard extends DashboardModifierController {
           settingsProps={buildItemSettingsProps(this)}
         />
 
-        {/* Create / Edit Category Fullscreen Modal */}
         <CategoryFormModal
           isOpen={isCreateCategoryOpen}
           editingCategoryId={editingCategoryId}
@@ -270,7 +268,6 @@ class Dashboard extends DashboardModifierController {
           }
         />
 
-        {/* Parent Category Modal */}
         <ParentCategoryModal
           isOpen={isParentCategoryModalOpen}
           onClose={this.closeParentCategoryModal}
@@ -285,7 +282,6 @@ class Dashboard extends DashboardModifierController {
           editingCategoryId={editingCategoryId}
         />
 
-        {/* Add Items Modal */}
         <AddItemsModal
           isOpen={isAddItemsModalOpen}
           onClose={this.closeAddItemsModal}
@@ -303,14 +299,12 @@ class Dashboard extends DashboardModifierController {
           }}
         />
 
-        {/* Unsaved Changes Modal */}
         <UnsavedChangesModal
           isOpen={isUnsavedChangesModalOpen}
           onDiscard={this.handleDiscardChanges}
           onResume={() => this.setState({ isUnsavedChangesModalOpen: false })}
         />
 
-        {/* Filter Drawer */}
         <ItemFilterDrawer
           isOpen={isFilterDrawerOpen}
           onClose={this.closeFilterDrawer}
@@ -333,7 +327,6 @@ class Dashboard extends DashboardModifierController {
           onChangeDrawerView={(view) => this.setState({ filterDrawerView: view })}
         />
 
-        {/* Create / Edit Modifier Set Fullscreen Modal */}
         {isCreateModifierOpen && (
           <ModifierSetModal
             key={editingModifierSetId || "new_modifier_set"}
@@ -348,7 +341,6 @@ class Dashboard extends DashboardModifierController {
           />
         )}
 
-        {/* Apply Modifier Set to Items Modal */}
         <ApplyToItemsModal
           isOpen={isApplyToItemsOpen}
           onClose={this.handleCloseApplyToItems}

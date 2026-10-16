@@ -17,20 +17,17 @@ export default class DashboardHomeView extends PureComponent {
 
     return (
       <div className="sq-home-view-container">
-        {/* Header */}
-        <header className="sq-dashboard-header">
+<header className="sq-dashboard-header">
           <h1 className="sq-dashboard-title">Set up your business to start selling</h1>
           <p className="sq-dashboard-subtitle">1 of 6 steps completed</p>
         </header>
 
-        {/* Setup Guides Cards */}
-        <HomeOnboardingGrid
+<HomeOnboardingGrid
           dismissedPosCard={dismissedPosCard}
           onDismissPos={onDismissPos}
         />
 
-        {/* 2-Column Main Section */}
-        <HomeMetricsSection
+<HomeMetricsSection
           aiQuery={aiQuery}
           onAiSubmit={onAiSubmit}
           onAiQueryChange={onAiQueryChange}

@@ -7,12 +7,31 @@
     "users": {
       "$uid": {
         ".read": "auth != null && auth.uid === $uid",
-        ".write": "auth != null && auth.uid === $uid"
+        ".write": "auth != null && auth.uid === $uid",
+        "categories": {
+          ".read": true
+        },
+        "items": {
+          ".read": true
+        },
+        "modifierSets": {
+          ".read": true
+        }
       }
     },
     "appData": {
       ".read": "auth != null && auth.token.email_verified === true",
       ".write": "auth != null && auth.token.email_verified === true"
+    },
+    "onlineStores": {
+      ".read": true,
+      "$storeId": {
+        ".write": "auth != null"
+      }
+    },
+    "storeSlugs": {
+      ".read": true,
+      ".write": "auth != null"
     }
   }
 }

@@ -119,8 +119,7 @@ export default class SquareBanking extends Component {
           </p>
 
           <div className="banking-feature-box">
-            {/* Square Checking */}
-            <div className="banking-feature-row">
+<div className="banking-feature-row">
               <div className="banking-feature-icon">
                 <DebitCardIcon />
               </div>
@@ -143,8 +142,7 @@ export default class SquareBanking extends Component {
               </button>
             </div>
 
-            {/* Square Savings */}
-            <div className="banking-feature-row">
+<div className="banking-feature-row">
               <div className="banking-feature-icon">
                 <SavingsCoinIcon />
               </div>

@@ -12,16 +12,14 @@ export default class HomeOnboardingGrid extends PureComponent {
 
     return (
       <section className="sq-onboarding-grid" aria-label="Setup Guides">
-        {/* Row 1, Card 1: Promo card */}
-        <div className="sq-card-promo">
+<div className="sq-card-promo">
           <span className="sq-promo-expiry">Expires in 2 days 23 hours</span>
           <p className="sq-promo-text">
             Get free processing on up to $1,000 when you take your first card payment
           </p>
         </div>
 
-        {/* Row 1, Card 2: Demo your new POS */}
-        {!dismissedPosCard && (
+{!dismissedPosCard && (
           <div className="sq-card-standard">
             <div>
               <div className="sq-card-icon-wrap">
@@ -45,8 +43,7 @@ export default class HomeOnboardingGrid extends PureComponent {
           </div>
         )}
 
-        {/* Row 1, Card 3: Get approved to take payments */}
-        <div className="sq-card-standard">
+<div className="sq-card-standard">
           <div>
             <div className="sq-card-icon-wrap">
               <ShieldCheckIcon />
@@ -61,8 +58,7 @@ export default class HomeOnboardingGrid extends PureComponent {
           </div>
         </div>
 
-        {/* Row 2, Card 1: Add hardware */}
-        <div className="sq-card-standard">
+<div className="sq-card-standard">
           <div>
             <div className="sq-card-icon-wrap">
               <HardwareGridIcon />
@@ -80,8 +76,7 @@ export default class HomeOnboardingGrid extends PureComponent {
           </div>
         </div>
 
-        {/* Row 2, Card 2: Take your first payment */}
-        <div className="sq-card-standard">
+<div className="sq-card-standard">
           <div>
             <div className="sq-card-icon-wrap">
               <CreditCardIcon />
@@ -96,8 +91,7 @@ export default class HomeOnboardingGrid extends PureComponent {
           </div>
         </div>
 
-        {/* Row 2, Card 3: Empty slot */}
-        <div className="sq-card-empty" aria-hidden="true" />
+<div className="sq-card-empty" aria-hidden="true" />
       </section>
     );
   }

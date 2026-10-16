@@ -32,7 +32,6 @@
   margin: 0 0 32px 0;
 }
 
-/* Feature Box */
 .banking-feature-box {
   border: 1px solid #ebebeb;
   border-radius: 16px;
@@ -82,7 +81,6 @@
   line-height: 1.4;
 }
 
-/* Toggle Switch */
 .banking-toggle-btn {
   width: 50px;
   height: 30px;
@@ -115,7 +113,6 @@
   transform: translateX(20px);
 }
 
-/* Button Actions */
 .banking-actions-row {
   display: flex;
   align-items: center;
@@ -155,7 +152,6 @@
   background-color: #2a2a2a;
 }
 
-/* Disclaimers */
 .banking-disclaimers {
   border-top: 1px solid #f0f0f0;
   padding-top: 28px;
