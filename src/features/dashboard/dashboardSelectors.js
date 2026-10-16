@@ -1,17 +1,17 @@
 export function getFilteredItems(items, librarySearchQuery, appliedCategories, appliedStatuses) {
   return items.filter((item) => {
-    // Search filter
+
     if (librarySearchQuery.trim()) {
       const q = librarySearchQuery.toLowerCase().trim();
       const matchName = item.name && item.name.toLowerCase().includes(q);
       const matchCat = item.category && item.category.toLowerCase().includes(q);
       if (!matchName && !matchCat) return false;
     }
-    // Category filter
+
     if (appliedCategories.length > 0) {
       if (!appliedCategories.includes(item.category)) return false;
     }
-    // Status filter
+
     if (appliedStatuses.length > 0) {
       if (!appliedStatuses.includes(item.status)) return false;
     }

@@ -29,7 +29,6 @@ export default function ApplyToItemsModal({
 
   if (!isOpen || !modifierSet) return null;
 
-  // Filter items by search query (diacritic and case-insensitive)
   const filteredItems = items.filter((item) => {
     if (!searchQuery.trim()) return true;
     const normName = (item.name || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -95,8 +94,7 @@ export default function ApplyToItemsModal({
             {error}
           </div>
         )}
-        {/* Header */}
-        <div className="sq-apply-modal-header">
+<div className="sq-apply-modal-header">
           <h2 className="sq-apply-modal-title">Apply Set to Items</h2>
           <div className="sq-apply-select-links">
             <button
@@ -118,14 +116,12 @@ export default function ApplyToItemsModal({
           </div>
         </div>
 
-        {/* Gray Banner */}
-        <div className="sq-apply-banner">
+<div className="sq-apply-banner">
           The modifier set <strong>{modifierSet.name}</strong> will be applied to{" "}
           <strong>{selectedCount}</strong> items.
         </div>
 
-        {/* Search */}
-        <div className="sq-apply-search-row">
+<div className="sq-apply-search-row">
           <span className="sq-apply-search-icon">
             <SearchIcon size={16} color="#71717a" />
           </span>
@@ -138,8 +134,7 @@ export default function ApplyToItemsModal({
           />
         </div>
 
-        {/* Checklist */}
-        <div className="sq-apply-items-list">
+<div className="sq-apply-items-list">
           {filteredItems.length === 0 ? (
             <div className="sq-apply-empty-text">No items found</div>
           ) : (
@@ -160,8 +155,7 @@ export default function ApplyToItemsModal({
           )}
         </div>
 
-        {/* Footer */}
-        <div className="sq-apply-modal-footer">
+<div className="sq-apply-modal-footer">
           <button
             type="button"
             className="sq-btn-pill-cancel"

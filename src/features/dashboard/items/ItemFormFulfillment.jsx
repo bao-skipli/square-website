@@ -27,8 +27,7 @@ export default class ItemFormFulfillment extends PureComponent {
 
     return (
       <>
-        {/* Manage checkout */}
-        <div>
+<div>
           <button
             type="button"
             className="sq-accordion-header"
@@ -154,8 +153,7 @@ export default class ItemFormFulfillment extends PureComponent {
 
         <div className="sq-divider-thick-block" />
 
-        {/* Fulfill orders */}
-        <div>
+<div>
           <button
             type="button"
             className="sq-accordion-header"

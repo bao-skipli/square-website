@@ -14,10 +14,8 @@ export default class HomeMetricsSection extends PureComponent {
 
     return (
       <section className="sq-dashboard-columns">
-        {/* Left Column (~70%) */}
-        <div className="sq-col-left">
-          {/* AI Chat Prompt Input */}
-          <form className="sq-ai-input-card" onSubmit={onAiSubmit}>
+<div className="sq-col-left">
+<form className="sq-ai-input-card" onSubmit={onAiSubmit}>
             <input
               type="text"
               className="sq-ai-input-field"
@@ -31,8 +29,7 @@ export default class HomeMetricsSection extends PureComponent {
             </button>
           </form>
 
-          {/* Order Volume Card */}
-          <div className="sq-order-volume-card">
+<div className="sq-order-volume-card">
             <div className="sq-ov-header">
               <div>
                 <h2 className="sq-ov-title">Order volume</h2>
@@ -74,12 +71,10 @@ export default class HomeMetricsSection extends PureComponent {
             </div>
           </div>
 
-          {/* Performance Card */}
-          <div className="sq-performance-card">
+<div className="sq-performance-card">
             <h2 className="sq-perf-title">Performance</h2>
 
-            {/* 3 Filter Chips */}
-            <div className="sq-perf-filters">
+<div className="sq-perf-filters">
               <button type="button" className="sq-filter-chip">
                 <span className="sq-chip-prefix">Date</span>
                 <span className="sq-chip-val">{selectedDateChip}</span>
@@ -94,8 +89,7 @@ export default class HomeMetricsSection extends PureComponent {
               </button>
             </div>
 
-            {/* Chart & Net Sales Block */}
-            <div className="sq-perf-main-row">
+<div className="sq-perf-main-row">
               <div className="sq-net-sales-block">
                 <div>
                   <span className="sq-net-sales-label">Net sales</span>
@@ -140,8 +134,7 @@ export default class HomeMetricsSection extends PureComponent {
 
             <hr className="sq-perf-divider" />
 
-            {/* Metrics 2-Column Grid */}
-            <div className="sq-metrics-grid">
+<div className="sq-metrics-grid">
               <div className="sq-metric-item">
                 <div className="sq-metric-info">
                   <span className="sq-metric-label">Gross sales</span>
@@ -205,10 +198,8 @@ export default class HomeMetricsSection extends PureComponent {
           </div>
         </div>
 
-        {/* Right Column (~30%) */}
-        <div className="sq-col-right">
-          {/* Banking Card */}
-          <div className="sq-banking-card">
+<div className="sq-col-right">
+<div className="sq-banking-card">
             <h3 className="sq-banking-title">Banking</h3>
             <div className="sq-banking-row">
               <span className="sq-banking-balance-label">Balance</span>
@@ -216,8 +207,7 @@ export default class HomeMetricsSection extends PureComponent {
             </div>
           </div>
 
-          {/* Quick Actions Card */}
-          <div className="sq-quick-actions-card">
+<div className="sq-quick-actions-card">
             <h3 className="sq-qa-title">Quick actions</h3>
             <ul className="sq-qa-list">
               <li className="sq-qa-item">

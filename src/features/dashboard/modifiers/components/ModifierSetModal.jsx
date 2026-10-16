@@ -321,8 +321,7 @@ export default function ModifierSetModal({
       aria-modal="true"
       aria-label={isEditing ? "Edit modifier set" : "Create modifier set"}
     >
-      {/* Top Header: Clean with X (left) and Actions/Save (right) */}
-      <div className="sq-mod-modal-header">
+<div className="sq-mod-modal-header">
         <button
           type="button"
           className="sq-mod-modal-close-btn"
@@ -369,23 +368,20 @@ export default function ModifierSetModal({
         </div>
       </div>
 
-      {/* Main Form Content */}
-      <div className="sq-mod-modal-scroll-body">
+<div className="sq-mod-modal-scroll-body">
         {isEditing && !initialData ? (
           <div className="sq-mod-modal-loading-wrapper">
             <DashboardLoading message="Loading modifier set..." />
           </div>
         ) : (
           <div className="sq-mod-form-container">
-            {/* Main Title inside form */}
-            <h1 className="sq-mod-form-title">
+<h1 className="sq-mod-form-title">
               {isEditing ? "Edit modifier set" : "Create modifier set"}
             </h1>
 
           {formError && <div className="sq-mod-global-error">{formError}</div>}
 
-          {/* 1. Name */}
-          <div className="sq-mod-field-block">
+<div className="sq-mod-field-block">
             <input
               type="text"
               className={`sq-mod-input-lg ${!name.trim() && formError ? "is-invalid" : ""}`}
@@ -399,8 +395,7 @@ export default function ModifierSetModal({
             />
           </div>
 
-          {/* 2. Display Name & Type Dropdown */}
-          <div className="sq-mod-two-col-row">
+<div className="sq-mod-two-col-row">
             <div className="sq-mod-field-block" style={{ marginBottom: 0 }}>
               <input
                 type="text"
@@ -456,15 +451,13 @@ export default function ModifierSetModal({
             </div>
           </div>
 
-          {/* Text Modifier Caption (if type === text) */}
-          {type === "text" && (
+{type === "text" && (
             <p className="sq-mod-text-info-note">
               Text modifiers are only available on Websites, Kiosks, Ordering profiles, and payment links.
             </p>
           )}
 
-          {/* 3. Locations Row */}
-          <div className="sq-mod-info-row">
+<div className="sq-mod-info-row">
             <div className="sq-mod-info-left">
               <span className="sq-mod-info-icon">
                 <StoreIcon size={20} color="#18181b" />
@@ -486,8 +479,7 @@ export default function ModifierSetModal({
             </button>
           </div>
 
-          {/* 4. Channels Row (Only for list modifier) */}
-          {type === "list" && (
+{type === "list" && (
             <div className="sq-mod-info-row">
               <div className="sq-mod-info-left">
                 <span className="sq-mod-info-icon">
@@ -513,11 +505,9 @@ export default function ModifierSetModal({
 
           <div className="sq-divider-thick-block" />
 
-          {/* 5. List Modifier Sections */}
-          {type === "list" ? (
+{type === "list" ? (
             <>
-              {/* Modifier list editor */}
-              <ModifierListEditor
+<ModifierListEditor
                 modifiers={modifiers}
                 onChange={setModifiers}
                 showAvailability={isSingleLocation}
@@ -529,8 +519,7 @@ export default function ModifierSetModal({
 
               <div className="sq-divider-thick-block" />
 
-              {/* Selection Rules */}
-              <div className="sq-mod-rules-section">
+<div className="sq-mod-rules-section">
                 <h3 className="sq-mod-section-title">Selection rules</h3>
                 <p className="sq-mod-section-subdesc">
                   These settings are the default for the modifier set. You can override them for a specific item after applying the set.{" "}
@@ -566,8 +555,7 @@ export default function ModifierSetModal({
 
               <div className="sq-divider-thick-block" />
 
-              {/* Modifier Display Settings */}
-              <div className="sq-mod-display-section">
+<div className="sq-mod-display-section">
                 <h3 className="sq-mod-section-title">Modifier display settings</h3>
 
                 <div className="sq-mod-toggle-row">
@@ -623,7 +611,6 @@ export default function ModifierSetModal({
               </div>
             </>
           ) : (
-            /* 6. Text Modifier Settings (image copy 4.png) */
             <div className="sq-mod-text-settings-section">
               <h3 className="sq-mod-section-title">Settings</h3>
 
@@ -664,8 +651,7 @@ export default function ModifierSetModal({
         )}
       </div>
 
-      {/* Submodals for Locations and Channels */}
-      <LocationsSelectModal
+<LocationsSelectModal
         isOpen={isLocationsModalOpen}
         onClose={() => setIsLocationsModalOpen(false)}
         initialLocations={locationIds}
@@ -680,8 +666,7 @@ export default function ModifierSetModal({
         onApply={(updated) => setChannels(updated)}
       />
 
-      {/* Project's UnsavedChangesModal component */}
-      <UnsavedChangesModal
+<UnsavedChangesModal
         isOpen={isUnsavedModalOpen}
         onDiscard={() => {
           setIsUnsavedModalOpen(false);
@@ -690,8 +675,7 @@ export default function ModifierSetModal({
         onResume={() => setIsUnsavedModalOpen(false)}
       />
 
-      {/* Delete Confirmation Modal (Matching Square UI, no window.confirm) */}
-      {isDeleteModalOpen && (
+{isDeleteModalOpen && (
         <div className="sq-popup-modal-backdrop" style={{ zIndex: 99999 }}>
           <div
             className="sq-unsaved-changes-modal"

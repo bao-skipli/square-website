@@ -69,3 +69,35 @@ export function SkipliBrandMark({ size = 26 }) {
     </svg>
   );
 }
+
+export function SquareWebLogo({ size = 26, color = "currentColor" }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-label="Square Web Logo"
+    >
+      <rect
+        x="3"
+        y="3"
+        width="18"
+        height="18"
+        rx="4.5"
+        stroke={color}
+        strokeWidth="2.5"
+      />
+      <rect
+        x="8.5"
+        y="8.5"
+        width="7"
+        height="7"
+        rx="1.2"
+        fill={color}
+      />
+    </svg>
+  );
+}
+

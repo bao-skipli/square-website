@@ -5,8 +5,8 @@ export default class Button extends PureComponent {
   render() {
     const {
       children,
-      variant = "primary", // "primary" | "secondary" | "tertiary" | "danger" | "outline"
-      size = "md", // "sm" | "md" | "lg"
+      variant = "primary",
+      size = "md",
       type = "button",
       disabled = false,
       loading = false,

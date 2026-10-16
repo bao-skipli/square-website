@@ -29,8 +29,7 @@ export default class CategoriesView extends PureComponent {
 
     return (
       <section className="sq-categories-view" aria-label="Categories">
-        {/* Header */}
-        <div className="sq-categories-header">
+<div className="sq-categories-header">
           <h1 className="sq-categories-title">Categories</h1>
           <div className="sq-categories-header-actions">
             <button type="button" className="sq-btn-rearrange">
@@ -46,8 +45,7 @@ export default class CategoriesView extends PureComponent {
           </div>
         </div>
 
-        {/* Toolbar */}
-        <div className="sq-categories-toolbar">
+<div className="sq-categories-toolbar">
           <div className="sq-search-wrapper" style={{ marginBottom: 0, width: "230px" }}>
             <span className="sq-search-icon">
               <SearchIcon />
@@ -84,8 +82,7 @@ export default class CategoriesView extends PureComponent {
           </div>
         </div>
 
-        {/* Categories Table */}
-        <div className="sq-table-container">
+<div className="sq-table-container">
           <table className="sq-item-table sq-categories-table">
             <thead>
               <tr>
@@ -124,7 +121,7 @@ export default class CategoriesView extends PureComponent {
                   </td>
                 </tr>
               ) : categoryViewMode === "tree" ? (
-                /* Tree View */
+
                 (() => {
                   const query = (categoriesSearchQuery || "").toLowerCase().trim();
                   const rootCategories = categories.filter((c) => !c.parentId);
@@ -262,7 +259,7 @@ export default class CategoriesView extends PureComponent {
                   });
                 })()
               ) : (
-                /* List View */
+
                 filteredCategories.map((cat) => {
                   const isSelected = selectedCategoryIds.includes(cat.id);
                   const count = getItemCountForCategory(cat.name);

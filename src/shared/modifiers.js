@@ -1,20 +1,11 @@
-/**
- * Shared modifier utilities for Storefront & Dashboard
- */
 
-/**
- * Merge base modifier set configuration with item-level overrides.
- * @param {object} set - Original modifier set from library
- * @param {object} [itemOverride] - Overrides from item.modifierSets[setId]?.overrides
- * @returns {object} Effective modifier set ready for display and validation
- */
+
 export function getEffectiveSettings(set, itemOverride = null) {
   if (!set) return null;
 
   const overrides = itemOverride || {};
   const isText = set.type === "text";
 
-  // Merge selection rules
   const baseRules = set.selectionRules || { required: false, allowMultiple: false };
   const overrideRules = overrides.selectionRules || {};
   const effectiveRules = isText
@@ -32,7 +23,6 @@ export function getEffectiveSettings(set, itemOverride = null) {
         max: overrideRules.max !== undefined ? overrideRules.max : baseRules.max,
       };
 
-  // Merge display settings
   const baseDisplay = set.displaySettings || {
     hideOnReceipts: false,
     conversational: false,
@@ -54,7 +44,6 @@ export function getEffectiveSettings(set, itemOverride = null) {
         : Boolean(baseDisplay.sortSoldOutLast),
   };
 
-  // Resolve preselect map and in-stock status for list modifiers
   let rawModifiers = [];
   if (!isText && set.modifiers) {
     rawModifiers = Array.isArray(set.modifiers)
@@ -77,12 +66,11 @@ export function getEffectiveSettings(set, itemOverride = null) {
       return {
         ...mod,
         inStock: isInStock,
-        // If out of stock, never preselect
+
         preselect: isInStock ? isPreselected : false,
       };
     });
 
-  // Sort sold out to the end if sortSoldOutLast is enabled
   if (effectiveDisplay.sortSoldOutLast) {
     effectiveModifiers.sort((a, b) => {
       if (a.inStock === b.inStock) return (a.order ?? 0) - (b.order ?? 0);
@@ -102,13 +90,6 @@ export function getEffectiveSettings(set, itemOverride = null) {
   };
 }
 
-/**
- * Validate customer selection against modifier set rules.
- * @param {Array<object>} sets - List of effective modifier sets
- * @param {object} selection - Map of { [setId]: { [modId]: boolean } }
- * @param {object} textValues - Map of { [setId]: string }
- * @returns {object} { isValid: boolean, errors: { [setId]: string }, firstErrorSetId: string|null }
- */
 export function validateSelection(sets = [], selection = {}, textValues = {}) {
   const errors = {};
   let firstErrorSetId = null;
@@ -131,10 +112,9 @@ export function validateSelection(sets = [], selection = {}, textValues = {}) {
       return;
     }
 
-    // List modifier
     const rules = set.selectionRules || {};
     const setSelection = selection[set.id] || {};
-    // Only count options that are inStock
+
     const validModIds = new Set(
       (set.modifiers || []).filter((m) => m.inStock).map((m) => m.id)
     );

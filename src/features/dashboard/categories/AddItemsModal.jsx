@@ -32,8 +32,7 @@ export default class AddItemsModal extends PureComponent {
           aria-modal="true"
           aria-label="Add items"
         >
-          {/* Header */}
-          <div className="sq-popup-modal-header">
+<div className="sq-popup-modal-header">
             <button
               type="button"
               className="sq-modal-circle-close"
@@ -55,8 +54,7 @@ export default class AddItemsModal extends PureComponent {
 
           <h2 className="sq-popup-modal-title">Add items</h2>
 
-          {/* Search row with filter button */}
-          <div className="sq-add-items-search-row">
+<div className="sq-add-items-search-row">
             <div className="sq-modal-search-wrapper" style={{ flex: 1, marginBottom: 0 }}>
               <span className="sq-modal-search-icon">
                 <SearchIcon />
@@ -75,15 +73,13 @@ export default class AddItemsModal extends PureComponent {
             </button>
           </div>
 
-          {/* Items Section Header */}
-          <div className="sq-add-items-bar">
+<div className="sq-add-items-bar">
             <span>Items</span>
             <span>{draftSelectedItems.length} selected</span>
           </div>
 
           <div className="sq-add-items-list">
-            {/* Create new items button row */}
-            <div
+<div
               className="sq-add-items-create-row"
               onClick={onCreateNewItem}
             >
@@ -93,8 +89,7 @@ export default class AddItemsModal extends PureComponent {
               <span className="sq-add-items-create-text">Create new items</span>
             </div>
 
-            {/* Items checkboxes */}
-            {items
+{items
               .filter((item) => {
                 if (!addItemsSearch.trim()) return true;
                 return item.name

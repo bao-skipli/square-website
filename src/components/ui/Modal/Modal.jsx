@@ -30,7 +30,7 @@ export default class Modal extends Component {
       title,
       children,
       footer,
-      size = "md", // "sm" | "md" | "lg"
+      size = "md",
       className = "",
       showClose = true,
     } = this.props;

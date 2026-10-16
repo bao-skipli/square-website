@@ -58,8 +58,6 @@
   background-color: #f6f5f3;
 }
 
-/* ================= IMAGE & VIDEO ================= */
-
 .hardware-product-image,
 .hardware-product-video {
   position: absolute;
@@ -92,7 +90,6 @@
   opacity: 1;
 }
 
-/* Dark bottom gradient overlay for contrast with white text on video */
 .hardware-product-overlay {
   position: absolute;
   inset: 0;
@@ -109,8 +106,6 @@
 .hardware-product-card.is-active .hardware-product-overlay {
   opacity: 1;
 }
-
-/* ================= TEXT CONTENT & ANIMATION ================= */
 
 .hardware-product-content {
   position: absolute;
@@ -145,12 +140,10 @@
   cursor: pointer;
   pointer-events: auto;
 
-  /* Sits naturally at the bottom-left with padding when not hovered */
   transition: color 0.35s ease;
   will-change: color;
 }
 
-/* When hovered: title turns white */
 .hardware-product-card.is-active .hardware-product-title {
   color: #ffffff;
 }
@@ -164,7 +157,6 @@
   overflow: hidden;
   box-sizing: border-box;
 
-  /* Inactive: 0 height so title sits cleanly at bottom-left corner */
   max-height: 0;
   margin-top: 0;
   opacity: 0;
@@ -179,7 +171,6 @@
   will-change: max-height, margin-top, transform, opacity;
 }
 
-/* Active on hover: expands smoothly, pushing title upward and revealing details */
 .hardware-product-card.is-active .hardware-product-details {
   max-height: 80px;
   margin-top: 12px;
@@ -235,8 +226,6 @@
   background-color: #f0f0f0;
   transform: scale(1.03);
 }
-
-/* ================= RESPONSIVE ================= */
 
 @media (max-width: 768px) {
   .hardware-product-card {

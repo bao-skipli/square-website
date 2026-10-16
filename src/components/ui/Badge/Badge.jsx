@@ -5,7 +5,7 @@ export default class Badge extends PureComponent {
   render() {
     const {
       children,
-      variant = "neutral", // "available" | "archived" | "neutral" | "success" | "warning"
+      variant = "neutral",
       className = "",
       dot = false,
       ...rest

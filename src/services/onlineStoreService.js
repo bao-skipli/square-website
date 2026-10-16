@@ -9,6 +9,7 @@ export const DEFAULT_ONLINE_STORE = {
   name: "Skipli",
   slug: "skipli",
   logoUrl: null,
+  themeColor: "#E53E3E",
   locationId: "loc-skipli",
   enabled: false,
   menu: {
@@ -18,23 +19,16 @@ export const DEFAULT_ONLINE_STORE = {
   updatedAt: Date.now(),
 };
 
-/**
- * Generate a clean URL-friendly slug from store name.
- * Accepts lowercase letters, digits, and hyphens.
- */
 export function generateSlug(name) {
   if (!name) return "";
   return name
     .toLowerCase()
     .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "") // remove Vietnamese diacritics
-    .replace(/[^a-z0-9]+/g, "-") // replace non-alphanumeric with hyphen
-    .replace(/^-+|-+$/g, ""); // trim leading/trailing hyphens
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }
 
-/**
- * Local storage helpers for guest / offline mode
- */
 export function getLocalOnlineStore() {
   try {
     const raw = localStorage.getItem(LOCAL_STORAGE_ONLINE_STORE_KEY);
@@ -67,19 +61,12 @@ export function getLocalStoreSlugs() {
   return { skipli: "store_skipli" };
 }
 
-/**
- * Check if a slug is available.
- * @param {string} slug
- * @param {string} currentStoreId
- * @returns {Promise<{ available: boolean, reason?: string }>}
- */
 export async function checkSlugAvailability(slug, currentStoreId) {
   const cleanSlug = generateSlug(slug);
   if (!cleanSlug) {
     return { available: false, reason: "Slug cannot be empty." };
   }
 
-  // Check in Firebase
   try {
     const slugRef = ref(database, `storeSlugs/${cleanSlug}`);
     const snap = await get(slugRef);
@@ -90,7 +77,7 @@ export async function checkSlugAvailability(slug, currentStoreId) {
       }
     }
   } catch (err) {
-    // Check fallback in local storage
+
     const localSlugs = getLocalStoreSlugs();
     if (localSlugs[cleanSlug] && localSlugs[cleanSlug] !== currentStoreId) {
       return { available: false, reason: "This store link is already taken." };
@@ -100,10 +87,6 @@ export async function checkSlugAvailability(slug, currentStoreId) {
   return { available: true };
 }
 
-/**
- * Realtime listener for Online Store configuration in Admin.
- * Returns { unsubscribe, firstPromise }
- */
 export function subscribeOnlineStore(userId, callback, onFirstSnapshot) {
   let isFirst = true;
   let firstResolve;
@@ -161,10 +144,6 @@ export function subscribeOnlineStore(userId, callback, onFirstSnapshot) {
   return { unsubscribe, firstPromise };
 }
 
-/**
- * Save Online Store configuration via atomic multi-path update.
- * Updates onlineStores/{storeId} and storeSlugs/{slug} simultaneously.
- */
 export async function saveOnlineStore(userId, storeData, oldSlug = null) {
   const storeId = storeData.id || (userId ? `store_${userId}` : "store_skipli");
   const cleanSlug = generateSlug(storeData.slug || storeData.name || "store");
@@ -184,20 +163,22 @@ export async function saveOnlineStore(userId, storeData, oldSlug = null) {
     createdAt: storeData.createdAt || now,
   };
 
-  // Perform multi-path update in Firebase if authenticated
   if (userId) {
-    const updates = {};
-    updates[`onlineStores/${storeId}`] = normalized;
-    updates[`storeSlugs/${cleanSlug}`] = storeId;
+    try {
+      const updates = {};
+      updates[`onlineStores/${storeId}`] = normalized;
+      updates[`storeSlugs/${cleanSlug}`] = storeId;
 
-    if (oldSlug && oldSlug !== cleanSlug) {
-      updates[`storeSlugs/${oldSlug}`] = null;
+      if (oldSlug && oldSlug !== cleanSlug) {
+        updates[`storeSlugs/${oldSlug}`] = null;
+      }
+
+      await update(ref(database), updates);
+    } catch (dbErr) {
+      console.warn("RTDB update failed, using local storage fallback:", dbErr);
     }
-
-    await update(ref(database), updates);
   }
 
-  // Always sync to local storage for instant responsiveness
   setLocalOnlineStore(normalized);
   return normalized;
 }

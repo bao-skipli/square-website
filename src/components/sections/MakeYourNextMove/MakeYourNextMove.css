@@ -1,15 +1,8 @@
-/* ==========================================================
-   MAKE YOUR NEXT MOVE SECTION - CSS THUẦN (KHÔNG TAILWIND)
-   Thiết kế ở viewport 1440px (khớp từng px)
-   ========================================================== */
+
 
 :root,
 .next-move-section {
-  /* ==========================================================
-     CONFIGURABLE MEASUREMENTS (BIẾN CSS Ở ĐẦU FILE)
-     ========================================================== */
 
-  /* Colors */
   --nm-bg-section: #000000;
   --nm-color-white: #ffffff;
   --nm-color-blue: #2c68f6;
@@ -17,12 +10,10 @@
   --nm-color-btn-white-hover: #f0f0f0;
   --nm-overlay-dark: rgba(0, 0, 0, 0.42);
 
-  /* Central Card */
   --nm-card-width: 480px;
   --nm-card-height: 480px;
   --nm-card-radius: 44px;
 
-  /* Typography */
   --nm-font-serif: var(--font-serif, Georgia, "Times New Roman", serif);
   --nm-font-sans: var(--font-sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif);
   --nm-heading-size-desktop: 56px;
@@ -30,13 +21,11 @@
   --nm-heading-line-height: 1.1;
   --nm-heading-letter-spacing: -0.02em;
 
-  /* Internal Card Spacing */
   --nm-pad-top-to-text: 127px;
   --nm-gap-text-to-btns: 66px;
   --nm-gap-between-btns: 20px;
   --nm-pad-btns-to-bottom: 116px;
 
-  /* Buttons */
   --nm-btn-height: 44px;
   --nm-btn-radius: 9999px;
   --nm-btn-start-width: 126px;
@@ -44,12 +33,10 @@
   --nm-btn-font-size: 14px;
   --nm-btn-font-weight: 500;
 
-  /* Rotating Inline Image */
   --nm-thumb-size: 0.9em;
   --nm-thumb-radius: 8px;
   --nm-thumb-margin-left: 0.25em;
 
-  /* Image Trail Hover Effect */
   --nm-trail-size-desktop: 180px;
   --nm-trail-size-tablet: 140px;
   --nm-trail-radius-desktop: 12px;
@@ -57,16 +44,12 @@
   --nm-trail-dist-desktop: 100px;
   --nm-trail-dist-tablet: 80px;
 
-  /* Section Layout */
   --nm-section-pad-x-desktop: 64px;
   --nm-section-pad-x-tablet: 40px;
   --nm-section-pad-x-mobile: 20px;
   --nm-section-min-height: 100svh;
 }
 
-/* ==========================================================
-   SECTION CONTAINER
-   ========================================================== */
 .next-move-section {
   position: relative;
   width: 100%;
@@ -82,9 +65,6 @@
   user-select: none;
 }
 
-/* ==========================================================
-   IMAGE TRAIL LAYER (NẰM DƯỚI CARD & TEXT)
-   ========================================================== */
 .next-move-trail-container {
   position: absolute;
   inset: 0;
@@ -121,25 +101,22 @@
     opacity: 0;
   }
   21.7% {
-    /* 250ms / 1150ms: Xuất hiện scale 0.6 -> 1, opacity 0 -> 1 */
+
     transform: translate(-50%, -50%) scale(1);
     opacity: 1;
   }
   47.8% {
-    /* (250ms + 300ms) = 550ms: Giữ nguyên trong 300ms */
+
     transform: translate(-50%, -50%) scale(1);
     opacity: 1;
   }
   100% {
-    /* (550ms + 600ms) = 1150ms: Biến mất scale 1 -> 0.3, opacity 1 -> 0 */
+
     transform: translate(-50%, -50%) scale(0.3);
     opacity: 0;
   }
 }
 
-/* ==========================================================
-   CENTRAL CARD (480px x 480px, bo góc 44px)
-   ========================================================== */
 .next-move-card {
   position: relative;
   width: var(--nm-card-width);
@@ -162,7 +139,6 @@
   box-shadow: none;
 }
 
-/* Nền ảnh xoay vòng của Card */
 .next-move-card-bg-layer {
   position: absolute;
   inset: 0;
@@ -194,7 +170,6 @@
   transform: scale(1);
 }
 
-/* Lớp phủ màu tối đảm bảo chữ trắng luôn tương phản cao */
 .next-move-card-overlay {
   position: absolute;
   inset: 0;
@@ -212,9 +187,6 @@
   opacity: 0;
 }
 
-/* ==========================================================
-   CARD CONTENT (TEXT & BUTTONS)
-   ========================================================== */
 .next-move-content {
   position: relative;
   z-index: 3;
@@ -225,7 +197,6 @@
   width: 100%;
 }
 
-/* Heading: Make your next move */
 .next-move-heading {
   margin: 0;
   padding: 0;
@@ -249,7 +220,6 @@
   white-space: nowrap;
 }
 
-/* Ảnh nhỏ sau text (Xoay vòng mỗi 3 giây) */
 .next-move-inline-thumb {
   display: inline-block;
   position: relative;
@@ -277,9 +247,6 @@
   opacity: 1;
 }
 
-/* ==========================================================
-   CTA BUTTONS
-   ========================================================== */
 .next-move-buttons {
   margin-top: var(--nm-gap-text-to-btns);
   display: flex;
@@ -310,7 +277,6 @@
   transform: scale(0.97);
 }
 
-/* Button 1: Get started (Nền trắng, chữ xanh) */
 .next-move-btn-start {
   width: var(--nm-btn-start-width);
   background-color: var(--nm-color-white);
@@ -322,7 +288,6 @@
   background-color: var(--nm-color-btn-white-hover);
 }
 
-/* Button 2: Contact sales (Nền xanh, chữ trắng) */
 .next-move-btn-contact {
   width: var(--nm-btn-contact-width);
   background-color: var(--nm-color-blue);
@@ -334,11 +299,6 @@
   background-color: var(--nm-color-blue-hover);
 }
 
-/* ==========================================================
-   RESPONSIVE (DESKTOP TRƯỚC, MAX-WIDTH MEDIA QUERIES)
-   ========================================================== */
-
-/* Tablet (768px - 1024px) */
 @media (max-width: 1024px) {
   .next-move-section {
     padding: 40px var(--nm-section-pad-x-tablet);
@@ -351,7 +311,6 @@
   }
 }
 
-/* Mobile (< 768px) */
 @media (max-width: 768px) {
   .next-move-section {
     padding: 30px var(--nm-section-pad-x-mobile);
@@ -388,7 +347,6 @@
   }
 }
 
-/* Small Mobile (< 400px) */
 @media (max-width: 400px) {
   .next-move-card {
     aspect-ratio: auto;
@@ -414,18 +372,12 @@
   }
 }
 
-/* ==========================================================
-   TOUCH DEVICES (media (hover: none))
-   ========================================================== */
 @media (hover: none) {
   .next-move-trail-container {
     display: none;
   }
 }
 
-/* ==========================================================
-   PREFERS-REDUCED-MOTION
-   ========================================================== */
 @media (prefers-reduced-motion: reduce) {
   .next-move-trail-container {
     display: none;

@@ -3,12 +3,9 @@ import { parsePriceToCents, formatMoney, findBestDiscount, applyDiscount } from 
 import { PlusSmallIcon } from './StorefrontIcons';
 import { ImageSkeleton } from './skeletons';
 
-/**
- * Checks if an item is sold out given store's active location.
- */
 export function isItemSoldOut(item, locationId) {
   if (!item) return false;
-  // Check location-specific status if present
+
   if (locationId && item.locationStatuses && item.locationStatuses[locationId]) {
     const locStatus = String(item.locationStatuses[locationId]).toLowerCase();
     if (locStatus === 'sold out' || locStatus === 'unavailable' || locStatus === 'sold_out') {
@@ -19,7 +16,6 @@ export function isItemSoldOut(item, locationId) {
     }
   }
 
-  // Fallback to item global status
   if (item.status) {
     const st = String(item.status).toLowerCase();
     if (st === 'sold out' || st === 'unavailable' || st === 'sold_out') {
@@ -30,17 +26,14 @@ export function isItemSoldOut(item, locationId) {
   return false;
 }
 
-/**
- * Extracts base pricing and variation info for display.
- */
 export function getItemDisplayPrice(item, discounts = []) {
-  if (!item) return { isFrom: false, baseCents: 0, finalCents: 0, discount: null };
+  if (!item) return { isFrom: false, baseCents: 0, finalCents: 0, hasDiscount: false, discount: null };
 
   const variations = Array.isArray(item.variations)
     ? item.variations
     : item.variations && typeof item.variations === 'object'
-    ? Object.values(item.variations)
-    : [];
+      ? Object.values(item.variations)
+      : [];
 
   let baseCents = 0;
   let isFrom = false;
@@ -55,14 +48,16 @@ export function getItemDisplayPrice(item, discounts = []) {
     baseCents = parsePriceToCents(item.priceCents ?? item.price ?? 0);
   }
 
-  const bestDiscount = findBestDiscount(item, discounts);
-  const discountResult = bestDiscount ? applyDiscount(baseCents, bestDiscount) : null;
+  const bestDiscount = findBestDiscount(baseCents, discounts, item?.id);
+  const finalCents = bestDiscount ? applyDiscount(baseCents, bestDiscount) : baseCents;
+  const hasDiscount = Boolean(bestDiscount && typeof finalCents === 'number' && finalCents < baseCents);
 
   return {
     isFrom,
     baseCents,
-    finalCents: discountResult ? discountResult.finalCents : baseCents,
-    discount: discountResult,
+    finalCents,
+    hasDiscount,
+    discount: hasDiscount ? bestDiscount : null,
     rawDiscount: bestDiscount
   };
 }
@@ -72,7 +67,7 @@ export default function ItemCard({ item, discounts = [], locationId, onSelect })
   const [imgError, setImgError] = useState(false);
 
   const soldOut = isItemSoldOut(item, locationId);
-  const { isFrom, baseCents, finalCents, discount } = getItemDisplayPrice(item, discounts);
+  const { isFrom, baseCents, finalCents, hasDiscount, discount } = getItemDisplayPrice(item, discounts);
 
   const handleCardClick = () => {
     if (soldOut) return;
@@ -85,12 +80,12 @@ export default function ItemCard({ item, discounts = [], locationId, onSelect })
     onSelect?.(item);
   };
 
-  const hasImage = Boolean(item.imageUrl || item.image || item.photo);
-  const imageSrc = item.imageUrl || item.image || item.photo;
+  const hasImage = Boolean(item?.imageUrl || item?.image || item?.photo);
+  const imageSrc = item?.imageUrl || item?.image || item?.photo;
 
   return (
     <div
-      className={`sf-item-card ${soldOut ? 'sf-item-card--soldout' : ''}`}
+      className={`sf-item-card ${soldOut ? 'sf-item-card--soldout' : ''} ${!hasImage || imgError ? 'sf-item-card--no-image' : ''}`}
       onClick={handleCardClick}
       role={soldOut ? 'presentation' : 'button'}
       tabIndex={soldOut ? -1 : 0}
@@ -102,7 +97,6 @@ export default function ItemCard({ item, discounts = [], locationId, onSelect })
       }}
       aria-disabled={soldOut}
     >
-      {/* Plus button protruding top-right */}
       {!soldOut && (
         <button
           type="button"
@@ -114,7 +108,6 @@ export default function ItemCard({ item, discounts = [], locationId, onSelect })
         </button>
       )}
 
-      {/* Left content: title, 2-line description, price row */}
       <div className="sf-item-card__content">
         <h3 className="sf-item-card__title">{item.name}</h3>
         {item.description && (
@@ -128,7 +121,7 @@ export default function ItemCard({ item, discounts = [], locationId, onSelect })
             <span className="sf-badge-soldout">SOLD OUT</span>
           ) : (
             <div className="sf-item-card__price-row">
-              {discount ? (
+              {hasDiscount && discount ? (
                 <>
                   <span className="sf-price-original">
                     {isFrom ? 'From ' : ''}
@@ -151,25 +144,21 @@ export default function ItemCard({ item, discounts = [], locationId, onSelect })
         </div>
       </div>
 
-      {/* Right image box */}
-      <div className="sf-item-card__image-wrapper">
-        {hasImage && !imgError ? (
-          <>
-            {!imgLoaded && <ImageSkeleton className="sf-item-card__image-skeleton" />}
-            <img
-              src={imageSrc}
-              alt={item.name}
-              className={`sf-item-card__img ${imgLoaded ? 'sf-item-card__img--loaded' : 'sf-item-card__img--hidden'}`}
-              loading="lazy"
-              decoding="async"
-              onLoad={() => setImgLoaded(true)}
-              onError={() => setImgError(true)}
-            />
-          </>
-        ) : (
-          <div className="sf-item-card__placeholder-img" aria-hidden="true" />
-        )}
-      </div>
+      {hasImage && !imgError && (
+        <div className="sf-item-card__image-wrapper">
+          {!imgLoaded && <ImageSkeleton className="sf-item-card__image-skeleton" />}
+          <img
+            src={imageSrc}
+            alt={item.name}
+            className={`sf-item-card__img ${imgLoaded ? 'sf-item-card__img--loaded' : 'sf-item-card__img--hidden'}`}
+            loading="lazy"
+            decoding="async"
+            onLoad={() => setImgLoaded(true)}
+            onError={() => setImgError(true)}
+          />
+        </div>
+      )}
     </div>
   );
 }
+

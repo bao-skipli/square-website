@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import { Component } from "react";
 import { subscribeAuth } from "@/firebase/authService";
 import {
   subscribeHomeData,
@@ -12,6 +12,35 @@ import {
   MENU_LABELS,
 } from "./dashboardConstants";
 import { getInitialDashboardRouteState } from "./dashboardRouteHelper";
+import {
+  VIEWS,
+  getViewFromPath,
+  EMPTY_FORMS,
+  parseDashboardRoute,
+} from "./dashboardViews";
+
+const LOADERS = {
+  home: {
+    promiseKey: "homeFirstPromise",
+    flagKey: "hasLoadedHome",
+    isHome: true,
+  },
+  "item-library": {
+    promiseKey: "itemsFirstPromise",
+    flagKey: "hasLoadedItems",
+    isHome: false,
+  },
+  categories: {
+    promiseKey: "categoriesFirstPromise",
+    flagKey: "hasLoadedCategories",
+    isHome: false,
+  },
+  modifiers: {
+    promiseKey: "modifiersFirstPromise",
+    flagKey: "hasLoadedModifiers",
+    isHome: false,
+  },
+};
 
 export class DashboardBase extends Component {
   constructor(props) {
@@ -114,6 +143,7 @@ export class DashboardBase extends Component {
     this.hasLoadedHome = false;
     this.hasLoadedItems = false;
     this.hasLoadedCategories = false;
+    this.hasLoadedModifiers = false;
 
     this.homeFirstPromise = new Promise((resolve) => {
       this.resolveHomeFirst = resolve;
@@ -127,7 +157,6 @@ export class DashboardBase extends Component {
     this.modifiersFirstPromise = new Promise((resolve) => {
       this.resolveModifiersFirst = resolve;
     });
-    this.hasLoadedModifiers = false;
 
     this.unsubscribeAuth = null;
     this.unsubscribeHome = null;
@@ -141,14 +170,7 @@ export class DashboardBase extends Component {
   componentDidMount() {
     this._isMounted = true;
     const initialPath = this.props.router?.location?.pathname || "/dashboard";
-    let initialView = "home";
-    if (initialPath.includes("/modifiers")) {
-      initialView = "modifiers";
-    } else if (initialPath.includes("/categories")) {
-      initialView = "categories";
-    } else if (initialPath.includes("/library")) {
-      initialView = "item-library";
-    }
+    const initialView = getViewFromPath(initialPath) || "home";
 
     this.startViewLoading(initialView);
     this.syncRouteWithState();
@@ -185,21 +207,52 @@ export class DashboardBase extends Component {
     ) {
       const prevPath = prevProps.router.location.pathname;
       const newPath = this.props.router.location.pathname;
-      const getBaseView = (path) => {
-        if (path.includes("/modifiers")) return "modifiers";
-        if (path.includes("/categories")) return "categories";
-        if (path.includes("/library")) return "item-library";
-        if (path === "/dashboard" || path === "/dashboard/") return "home";
-        return null;
-      };
-      const prevView = getBaseView(prevPath);
-      const newView = getBaseView(newPath);
+      const prevView = getViewFromPath(prevPath);
+      const newView = getViewFromPath(newPath);
       if (newView && newView !== prevView && newView !== this.state.currentView) {
         this.startViewLoading(newView);
       }
       this.syncRouteWithState();
     }
   }
+
+  createCatalogSubscriptionCallbacks = ({
+    listKey,
+    pathPrefix,
+    openEditMethod,
+    navigateMethod,
+    resolveFirstMethod,
+    loadedFlagKey,
+  }) => {
+    const handleEntityMatch = (list, isFirstLoad) => {
+      const currentPath = this.props.router?.location?.pathname || "";
+      if (currentPath.startsWith(pathPrefix)) {
+        const id = currentPath.replace(pathPrefix, "");
+        const target = list.find((item) => item.id === id);
+        if (target && this[openEditMethod]) {
+          this[openEditMethod](target, false);
+        } else if (isFirstLoad || this[loadedFlagKey]) {
+          if (this[navigateMethod]) {
+            this[navigateMethod]();
+          }
+        }
+      }
+    };
+
+    return {
+      onChange: (data) => {
+        this.setState({ [listKey]: data });
+        handleEntityMatch(data, false);
+      },
+      onFirstLoad: (data) => {
+        this[loadedFlagKey] = true;
+        if (this[resolveFirstMethod]) {
+          this[resolveFirstMethod](data);
+        }
+        handleEntityMatch(data, true);
+      },
+    };
+  };
 
   setupRealtimeSubscriptions(userId) {
     if (this.unsubscribeHome) this.unsubscribeHome();
@@ -219,153 +272,78 @@ export class DashboardBase extends Component {
     );
     this.unsubscribeHome = homeSub.unsubscribe;
 
+    const itemCallbacks = this.createCatalogSubscriptionCallbacks({
+      listKey: "items",
+      pathPrefix: "/dashboard/items/library/",
+      openEditMethod: "openEditItem",
+      navigateMethod: "navigateToItemLibrary",
+      resolveFirstMethod: "resolveItemsFirst",
+      loadedFlagKey: "hasLoadedItems",
+    });
     const itemsSub = subscribeItems(
       userId,
-      (items) => {
-        this.setState({ items });
-        const currentPath = this.props.router?.location?.pathname || "";
-        if (currentPath.startsWith("/dashboard/items/library/")) {
-          const itemId = currentPath.replace("/dashboard/items/library/", "");
-          const targetItem = items.find((i) => i.id === itemId);
-          if (targetItem) {
-            this.openEditItem(targetItem, false);
-          } else if (this.hasLoadedItems) {
-            this.navigateToItemLibrary();
-          }
-        }
-      },
-      (items) => {
-        this.hasLoadedItems = true;
-        this.resolveItemsFirst(items);
-        const currentPath = this.props.router?.location?.pathname || "";
-        if (currentPath.startsWith("/dashboard/items/library/")) {
-          const itemId = currentPath.replace("/dashboard/items/library/", "");
-          const targetItem = items.find((i) => i.id === itemId);
-          if (targetItem) {
-            this.openEditItem(targetItem, false);
-          } else {
-            this.navigateToItemLibrary();
-          }
-        }
-      }
+      itemCallbacks.onChange,
+      itemCallbacks.onFirstLoad
     );
     this.unsubscribeItems = itemsSub.unsubscribe;
 
+    const catCallbacks = this.createCatalogSubscriptionCallbacks({
+      listKey: "categories",
+      pathPrefix: "/dashboard/items/categories/",
+      openEditMethod: "openEditCategory",
+      navigateMethod: "navigateToCategories",
+      resolveFirstMethod: "resolveCategoriesFirst",
+      loadedFlagKey: "hasLoadedCategories",
+    });
     const catSub = subscribeCategories(
       userId,
-      (categories) => {
-        this.setState({ categories });
-        const currentPath = this.props.router?.location?.pathname || "";
-        if (currentPath.startsWith("/dashboard/items/categories/")) {
-          const catId = currentPath.replace("/dashboard/items/categories/", "");
-          const targetCat = categories.find((c) => c.id === catId);
-          if (targetCat) {
-            this.openEditCategory(targetCat, false);
-          } else if (this.hasLoadedCategories) {
-            this.navigateToCategories();
-          }
-        }
-      },
-      (categories) => {
-        this.hasLoadedCategories = true;
-        this.resolveCategoriesFirst(categories);
-        const currentPath = this.props.router?.location?.pathname || "";
-        if (currentPath.startsWith("/dashboard/items/categories/")) {
-          const catId = currentPath.replace("/dashboard/items/categories/", "");
-          const targetCat = categories.find((c) => c.id === catId);
-          if (targetCat) {
-            this.openEditCategory(targetCat, false);
-          } else {
-            this.navigateToCategories();
-          }
-        }
-      }
+      catCallbacks.onChange,
+      catCallbacks.onFirstLoad
     );
     this.unsubscribeCategories = catSub.unsubscribe;
   }
 
   startViewLoading = async (targetView) => {
     const loadingId = ++this.activeLoadingId;
+    const loaderConfig = LOADERS[targetView];
+    const isHome = loaderConfig?.isHome ?? (targetView === "home");
 
-    if (targetView === "home") {
+    if (isHome) {
       this.setState({ isHomeLoading: true, isContentLoading: false });
-      try {
-        if (!this.hasLoadedHome) {
-          await withMinDelay(this.homeFirstPromise, MIN_LOADING_MS);
-          this.hasLoadedHome = true;
-        } else {
-          await withMinDelay(Promise.resolve(), MIN_LOADING_MS);
-        }
-      } catch (err) {
-        console.warn("Home initial load error:", err);
-      }
-      if (this._isMounted && this.activeLoadingId === loadingId) {
-        this.setState({ isHomeLoading: false });
-      }
-    } else if (targetView === "item-library") {
+    } else {
       this.setState({ isContentLoading: true, isHomeLoading: false });
-      try {
-        if (!this.hasLoadedItems) {
-          await withMinDelay(this.itemsFirstPromise, MIN_LOADING_MS);
-          this.hasLoadedItems = true;
-        } else {
-          await withMinDelay(Promise.resolve(), MIN_LOADING_MS);
-        }
-      } catch (err) {
-        console.warn("Items initial load error:", err);
-      }
-      if (this._isMounted && this.activeLoadingId === loadingId) {
-        this.setState({ isContentLoading: false });
-      }
-    } else if (targetView === "categories") {
-      this.setState({ isContentLoading: true, isHomeLoading: false });
-      try {
-        if (!this.hasLoadedCategories) {
-          await withMinDelay(this.categoriesFirstPromise, MIN_LOADING_MS);
-          this.hasLoadedCategories = true;
-        } else {
-          await withMinDelay(Promise.resolve(), MIN_LOADING_MS);
-        }
-      } catch (err) {
-        console.warn("Categories initial load error:", err);
-      }
-      if (this._isMounted && this.activeLoadingId === loadingId) {
-        this.setState({ isContentLoading: false });
-      }
-    } else if (targetView === "modifiers") {
-      this.setState({ isContentLoading: true, isHomeLoading: false });
-      try {
-        if (!this.hasLoadedModifiers) {
-          const sets = await withMinDelay(this.modifiersFirstPromise, MIN_LOADING_MS);
-          this.hasLoadedModifiers = true;
-          if (this._isMounted && Array.isArray(sets)) {
-            this.setState({ modifierSets: sets, hasLoadedModifiers: true });
+    }
+
+    try {
+      if (loaderConfig && !this[loaderConfig.flagKey]) {
+        const result = await withMinDelay(this[loaderConfig.promiseKey], MIN_LOADING_MS);
+        this[loaderConfig.flagKey] = true;
+        if (targetView === "modifiers") {
+          if (this._isMounted && Array.isArray(result)) {
+            this.setState({ modifierSets: result, hasLoadedModifiers: true });
             const currentPath = this.props.router?.location?.pathname || "";
             if (currentPath.startsWith("/dashboard/items/modifiers/")) {
               const setId = currentPath.replace("/dashboard/items/modifiers/", "");
-              const targetSet = sets.find((s) => s.id === setId);
+              const targetSet = result.find((s) => s.id === setId);
               if (targetSet && this.openEditModifierSet) {
                 this.openEditModifierSet(targetSet, false);
               }
             }
           }
-        } else {
-          await withMinDelay(Promise.resolve(), MIN_LOADING_MS);
         }
-      } catch (err) {
-        console.warn("Modifiers initial load error:", err);
-      }
-      if (this._isMounted && this.activeLoadingId === loadingId) {
-        this.setState({ isContentLoading: false, hasLoadedModifiers: true });
-      }
-    } else {
-      this.setState({ isContentLoading: true, isHomeLoading: false });
-      try {
+      } else {
         await withMinDelay(Promise.resolve(), MIN_LOADING_MS);
-      } catch (err) {
-        console.warn("View load error:", err);
       }
-      if (this._isMounted && this.activeLoadingId === loadingId) {
+    } catch (err) {
+      console.warn(`${targetView} initial load error:`, err);
+    }
+
+    if (this._isMounted && this.activeLoadingId === loadingId) {
+      if (isHome) {
+        this.setState({ isHomeLoading: false });
+      } else if (targetView === "modifiers") {
+        this.setState({ isContentLoading: false, hasLoadedModifiers: true });
+      } else {
         this.setState({ isContentLoading: false });
       }
     }
@@ -378,129 +356,55 @@ export class DashboardBase extends Component {
   syncRouteWithState = () => {
     if (!this.props.router?.location) return;
     const { pathname } = this.props.router.location;
+    const { view, mode, id } = parseDashboardRoute(pathname);
+    if (!view) return;
 
-    if (pathname === "/dashboard/items/modifiers/new") {
-      this.setState({
-        currentView: "modifiers",
-        activeMenu: "modifiers",
-        isItemsMenusOpen: true,
-        isItemsOpen: true,
-        isCreateModifierOpen: true,
-        editingModifierSetId: null,
-        editingModifierSet: null,
-      });
-    } else if (pathname.startsWith("/dashboard/items/modifiers/")) {
-      const setId = pathname.replace("/dashboard/items/modifiers/", "");
-      const set = this.state.modifierSets?.find((s) => s.id === setId);
-      if (set && this.openEditModifierSet) {
-        this.openEditModifierSet(set, false);
-      } else if (this.hasLoadedModifiers && this.navigateToModifiers) {
-        this.navigateToModifiers();
-      } else {
+    const cfg = VIEWS[view];
+    if (cfg.hasCrud) {
+      if (mode === "new") {
         this.setState({
-          currentView: "modifiers",
-          activeMenu: "modifiers",
+          currentView: view,
+          activeMenu: view,
           isItemsMenusOpen: true,
           isItemsOpen: true,
-          isCreateModifierOpen: true,
-          editingModifierSetId: setId,
+          ...EMPTY_FORMS[view],
+        });
+      } else if (mode === "edit" && id) {
+        const list = this.state[cfg.listKey] || [];
+        const entity = list.find((item) => item.id === id);
+        if (entity && this[cfg.openEdit]) {
+          this[cfg.openEdit](entity, false);
+        } else if (this[cfg.hasLoadedFlag] && this[cfg.navigateList]) {
+          this[cfg.navigateList]();
+        } else {
+          this.setState({
+            currentView: view,
+            activeMenu: view,
+            isItemsMenusOpen: true,
+            isItemsOpen: true,
+            [cfg.createFlag]: true,
+            [cfg.editingIdKey]: id,
+          });
+        }
+      } else {
+        this.setState({
+          currentView: view,
+          activeMenu: view,
+          isItemsMenusOpen: true,
+          isItemsOpen: true,
+          [cfg.createFlag]: false,
         });
       }
-    } else if (pathname === "/dashboard/items/modifiers") {
+    } else if (view === "online-ordering") {
       this.setState({
-        currentView: "modifiers",
-        activeMenu: "modifiers",
-        isItemsMenusOpen: true,
-        isItemsOpen: true,
+        currentView: "online-ordering",
+        activeMenu: "online-ordering",
+        isItemsMenusOpen: false,
+        isCreateItemOpen: false,
+        isCreateCategoryOpen: false,
         isCreateModifierOpen: false,
       });
-    } else if (pathname === "/dashboard/items/categories/new") {
-      this.setState({
-        currentView: "categories",
-        activeMenu: "categories",
-        isItemsMenusOpen: true,
-        isItemsOpen: true,
-        isCreateCategoryOpen: true,
-        editingCategoryId: null,
-        categoryFormName: "",
-        categoryFormParentId: null,
-        categoryFormItems: [],
-        categoryFormPointsOfSale: true,
-        categoryFormInitial: { name: "", parentId: null, items: [] },
-      });
-    } else if (pathname.startsWith("/dashboard/items/categories/")) {
-      const catId = pathname.replace("/dashboard/items/categories/", "");
-      const cat = this.state.categories.find((c) => c.id === catId);
-      if (cat) {
-        this.openEditCategory(cat, false);
-      } else if (this.hasLoadedCategories && this.navigateToCategories) {
-        this.navigateToCategories();
-      } else {
-        this.setState({
-          currentView: "categories",
-          activeMenu: "categories",
-          isItemsMenusOpen: true,
-          isItemsOpen: true,
-          isCreateCategoryOpen: true,
-          editingCategoryId: catId,
-        });
-      }
-    } else if (pathname === "/dashboard/items/categories") {
-      this.setState({
-        currentView: "categories",
-        activeMenu: "categories",
-        isItemsMenusOpen: true,
-        isItemsOpen: true,
-        isCreateCategoryOpen: false,
-      });
-    } else if (pathname === "/dashboard/items/library/new") {
-      this.setState({
-        currentView: "item-library",
-        activeMenu: "item-library",
-        isItemsMenusOpen: true,
-        isItemsOpen: true,
-        isCreateItemOpen: true,
-        editingItemId: null,
-        formName: "",
-        formPrice: "",
-        formCategory: "",
-        formDescription: "",
-        formKitchenName: "",
-        formMenu: "",
-        formSku: "",
-        formGtin: "",
-        formStatus: "Available",
-        itemFormInitial: { name: "", price: "", category: "", status: "Available" },
-      });
-    } else if (pathname.startsWith("/dashboard/items/library/")) {
-      const itemId = pathname.replace("/dashboard/items/library/", "");
-      const item = this.state.items.find((i) => i.id === itemId);
-      if (item) {
-        this.openEditItem(item, false);
-      } else if (this.hasLoadedItems && this.navigateToItemLibrary) {
-        this.navigateToItemLibrary();
-      } else {
-        this.setState({
-          currentView: "item-library",
-          activeMenu: "item-library",
-          isItemsMenusOpen: true,
-          isItemsOpen: true,
-          isCreateItemOpen: true,
-          editingItemId: itemId,
-        });
-      }
-    } else if (
-      pathname === "/dashboard/items/library" ||
-      pathname.startsWith("/dashboard/items/library")
-    ) {
-      this.setState({
-        currentView: "item-library",
-        activeMenu: "item-library",
-        isItemsMenusOpen: true,
-        isItemsOpen: true,
-        isCreateItemOpen: false,
-      });
-    } else if (pathname === "/dashboard") {
+    } else if (view === "home") {
       this.setState({
         currentView: "home",
         activeMenu: "home",
@@ -510,32 +414,47 @@ export class DashboardBase extends Component {
     }
   };
 
-  navigateToHome = () => {
-    if (this.state.currentView !== "home") {
-      this.startViewLoading("home");
+  navigateTo = (viewKey, sub = "") => {
+    const cfg = VIEWS[viewKey];
+    if (!cfg) return;
+    if (this.state.currentView !== viewKey) {
+      this.startViewLoading(viewKey);
     }
+    const path = sub ? `${cfg.base}/${sub}` : cfg.base;
     if (this.props.router?.navigate) {
-      this.props.router.navigate("/dashboard");
+      this.props.router.navigate(path);
     } else {
-      this.setState({ currentView: "home", activeMenu: "home" });
+      if (viewKey === "home") {
+        this.setState({ currentView: "home", activeMenu: "home" });
+      } else if (viewKey === "online-ordering") {
+        this.setState({
+          currentView: "online-ordering",
+          activeMenu: "online-ordering",
+          isItemsMenusOpen: false,
+          isCreateItemOpen: false,
+          isCreateCategoryOpen: false,
+          isCreateModifierOpen: false,
+        });
+      } else if (cfg.isItemSubnav) {
+        this.setState({
+          currentView: viewKey,
+          activeMenu: viewKey,
+          isItemsMenusOpen: true,
+          isItemsOpen: true,
+          [cfg.createFlag]: false,
+        });
+      } else {
+        this.setState({ currentView: viewKey, activeMenu: viewKey });
+      }
     }
   };
 
+  navigateToHome = () => {
+    this.navigateTo("home");
+  };
+
   navigateToItemLibrary = () => {
-    if (this.state.currentView !== "item-library") {
-      this.startViewLoading("item-library");
-    }
-    if (this.props.router?.navigate) {
-      this.props.router.navigate("/dashboard/items/library");
-    } else {
-      this.setState({
-        currentView: "item-library",
-        activeMenu: "item-library",
-        isItemsMenusOpen: true,
-        isItemsOpen: true,
-        isCreateItemOpen: false,
-      });
-    }
+    this.navigateTo("item-library");
   };
 
   navigateToCreateItem = () => {
@@ -547,20 +466,7 @@ export class DashboardBase extends Component {
   };
 
   navigateToCategories = () => {
-    if (this.state.currentView !== "categories") {
-      this.startViewLoading("categories");
-    }
-    if (this.props.router?.navigate) {
-      this.props.router.navigate("/dashboard/items/categories");
-    } else {
-      this.setState({
-        currentView: "categories",
-        activeMenu: "categories",
-        isItemsMenusOpen: true,
-        isItemsOpen: true,
-        isCreateCategoryOpen: false,
-      });
-    }
+    this.navigateTo("categories");
   };
 
   navigateToCreateCategory = () => {
@@ -581,14 +487,15 @@ export class DashboardBase extends Component {
   };
 
   navigateToOnlineOrdering = () => {
-    if (this.props.router?.navigate) {
-      this.props.router.navigate("/dashboard/online/store-setup");
-    } else {
-      this.setState({
-        currentView: "online-ordering",
-        activeMenu: "online-ordering",
-      });
-    }
+    this.navigateTo("online-ordering");
+    this.setState({
+      currentView: "online-ordering",
+      activeMenu: "online-ordering",
+      isItemsMenusOpen: false,
+      isCreateItemOpen: false,
+      isCreateCategoryOpen: false,
+      isCreateModifierOpen: false,
+    });
   };
 
   handleMenuClick = (menuKey) => {

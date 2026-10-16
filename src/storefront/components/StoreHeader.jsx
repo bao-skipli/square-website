@@ -1,10 +1,10 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   HamburgerIcon,
   DiscountBadgeIcon,
   BasketIcon,
   CloseIcon,
-  SkipliBrandMark,
+  SquareWebLogo,
   PlusSmallIcon,
   MinusSmallIcon,
 } from "./StorefrontIcons";
@@ -69,7 +69,11 @@ export function CategoryDrawer({ isOpen, onClose, store, categories = [], onSele
       >
         <div className="sf-drawer-header">
           <div className="sf-drawer-title-row">
-            <SkipliBrandMark size={24} />
+            {store?.logoUrl ? (
+              <img src={store.logoUrl} alt={store.name || "Store logo"} className="sf-drawer-logo-img" />
+            ) : (
+              <SquareWebLogo size={24} color="var(--sf-theme-primary, #111827)" />
+            )}
             <h3 className="sf-drawer-store-name">{store?.name || "Skipli"}</h3>
           </div>
           <button type="button" className="sf-btn-icon-close" onClick={onClose} aria-label="Close">
@@ -89,7 +93,8 @@ export function CategoryDrawer({ isOpen, onClose, store, categories = [], onSele
                 onClose();
               }}
             >
-              {cat.name}
+              <span>{cat.name}</span>
+              <span className="sf-drawer-cat-arrow" aria-hidden="true">→</span>
             </button>
           ))}
         </div>
@@ -99,7 +104,7 @@ export function CategoryDrawer({ isOpen, onClose, store, categories = [], onSele
 }
 
 export function CartDrawer({ isOpen, onClose }) {
-  const { items, totalCount, subtotalCents, updateQty, removeItem, clearCart } = useCart();
+  const { items, totalCount, subtotalCents, updateQty, clearCart } = useCart();
 
   if (!isOpen) return null;
 
@@ -125,7 +130,7 @@ export function CartDrawer({ isOpen, onClose }) {
         <div className="sf-cart-body">
           {items.length === 0 ? (
             <div className="sf-cart-empty">
-              <BasketIcon size={40} color="#a1a1aa" />
+              <BasketIcon size={44} color="#a1a1aa" />
               <p className="sf-cart-empty-text">Your cart is empty.</p>
               <p className="sf-cart-empty-sub">Add delicious items from the menu to get started.</p>
             </div>
@@ -149,14 +154,20 @@ export function CartDrawer({ isOpen, onClose }) {
                       </div>
                     )}
                     <div className="sf-cart-line-price">
-                      {line.lineOriginalCents > line.lineTotalCents && (
-                        <span className="sf-price-original">
-                          {formatMoney(line.lineOriginalCents)}
+                      {line.lineOriginalCents > line.lineTotalCents ? (
+                        <>
+                          <span className="sf-price-original">
+                            {formatMoney(line.lineOriginalCents)}
+                          </span>
+                          <span className="sf-price-current">
+                            {formatMoney(line.lineTotalCents)}
+                          </span>
+                        </>
+                      ) : (
+                        <span className="sf-price-current">
+                          {formatMoney(line.lineTotalCents)}
                         </span>
                       )}
-                      <span className="sf-price-current">
-                        {formatMoney(line.lineTotalCents)}
-                      </span>
                     </div>
                   </div>
 
@@ -217,63 +228,66 @@ export function StoreHeader({ store, discounts = [], categories = [], onSelectCa
 
   return (
     <>
-      <header className="sf-header">
-        {/* Left: Hamburger menu */}
-        <div className="sf-header-left">
-          <button
-            type="button"
-            className="sf-btn-hamburger"
-            onClick={() => setIsCategoryDrawerOpen(true)}
-            aria-label="Open categories navigation"
-          >
-            <HamburgerIcon size={22} />
-          </button>
-        </div>
+      <header className="sf-header sf-header-wrapper">
+        <div className="sf-header-inner">
+          <div className="sf-header-left">
+            <button
+              type="button"
+              className="sf-btn-hamburger"
+              onClick={() => setIsCategoryDrawerOpen(true)}
+              aria-label="Open categories navigation"
+            >
+              <HamburgerIcon size={22} />
+            </button>
+          </div>
 
-        {/* Center: Logo or Red Store Name (matching image 1) */}
-        <div className="sf-header-center">
-          {store?.logoUrl ? (
-            <img src={store.logoUrl} alt={store.name || "Store logo"} className="sf-store-logo-img" />
-          ) : (
-            <div className="sf-store-brand-text">
-              <SkipliBrandMark size={28} />
-              <span className="sf-store-name-red">{(store?.name || "SKIPLI").toUpperCase()}</span>
-            </div>
-          )}
-        </div>
+          <div className="sf-header-center">
+            {store?.logoUrl ? (
+              <div className="sf-header-brand-wrap">
+                <img src={store.logoUrl} alt={store.name || "Store logo"} className="sf-store-logo-img" />
+                <span className="sf-store-name-red">{(store?.name || "SKIPLI").toUpperCase()}</span>
+              </div>
+            ) : (
+              <div className="sf-store-brand-text">
+                <SquareWebLogo size={26} color="var(--sf-theme-primary, #111827)" />
+                <span className="sf-store-name-red">{(store?.name || "SKIPLI").toUpperCase()}</span>
+              </div>
+            )}
+          </div>
 
-        {/* Right: Promotions pill + Cart pill */}
-        <div className="sf-header-right">
-          <div className="sf-discount-pill-wrapper">
+          <div className="sf-header-right">
+            {activeDiscounts.length > 0 && (
+              <div className="sf-discount-pill-wrapper">
+                <button
+                  type="button"
+                  className="sf-header-pill-btn"
+                  onClick={() => setIsDiscountOpen((v) => !v)}
+                  aria-label={`View active promotions (${activeDiscounts.length})`}
+                >
+                  <DiscountBadgeIcon size={18} />
+                  <span className="sf-header-pill-count">{activeDiscounts.length}</span>
+                </button>
+                <DiscountPopover
+                  isOpen={isDiscountOpen}
+                  onClose={() => setIsDiscountOpen(false)}
+                  discounts={activeDiscounts}
+                />
+              </div>
+            )}
+
             <button
               type="button"
               className="sf-header-pill-btn"
-              onClick={() => setIsDiscountOpen((v) => !v)}
-              aria-label={`View active promotions (${activeDiscounts.length})`}
+              onClick={() => setIsCartOpen(true)}
+              aria-label={`View cart (${totalCount} items)`}
             >
-              <DiscountBadgeIcon size={18} />
-              <span className="sf-header-pill-count">{activeDiscounts.length}</span>
+              <BasketIcon size={18} />
+              <span className="sf-header-pill-count">{totalCount}</span>
             </button>
-            <DiscountPopover
-              isOpen={isDiscountOpen}
-              onClose={() => setIsDiscountOpen(false)}
-              discounts={activeDiscounts}
-            />
           </div>
-
-          <button
-            type="button"
-            className="sf-header-pill-btn"
-            onClick={() => setIsCartOpen(true)}
-            aria-label={`View cart (${totalCount} items)`}
-          >
-            <BasketIcon size={18} />
-            <span className="sf-header-pill-count">{totalCount}</span>
-          </button>
         </div>
       </header>
 
-      {/* Category Drawer */}
       <CategoryDrawer
         isOpen={isCategoryDrawerOpen}
         onClose={() => setIsCategoryDrawerOpen(false)}
@@ -282,11 +296,11 @@ export function StoreHeader({ store, discounts = [], categories = [], onSelectCa
         onSelectCategory={onSelectCategory}
       />
 
-      {/* Cart Drawer */}
       <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
     </>
   );
 }
 
 export default StoreHeader;
+
 

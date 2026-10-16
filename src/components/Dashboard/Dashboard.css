@@ -1,9 +1,5 @@
-/* ==========================================================================
-   SQUARE DASHBOARD - PIXEL-PERFECT STYLES
-   Matches Square POS Web Dashboard Reference Images 1 - 8
-   ========================================================================== */
 
-/* Overall Container & Resets */
+
 .sq-dashboard-root {
   display: flex;
   width: 100%;
@@ -15,10 +11,6 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ==========================================================================
-   SIDEBAR (Ảnh 3, 7, 8)
-   Width ≈ 17%, sticky/fixed, 100vh, independent scrollable menu
-   ========================================================================== */
 .sq-sidebar {
   width: 250px;
   min-width: 240px;
@@ -37,12 +29,10 @@
   overflow: hidden;
 }
 
-/* Header stays completely fixed at top */
 .sq-sidebar-header {
   flex-shrink: 0;
 }
 
-/* ONLY the navigation menu list is scrollable */
 .sq-sidebar-menu-scroll {
   flex: 1;
   min-height: 0;
@@ -51,7 +41,7 @@
   padding-right: 4px;
   margin-top: 4px;
   margin-bottom: 6px;
-  /* subtle scrollbar */
+
   scrollbar-width: thin;
   scrollbar-color: #e5e5e5 transparent;
 }
@@ -64,7 +54,6 @@
   border-radius: 4px;
 }
 
-/* 1. Account Card */
 .sq-account-card {
   border: 1px solid #e5e5e5;
   border-radius: 14px;
@@ -117,7 +106,6 @@
   opacity: 0.6;
 }
 
-/* 2. Setup Progress Bar */
 .sq-progress-section {
   margin-bottom: 14px;
   padding: 0 2px;
@@ -153,7 +141,6 @@
   color: #555555;
 }
 
-/* 3. Search Input Pill */
 .sq-search-wrapper {
   position: relative;
   margin-bottom: 12px;
@@ -192,7 +179,6 @@
   color: #71717a;
 }
 
-/* 4. Menu Items */
 .sq-nav-list {
   display: flex;
   flex-direction: column;
@@ -265,9 +251,6 @@
   transform: rotate(180deg);
 }
 
-/* ============================================================
-   Submenu Level 1 Accordion & Indentation
-   ============================================================ */
 .sq-subnav-collapse {
   display: grid;
   grid-template-rows: 0fr;
@@ -355,9 +338,6 @@
   text-overflow: ellipsis;
 }
 
-/* ============================================================
-   Submenu Level 2 Accordion & Indentation
-   ============================================================ */
 .sq-subsubnav-collapse {
   display: grid;
   grid-template-rows: 0fr;
@@ -453,7 +433,6 @@
   margin-left: 6px;
 }
 
-/* Divider */
 .sq-sidebar-divider {
   height: 1px;
   background-color: #e5e5e5;
@@ -461,7 +440,6 @@
   border: none;
 }
 
-/* Bottom Actions in Sidebar */
 .sq-sidebar-bottom {
   display: flex;
   flex-direction: column;
@@ -515,10 +493,6 @@
   background-color: #e5e5e5;
 }
 
-/* ==========================================================================
-   MAIN CONTENT AREA (Ảnh 1, 2, 4, 5, 6)
-   Width ≈ 83%, independent scrollable content, background: #FAFAFA
-   ========================================================================== */
 .sq-main-content {
   flex-grow: 1;
   min-width: 0;
@@ -528,7 +502,6 @@
   box-sizing: border-box;
 }
 
-/* Header (Ảnh 2) */
 .sq-dashboard-header {
   margin-bottom: 24px;
 }
@@ -549,10 +522,6 @@
   font-weight: 400;
 }
 
-/* ==========================================================================
-   ONBOARDING CARDS GRID (Ảnh 4)
-   3 Columns x 2 Rows, radius ~20px, borders #e5e5e5
-   ========================================================================== */
 .sq-onboarding-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -560,7 +529,6 @@
   margin-bottom: 24px;
 }
 
-/* Standard White Setup Card */
 .sq-card-standard {
   background: #ffffff;
   border: 1px solid #e5e5e5;
@@ -646,7 +614,6 @@
   opacity: 0.7;
 }
 
-/* Promo Card (Blurred Dark Green Foliage) */
 .sq-card-promo {
   border-radius: 20px;
   padding: 22px 24px;
@@ -680,15 +647,10 @@
   letter-spacing: -0.2px;
 }
 
-/* Empty 6th slot */
 .sq-card-empty {
   visibility: hidden;
 }
 
-/* ==========================================================================
-   2-COLUMN MAIN DASHBOARD SECTION (Ảnh 5 & 6)
-   Left: ~70%, Right: ~30%
-   ========================================================================== */
 .sq-dashboard-columns {
   display: grid;
   grid-template-columns: 1fr 310px;
@@ -710,9 +672,6 @@
   min-width: 0;
 }
 
-/* --------------------------------------------------------------------------
-   A) AI Input Bar (Ảnh 5)
-   -------------------------------------------------------------------------- */
 .sq-ai-input-card {
   background: #ffffff;
   border: 1px solid #e5e5e5;
@@ -764,9 +723,6 @@
   color: #ffffff;
 }
 
-/* --------------------------------------------------------------------------
-   B) Order Volume Card (Ảnh 5)
-   -------------------------------------------------------------------------- */
 .sq-order-volume-card {
   background: #ffffff;
   border: 1px solid #e5e5e5;
@@ -850,7 +806,6 @@
   opacity: 0.8;
 }
 
-/* Empty Chart Visualization */
 .sq-chart-area {
   position: relative;
   height: 150px;
@@ -897,9 +852,6 @@
   user-select: none;
 }
 
-/* --------------------------------------------------------------------------
-   C) Performance Card (Ảnh 6)
-   -------------------------------------------------------------------------- */
 .sq-performance-card {
   background: #ffffff;
   border: 1px solid #e5e5e5;
@@ -915,7 +867,6 @@
   letter-spacing: -0.3px;
 }
 
-/* 3 Filter Chips */
 .sq-perf-filters {
   display: flex;
   align-items: center;
@@ -952,7 +903,6 @@
   font-weight: 700;
 }
 
-/* Net sales & Time chart container */
 .sq-perf-main-row {
   display: grid;
   grid-template-columns: 180px 1fr;
@@ -1028,7 +978,6 @@
   justify-content: space-between;
 }
 
-/* Performance Metrics 2-column Grid */
 .sq-perf-divider {
   height: 1px;
   background-color: #f4f4f5;
@@ -1067,9 +1016,6 @@
   letter-spacing: -0.3px;
 }
 
-/* --------------------------------------------------------------------------
-   RIGHT COLUMN: Banking & Quick Actions Cards (Ảnh 5 & 6)
-   -------------------------------------------------------------------------- */
 .sq-banking-card {
   background: #ffffff;
   border: 1px solid #e5e5e5;
@@ -1102,7 +1048,6 @@
   color: #111111;
 }
 
-/* Quick Actions Card */
 .sq-quick-actions-card {
   background: #ffffff;
   border: 1px solid #e5e5e5;
@@ -1147,16 +1092,12 @@
   color: #2563eb;
 }
 
-/* ==========================================================================
-   ITEM LIBRARY PAGE (Ảnh 2)
-   ========================================================================== */
 .sq-item-library-view {
   display: flex;
   flex-direction: column;
   width: 100%;
 }
 
-/* Toolbar */
 .sq-library-toolbar {
   display: flex;
   align-items: center;
@@ -1243,7 +1184,6 @@
   opacity: 0.9;
 }
 
-/* Item Library Table */
 .sq-table-container {
   width: 100%;
   background: #ffffff;
@@ -1310,7 +1250,6 @@
   background-color: #e5e5e5;
 }
 
-/* Quick create row */
 .sq-quick-create-row {
   display: flex;
   align-items: center;
@@ -1332,7 +1271,6 @@
   background-color: #fafafa;
 }
 
-/* Empty Table State */
 .sq-empty-state-box {
   padding: 60px 24px;
   text-align: center;
@@ -1344,7 +1282,6 @@
   color: #111111;
 }
 
-/* Table Item Row */
 .sq-table-item-cell {
   display: flex;
   align-items: center;
@@ -1361,6 +1298,26 @@
   justify-content: center;
   color: #a1a1aa;
   flex-shrink: 0;
+}
+
+.sq-item-thumb-img-wrap {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #f4f4f5;
+  border: 1px solid #e4e4e7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sq-item-thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .sq-item-cell-name {
@@ -1403,9 +1360,6 @@
   color: #111111;
 }
 
-/* ==========================================================================
-   CREATE ITEM FULL-SCREEN PAGE (Ảnh 3 → 9)
-   ========================================================================== */
 .sq-create-item-overlay {
   position: fixed;
   inset: 0;
@@ -1417,7 +1371,6 @@
   -webkit-font-smoothing: antialiased;
 }
 
-/* Sticky Header */
 .sq-create-sticky-header {
   position: sticky;
   top: 0;
@@ -1528,7 +1481,6 @@
   opacity: 0.9;
 }
 
-/* Form Body */
 .sq-create-content-container {
   max-width: 1180px;
   width: 100%;
@@ -1545,7 +1497,6 @@
   letter-spacing: -0.4px;
 }
 
-/* 2 Columns: Left Form ~65%, Right Cards ~35% */
 .sq-create-grid {
   display: grid;
   grid-template-columns: 1fr 340px;
@@ -1568,7 +1519,6 @@
   min-width: 0;
 }
 
-/* Form Input Boxes (border 1px #DDD, rounded 12px) */
 .sq-form-box {
   border: 1px solid #d4d4d8;
   border-radius: 12px;
@@ -1613,7 +1563,6 @@
   font-weight: 500;
 }
 
-/* Price Unit Trigger & Dropdown Popover (image copy.png & image.png) */
 .sq-price-unit-container {
   position: relative;
   display: inline-flex;
@@ -1763,7 +1712,6 @@
   font-weight: 500;
 }
 
-/* Item Type Row (Ảnh 3) */
 .sq-item-type-box {
   border: 1px solid #d4d4d8;
   border-radius: 12px;
@@ -1811,7 +1759,6 @@
   color: #111111;
 }
 
-/* Margin chip */
 .sq-chip-margin {
   display: inline-flex;
   padding: 4px 12px;
@@ -1824,7 +1771,6 @@
   width: fit-content;
 }
 
-/* Description Textarea */
 .sq-textarea-desc {
   width: 100%;
   height: 110px;
@@ -1845,7 +1791,6 @@
   border-color: #111111;
 }
 
-/* Upload Dropzone (Ảnh 3) */
 .sq-upload-dropzone {
   border: 1.5px dashed #d1d5db;
   border-radius: 12px;
@@ -1882,7 +1827,100 @@
   text-decoration: underline;
 }
 
-/* Thick Gray Divider Block (~12px, Ảnh 4, 5, 6) */
+.sq-item-image-preview-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 24px;
+}
+
+.sq-item-image-preview-thumb {
+  width: 72px;
+  height: 72px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sq-item-image-preview-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.sq-item-image-preview-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow: hidden;
+  flex: 1;
+}
+
+.sq-item-image-preview-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #059669;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.sq-item-image-url-preview {
+  font-size: 11px;
+  color: #6b7280;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 320px;
+}
+
+.sq-item-image-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.sq-btn-remove-image {
+  background: none;
+  border: none;
+  font-size: 12px;
+  font-weight: 600;
+  color: #dc2626;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background-color 0.15s;
+}
+
+.sq-btn-remove-image:hover {
+  background-color: #fee2e2;
+}
+
+.sq-upload-error-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  font-size: 12.5px;
+  color: #991b1b;
+  margin-bottom: 20px;
+}
+
 .sq-divider-thick-block {
   height: 12px;
   background-color: #f4f4f5;
@@ -1892,7 +1930,6 @@
   width: 100%;
 }
 
-/* Section Row with Action */
 .sq-section-row {
   display: flex;
   align-items: center;
@@ -1918,7 +1955,6 @@
   color: #6b7280;
 }
 
-/* Accordion Sections */
 .sq-accordion-header {
   width: 100%;
   display: flex;
@@ -1959,7 +1995,6 @@
   padding-bottom: 16px;
 }
 
-/* Manage Inventory Table (Ảnh 4) */
 .sq-inventory-table {
   width: 100%;
   border-collapse: collapse;
@@ -1992,7 +2027,6 @@
   text-align: right;
 }
 
-/* Two Inputs Side by Side */
 .sq-two-inputs-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -2000,7 +2034,6 @@
   margin-bottom: 12px;
 }
 
-/* Add Unit Cost Link */
 .sq-link-blue-star {
   display: inline-flex;
   align-items: center;
@@ -2013,7 +2046,6 @@
   margin: 4px 0 12px 0;
 }
 
-/* Manage Checkout Info Banner (Ảnh 7) */
 .sq-checkout-info-banner {
   background-color: #f4f4f5;
   border-radius: 12px;
@@ -2043,7 +2075,6 @@
   color: #111111;
 }
 
-/* Toggle Switch */
 .sq-toggle-switch {
   width: 44px;
   height: 24px;
@@ -2076,7 +2107,6 @@
   transform: translateX(20px);
 }
 
-/* Highlighted Gray Toggle Row */
 .sq-toggle-row-gray {
   background-color: #f9fafb;
   border-radius: 10px;
@@ -2087,7 +2117,6 @@
   margin-bottom: 14px;
 }
 
-/* Right Column Cards (Ảnh 9) */
 .sq-create-card {
   background: #ffffff;
   border: 1px solid #e5e5e5;
@@ -2173,7 +2202,6 @@
   opacity: 0.8;
 }
 
-/* Actions Dropdown Menu (Ảnh image copy 3.png) */
 .sq-actions-dropdown-wrap {
   position: relative;
   display: inline-block;
@@ -2218,7 +2246,6 @@
   margin: 0;
 }
 
-/* Filter Chips active state */
 .sq-chip-btn.is-filtered {
   border-color: #111111;
   background-color: #ffffff;
@@ -2229,9 +2256,6 @@
   align-items: center;
 }
 
-/* ==========================================================================
-   FILTER DRAWER (Ảnh image.png, image copy.png, image copy 2.png)
-   ========================================================================== */
 .sq-drawer-backdrop {
   position: fixed;
   inset: 0;
@@ -2349,7 +2373,6 @@
   letter-spacing: -0.3px;
 }
 
-/* Category Search Pill in Drawer */
 .sq-drawer-search-pill {
   position: relative;
   display: flex;
@@ -2374,7 +2397,6 @@
   border-color: #111111;
 }
 
-/* Category & Status List Items */
 .sq-drawer-list {
   display: flex;
   flex-direction: column;
@@ -2433,7 +2455,6 @@
   font-weight: 500;
 }
 
-/* All Filters Menu Rows */
 .sq-drawer-menu-list {
   display: flex;
   flex-direction: column;
@@ -2474,9 +2495,6 @@
   to { opacity: 1; }
 }
 
-/* ==========================================================================
-   RESPONSIVENESS (<= 1024px)
-   ========================================================================== */
 @media (max-width: 1024px) {
   .sq-dashboard-root {
     flex-direction: column;
@@ -2516,9 +2534,6 @@
   }
 }
 
-/* ==========================================================================
-   CATEGORIES VIEW & STYLES (Ảnh image copy 8, 12, 13, 14.png)
-   ========================================================================== */
 .sq-categories-view {
   display: flex;
   flex-direction: column;
@@ -2585,7 +2600,6 @@
   justify-content: space-between;
 }
 
-/* View Mode Toggle Pill (Ảnh image copy 12.png) */
 .sq-view-toggle-pill {
   display: inline-flex;
   align-items: center;
@@ -2619,7 +2633,6 @@
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
 }
 
-/* Category Table */
 .sq-categories-table th.sq-col-cat-name {
   padding-left: 8px;
 }
@@ -2729,9 +2742,6 @@
   background-color: #fafafa;
 }
 
-/* ==========================================================================
-   CREATE / EDIT CATEGORY FORM (Ảnh image copy 9.png & 5.png)
-   ========================================================================== */
 .sq-category-form-wrap {
   width: 100%;
   max-width: 680px;
@@ -2747,7 +2757,6 @@
   letter-spacing: -0.3px;
 }
 
-/* 1. Category name */
 .sq-category-name-box {
   border: 1px solid #d4d4d8;
   border-radius: 10px;
@@ -2784,7 +2793,6 @@
   font-weight: 400;
 }
 
-/* 2. Image dropzone */
 .sq-category-dropzone {
   border: 1px dashed #d4d4d8;
   border-radius: 10px;
@@ -2819,7 +2827,6 @@
   color: #000000;
 }
 
-/* 3. Category Field Row */
 .sq-category-row-field {
   display: flex;
   align-items: center;
@@ -2897,9 +2904,6 @@
   color: #71717a;
 }
 
-/* ==========================================================================
-   POPUP MODALS (Parent Category, Add Items, Unsaved Changes)
-   ========================================================================== */
 .sq-popup-modal-backdrop {
   position: fixed;
   inset: 0;
@@ -2989,7 +2993,6 @@
   line-height: 1.4;
 }
 
-/* Modal Search Input */
 .sq-modal-search-wrapper {
   position: relative;
   display: flex;
@@ -3027,7 +3030,6 @@
   color: #71717a;
 }
 
-/* Parent Category Modal List */
 .sq-parent-cat-list {
   overflow-y: auto;
   flex: 1;
@@ -3077,7 +3079,6 @@
   color: #111111;
 }
 
-/* Custom Radio */
 .sq-radio-custom {
   appearance: none;
   -webkit-appearance: none;
@@ -3098,7 +3099,6 @@
   box-shadow: inset 0 0 0 5px #ffffff;
 }
 
-/* Add Items Modal Specifics */
 .sq-add-items-search-row {
   display: flex;
   align-items: center;
@@ -3204,7 +3204,6 @@
   color: #111111;
 }
 
-/* Unsaved Changes Modal (Ảnh image copy 4.png) */
 .sq-unsaved-changes-modal {
   background-color: #ffffff;
   border-radius: 20px;
@@ -3288,9 +3287,6 @@
   opacity: 0.9;
 }
 
-/* ==========================================================================
-   LOADING SPINNER (Custom pure-CSS / SVG vector spinner)
-   ========================================================================== */
 .sq-dashboard-loading-area {
   display: flex;
   align-items: center;
@@ -3333,9 +3329,6 @@
   }
 }
 
-/* ==========================================================================
-   HOME SKELETON LOADING (Uniform gray shimmering blocks simulating Home)
-   ========================================================================== */
 @keyframes sq-skeleton-pulse {
   0%, 100% {
     opacity: 1;
@@ -3359,7 +3352,6 @@
   animation: sq-skeleton-pulse 1.6s ease-in-out infinite;
 }
 
-/* Base shimmering gray for all skeleton elements - 100% uniform color */
 .sq-skel-line,
 .sq-skel-badge,
 .sq-skel-icon,
@@ -3504,7 +3496,6 @@
   border-radius: 8px;
 }
 
-/* Generic dashboard sub-view container */
 .sq-generic-view {
   display: flex;
   flex-direction: column;

@@ -3,7 +3,6 @@
   height: 240vh;
   background: var(--color-bg, #fff);
 
-  /* Desktop */
   --tile: min(140px, 13.5vh);
   --pitch: calc((100vw - 60px) * 2 / 9);
   --gap-k: 0.57;
@@ -48,7 +47,7 @@
   width: 100%;
   height: 100vh;
   display: flex;
-  /* align-items: flex-end; */
+
   align-items: center;
   justify-content: center;
   z-index: 20;
@@ -100,7 +99,6 @@
   }
 }
 
-/* OVERLAY ON HERO VIDEO */
 .hero-overlay {
   position: absolute;
   inset: 0;
@@ -144,7 +142,6 @@
   }
 }
 
-/* CENTER HEADLINE & ACTIONS */
 .hero-content {
   position: relative;
   z-index: 2;
@@ -252,7 +249,6 @@
   transform: scale(1.02);
 }
 
-/* BOTTOM LOGOS SLIDE / MARQUEE */
 .hero-slide-wrapper {
   position: relative;
   z-index: 2;
@@ -344,15 +340,6 @@
   }
 }
 
-/* .image-grid {
-  position: sticky;
-  top: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: 10;
-  pointer-events: none;
-} */
-
 .image-grid {
   position: sticky;
   top: 0;
@@ -386,7 +373,7 @@
 }
 
 .grid-group-1 {
-  /* top: 50px; */
+
 }
 
 .grid1-image-1 {
@@ -460,45 +447,6 @@
   will-change: opacity, transform;
 }
 
-/* .center-text {
-  position: absolute;
-  top: 450px;
-  left: 50%;
-  width: max-content;
-  max-width: max-content;
-  z-index: 12;
-  text-align: center;
-  font-family: var(--font-serif, Georgia, 'Times New Roman', serif);
-  font-size: 38px;
-  line-height: 1.25;
-  color: var(--color-text-primary, #000000);
-  opacity: 0;
-  transform: translate3d(-50%, 30px, 0);
-
-  animation-name: textReveal;
-  animation-duration: 1s;
-  animation-timing-function: linear;
-  animation-fill-mode: both;
-  animation-timeline: scroll(root block);
-  animation-range: 100vh 180vh;
-
-  will-change:
-    opacity,
-    transform;
-} */
-
-/* @keyframes textReveal {
-  from {
-    opacity: 0;
-    transform: translate3d(-50%, 30px, 0);
-  }
-
-  to {
-    opacity: 1;
-    transform: translate3d(-50%, 0, 0);
-  }
-} */
-
 @keyframes textReveal {
   from {
     opacity: 0;
@@ -569,25 +517,6 @@
 .row+.row {
   margin-top: var(--row-gap);
 }
-
-/* .grid-image {
-  width: 140px;
-  height: 140px;
-  object-fit: cover;
-  border-radius: 16px;
-  justify-self: center;
-  opacity: 0;
-  transform: scale(0);
-  animation-name: imageReveal;
-  animation-duration: 1s;
-  animation-timing-function: linear;
-  animation-fill-mode: both;
-  animation-timeline: scroll(root block);
-  animation-range: 105vh 135vh;
-  will-change:
-    opacity,
-    transform;
-} */
 
 .grid-image {
   flex: 0 0 var(--tile);

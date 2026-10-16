@@ -23,7 +23,6 @@
   box-sizing: border-box;
 }
 
-/* ================= LEFT COLUMN ================= */
 .signin-left-col {
   flex: 0 0 45%;
   min-width: 360px;
@@ -182,7 +181,6 @@
   height: 18px;
 }
 
-/* ================= RIGHT COLUMN ================= */
 .signin-right-col {
   flex: 1;
   display: flex;
@@ -200,7 +198,6 @@
   margin: 0 auto;
 }
 
-/* Dark Card with ticker and preview */
 .signin-dark-card {
   position: relative;
   background-color: var(--signin-card-bg);
@@ -213,14 +210,13 @@
   box-shadow: 0 20px 48px rgba(0, 0, 0, 0.12);
 }
 
-/* Vertical Text Ticker Section */
 .signin-ticker-viewport {
   position: relative;
   width: 52%;
   height: 100%;
   overflow: hidden;
   box-sizing: border-box;
-  /* Top & Bottom gradient mask for smooth fading */
+
   mask-image: linear-gradient(
     to bottom,
     transparent 0%,
@@ -237,7 +233,6 @@
   );
 }
 
-/* Gradient overlay fallback & blur effect */
 .signin-ticker-fade-top {
   position: absolute;
   top: 0;
@@ -298,7 +293,6 @@
   transform: scale(1);
 }
 
-/* Image Preview Pane (Right side of dark card) */
 .signin-preview-viewport {
   position: relative;
   width: 48%;
@@ -311,7 +305,6 @@
   overflow: hidden;
 }
 
-/* Main active card */
 .signin-card-preview {
   position: relative;
   width: 100%;
@@ -333,7 +326,6 @@
   transition: opacity 0.3s ease;
 }
 
-/* Background stacked peek card */
 .signin-card-preview-peek {
   position: absolute;
   right: -30px;
@@ -355,7 +347,6 @@
   display: block;
 }
 
-/* Promotional Section Under Dark Card */
 .signin-promo-section {
   margin-top: 32px;
 }
@@ -424,7 +415,6 @@
   color: #000000;
 }
 
-/* ================= RESPONSIVE ================= */
 @media (max-width: 1024px) {
   .signin-page {
     flex-direction: column;

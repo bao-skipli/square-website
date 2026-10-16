@@ -2,31 +2,28 @@ import { ref, set, get, update, remove, onValue } from "firebase/database";
 import { database } from "./firebaseConfig";
 
 export const INITIAL_CATEGORIES = [
-  { id: "cat-food", name: "Food", parentId: null, pointsOfSale: true },
-  { id: "cat-pho", name: "Pho", parentId: "cat-food", pointsOfSale: true },
-  { id: "cat-beverage", name: "Beverage", parentId: null, pointsOfSale: true },
-  { id: "cat-liquor", name: "Liquor", parentId: null, pointsOfSale: true },
-  { id: "cat-beer", name: "Beer", parentId: null, pointsOfSale: true },
-  { id: "cat-wine", name: "Wine", parentId: null, pointsOfSale: true },
-  { id: "cat-coffee", name: "Coffee & Tea", parentId: null, pointsOfSale: true },
-  { id: "cat-desserts", name: "Desserts", parentId: null, pointsOfSale: true },
+  // { id: "cat-food", name: "Food", parentId: null, pointsOfSale: true },
+  // { id: "cat-pho", name: "Pho", parentId: "cat-food", pointsOfSale: true },
+  // { id: "cat-beverage", name: "Beverage", parentId: null, pointsOfSale: true },
+  // { id: "cat-liquor", name: "Liquor", parentId: null, pointsOfSale: true },
+  // { id: "cat-beer", name: "Beer", parentId: null, pointsOfSale: true },
+  // { id: "cat-wine", name: "Wine", parentId: null, pointsOfSale: true },
+  // { id: "cat-coffee", name: "Coffee & Tea", parentId: null, pointsOfSale: true },
+  // { id: "cat-desserts", name: "Desserts", parentId: null, pointsOfSale: true },
 ];
 
 export const INITIAL_LIBRARY_ITEMS = [
-  { id: "item-1", name: "Banana Pudding", category: "Desserts", status: "Available", price: "$6.00" },
-  { id: "item-2", name: "Brownie", category: "Desserts", status: "Available", price: "$4.50" },
-  { id: "item-3", name: "Cheesecake", category: "Desserts", status: "Available", price: "$7.00" },
-  { id: "item-4", name: "Cookie", category: "Desserts", status: "Available", price: "$3.00" },
-  { id: "item-5", name: "Ice Cream", category: "Desserts", status: "Available", price: "$5.00" },
-  { id: "item-6", name: "Pho ga", category: "Pho", status: "Available", price: "$14.50" },
+  // { id: "item-1", name: "Banana Pudding", category: "Desserts", status: "Available", price: "$6.00" },
+  // { id: "item-2", name: "Brownie", category: "Desserts", status: "Available", price: "$4.50" },
+  // { id: "item-3", name: "Cheesecake", category: "Desserts", status: "Available", price: "$7.00" },
+  // { id: "item-4", name: "Cookie", category: "Desserts", status: "Available", price: "$3.00" },
+  // { id: "item-5", name: "Ice Cream", category: "Desserts", status: "Available", price: "$5.00" },
+  // { id: "item-6", name: "Pho ga", category: "Pho", status: "Available", price: "$14.50" },
 ];
 
 const LOCAL_STORAGE_ITEMS_KEY = "sq_dashboard_items";
 const LOCAL_STORAGE_CATEGORIES_KEY = "sq_dashboard_categories";
 
-/**
- * Helpers to get / set guest local data as fallback
- */
 function getLocalItems() {
   try {
     const raw = localStorage.getItem(LOCAL_STORAGE_ITEMS_KEY);
@@ -71,11 +68,6 @@ function toList(val) {
   return Object.values(val);
 }
 
-/**
- * Realtime listener for Home dashboard data (business info).
- * Returns an object: { unsubscribe, firstPromise }
- * `firstPromise` resolves with the business info object on the very first snapshot received from Firebase.
- */
 export function subscribeHomeData(userId, callback, onFirstSnapshot) {
   let isFirst = true;
   let firstResolve;
@@ -93,7 +85,7 @@ export function subscribeHomeData(userId, callback, onFirstSnapshot) {
 
   if (!userId) {
     notifyFirst(null);
-    return { unsubscribe: () => {}, firstPromise };
+    return { unsubscribe: () => { }, firstPromise };
   }
 
   const businessRef = ref(database, `users/${userId}/businessInfo`);
@@ -114,11 +106,6 @@ export function subscribeHomeData(userId, callback, onFirstSnapshot) {
   return { unsubscribe, firstPromise };
 }
 
-/**
- * Realtime listener for Items.
- * Returns an object: { unsubscribe, firstPromise }
- * `firstPromise` resolves with the items array on the very first snapshot received from Firebase.
- */
 export function subscribeItems(userId, callback, onFirstSnapshot) {
   let isFirst = true;
   let firstResolve;
@@ -154,7 +141,7 @@ export function subscribeItems(userId, callback, onFirstSnapshot) {
         callback(list);
         notifyFirst(list);
       } else {
-        // Initialize if empty
+
         const itemsMap = {};
         INITIAL_LIBRARY_ITEMS.forEach((i) => {
           itemsMap[i.id] = i;
@@ -184,11 +171,6 @@ export function subscribeItems(userId, callback, onFirstSnapshot) {
   return { unsubscribe, firstPromise };
 }
 
-/**
- * Realtime listener for Categories.
- * Returns an object: { unsubscribe, firstPromise }
- * `firstPromise` resolves with the categories array on the very first snapshot received from Firebase.
- */
 export function subscribeCategories(userId, callback, onFirstSnapshot) {
   let isFirst = true;
   let firstResolve;
@@ -224,7 +206,7 @@ export function subscribeCategories(userId, callback, onFirstSnapshot) {
         callback(list);
         notifyFirst(list);
       } else {
-        // Initialize if empty
+
         const catMap = {};
         INITIAL_CATEGORIES.forEach((c) => {
           catMap[c.id] = c;
@@ -254,10 +236,6 @@ export function subscribeCategories(userId, callback, onFirstSnapshot) {
   return { unsubscribe, firstPromise };
 }
 
-/**
- * Create or Edit Item in Firebase Realtime Database
- * Throws if Firebase write fails.
- */
 export async function saveItemToFirebase(userId, itemData) {
   const itemId = itemData.id || `item-${Date.now()}`;
   const itemToSave = {
@@ -272,7 +250,6 @@ export async function saveItemToFirebase(userId, itemData) {
     return itemToSave;
   }
 
-  // Fallback for unauthenticated guest session
   const currentItems = getLocalItems();
   const exists = currentItems.some((i) => i.id === itemId);
   let updated;
@@ -285,9 +262,6 @@ export async function saveItemToFirebase(userId, itemData) {
   return itemToSave;
 }
 
-/**
- * Delete Item from Firebase Realtime Database
- */
 export async function deleteItemFromFirebase(userId, itemId) {
   if (userId) {
     try {
@@ -318,7 +292,6 @@ export async function deleteItemFromFirebase(userId, itemId) {
   const updated = currentItems.filter((i) => i.id !== itemId);
   setLocalItems(updated);
 
-  // Clean local modifier set items index for guest
   try {
     const raw = localStorage.getItem("sq_dashboard_modifier_set_items");
     if (raw) {
@@ -342,9 +315,6 @@ export async function deleteItemFromFirebase(userId, itemId) {
   return true;
 }
 
-/**
- * Duplicate Item in Firebase Realtime Database
- */
 export async function duplicateItemInFirebase(userId, originalItem) {
   const newItemId = `item-${Date.now()}`;
   const duplicated = {
@@ -357,9 +327,6 @@ export async function duplicateItemInFirebase(userId, originalItem) {
   return await saveItemToFirebase(userId, duplicated);
 }
 
-/**
- * Archive Item in Firebase Realtime Database
- */
 export async function archiveItemInFirebase(userId, itemId) {
   if (userId) {
     const itemRef = ref(database, `users/${userId}/items/${itemId}`);
@@ -378,10 +345,6 @@ export async function archiveItemInFirebase(userId, itemId) {
   return true;
 }
 
-/**
- * Create or Edit Category in Firebase Realtime Database
- * and sync assigned items' categories. Throws on error.
- */
 export async function saveCategoryToFirebase(
   userId,
   categoryData,
@@ -397,11 +360,10 @@ export async function saveCategoryToFirebase(
   };
 
   if (userId) {
-    // 1. Save category
+
     const catRef = ref(database, `users/${userId}/categories/${catId}`);
     await set(catRef, catToSave);
 
-    // 2. Sync assigned items in Realtime Database
     const updates = {};
     allItems.forEach((item) => {
       if (assignedItemIds.includes(item.id)) {
@@ -424,7 +386,6 @@ export async function saveCategoryToFirebase(
     return catToSave;
   }
 
-  // Fallback to local storage for guest
   const currentCats = getLocalCategories();
   const exists = currentCats.some((c) => c.id === catId);
   let updatedCats;
@@ -453,9 +414,6 @@ export async function saveCategoryToFirebase(
   return catToSave;
 }
 
-/**
- * Delete Category from Firebase Realtime Database
- */
 export async function deleteCategoryFromFirebase(
   userId,
   categoryId,
@@ -464,11 +422,10 @@ export async function deleteCategoryFromFirebase(
   allItems = []
 ) {
   if (userId) {
-    // 1. Delete category
+
     const catRef = ref(database, `users/${userId}/categories/${categoryId}`);
     await remove(catRef);
 
-    // 2. Unparent child categories and unassign items
     const updates = {};
     allCategories
       .filter((c) => c.parentId === categoryId)

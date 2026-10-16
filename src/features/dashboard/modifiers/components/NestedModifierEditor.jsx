@@ -93,15 +93,12 @@ export default function NestedModifierEditor({
 
   if (!isOpen) return null;
 
-  // Fallback to local sets if none passed
   const baseSets = allModifierSets && allModifierSets.length > 0
     ? allModifierSets
     : getLocalModifierSets();
 
-  // Combine with any sets newly created in this session
   const combinedSets = [...createdSets, ...baseSets.filter((s) => !createdSets.some((c) => c.id === s.id))];
 
-  // Exclude current modifier set being edited to prevent cyclical nesting
   const availableSets = combinedSets.filter((s) => s.id !== currentModifierSetId);
 
   const handleToggleSet = (setId) => {
@@ -180,8 +177,7 @@ export default function NestedModifierEditor({
           aria-modal="true"
           aria-label="Edit nested modifier sets"
         >
-          {/* Header */}
-          <div className="sq-popup-modal-header">
+<div className="sq-popup-modal-header">
             <button
               type="button"
               className="sq-modal-circle-close"
@@ -199,14 +195,12 @@ export default function NestedModifierEditor({
             </button>
           </div>
 
-          {/* Heading */}
-          <h2 className="sq-nested-modal-title">Edit nested modifier sets</h2>
+<h2 className="sq-nested-modal-title">Edit nested modifier sets</h2>
           <p className="sq-nested-modal-subtitle">
             Search for modifiers, or select from the list below
           </p>
 
-          {/* Action Row: Create modifier set */}
-          {isCreating ? (
+{isCreating ? (
             <div className="sq-nested-quick-create-box">
               <input
                 type="text"
@@ -254,11 +248,9 @@ export default function NestedModifierEditor({
             </div>
           )}
 
-          {/* Divider */}
-          <div className="sq-nested-modal-divider" />
+<div className="sq-nested-modal-divider" />
 
-          {/* List of Modifier Sets */}
-          <div className="sq-nested-modal-list">
+<div className="sq-nested-modal-list">
             {availableSets.length === 0 ? (
               <div className="sq-nested-modal-empty">
                 No modifier sets available. Create one above to get started.
@@ -299,8 +291,7 @@ export default function NestedModifierEditor({
         </div>
       </div>
 
-      {/* Confirmation Modal when Discarding / Closing with Unsaved Changes */}
-      <UnsavedChangesModal
+<UnsavedChangesModal
         isOpen={isUnsavedModalOpen}
         onDiscard={handleDiscard}
         onResume={handleResume}

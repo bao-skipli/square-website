@@ -1,12 +1,5 @@
 import React, { useRef, useEffect } from 'react';
 
-/**
- * CategoryTabs - Sticky horizontal tabs below the header.
- * - Inactive tabs: grey text.
- * - Active tab: red text + thick red underline under text (width matches text).
- * - Hidden scrollbar, scrollable via touch/wheel/drag.
- * - Auto-scrolls active tab into view (centered).
- */
 export default function CategoryTabs({ categories = [], activeCategoryId, onSelectCategory }) {
   const scrollContainerRef = useRef(null);
   const activeTabRef = useRef(null);
@@ -14,7 +7,6 @@ export default function CategoryTabs({ categories = [], activeCategoryId, onSele
   const startXRef = useRef(0);
   const scrollLeftRef = useRef(0);
 
-  // Auto-scroll active tab into center view
   useEffect(() => {
     if (activeTabRef.current && scrollContainerRef.current) {
       activeTabRef.current.scrollIntoView({
@@ -25,7 +17,6 @@ export default function CategoryTabs({ categories = [], activeCategoryId, onSele
     }
   }, [activeCategoryId]);
 
-  // Drag-to-scroll for desktop mouse
   const handleMouseDown = (e) => {
     if (!scrollContainerRef.current) return;
     isDraggingRef.current = true;
@@ -48,11 +39,11 @@ export default function CategoryTabs({ categories = [], activeCategoryId, onSele
   if (!categories || categories.length === 0) return null;
 
   return (
-    <nav 
-      className="sf-category-tabs-wrapper" 
+    <nav
+      className="sf-category-tabs-wrapper"
       aria-label="Category navigation"
     >
-      <div 
+      <div
         className="sf-category-tabs-container"
         ref={scrollContainerRef}
         onMouseDown={handleMouseDown}

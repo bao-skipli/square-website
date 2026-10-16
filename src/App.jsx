@@ -12,6 +12,7 @@ const EstimatedRevenue = lazy(() => import("@/components/Onboarding/EstimatedRev
 const SquareBanking = lazy(() => import("@/components/Onboarding/SquareBanking/SquareBanking"));
 const Dashboard = lazy(() => import("@/components/Dashboard/Dashboard"));
 const StorefrontPage = lazy(() => import("@/storefront/StorefrontPage"));
+const ImageUploader = lazy(() => import("@/components/ImageUploader"));
 
 export default class App extends Component {
   render() {
@@ -149,6 +150,14 @@ export default class App extends Component {
           />
           <Route
             path="/dashboard/items/modifiers/:setId"
+            element={
+              <Suspense fallback={<DashboardLoading fullScreen message="Loading Square..." />}>
+                <Dashboard />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/dashboard/store-setup/review"
             element={
               <Suspense fallback={<DashboardLoading fullScreen message="Loading Square..." />}>
                 <Dashboard />

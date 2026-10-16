@@ -1,4 +1,4 @@
-/* Modifiers View Container */
+
 .sq-modifiers-page {
   max-width: 1400px;
   margin: 0 auto;
@@ -23,7 +23,6 @@
   margin: 0;
 }
 
-/* Empty State */
 .sq-modifiers-empty-wrapper {
   max-width: 1400px;
   margin: 0 auto;
@@ -117,7 +116,6 @@
   text-decoration: underline;
 }
 
-/* Filter Bar */
 .sq-modifiers-filter-bar {
   display: flex;
   align-items: center;
@@ -201,7 +199,6 @@
   align-items: center;
 }
 
-/* Modifiers Table */
 .sq-modifiers-table-wrapper {
   background-color: #ffffff;
   border: 1px solid #e4e4e7;

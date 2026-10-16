@@ -33,7 +33,6 @@ export default function ModifierOverrideModal({
   useEffect(() => {
     if (!isOpen || !modifierSet) return;
 
-    // Initialize preselects: start with parent set defaults, then apply overrides if present
     const initPreselect = {};
     if (modifierSet.modifiers) {
       Object.values(modifierSet.modifiers).forEach((mod) => {
@@ -48,14 +47,12 @@ export default function ModifierOverrideModal({
     }
     setPreselectMap(initPreselect);
 
-    // Initialize selection rules
     const initRules = {
       required: initialOverrides?.selectionRules?.required ?? Boolean(modifierSet.selectionRules?.required),
       allowMultiple: initialOverrides?.selectionRules?.allowMultiple ?? Boolean(modifierSet.selectionRules?.allowMultiple),
     };
     setSelectionRules(initRules);
 
-    // Initialize display settings
     const initDisplay = {
       hideOnReceipts: initialOverrides?.displaySettings?.hideOnReceipts ?? Boolean(modifierSet.displaySettings?.hideOnReceipts),
       conversational: initialOverrides?.displaySettings?.conversational ?? Boolean(modifierSet.displaySettings?.conversational),
@@ -184,8 +181,7 @@ export default function ModifierOverrideModal({
       aria-modal="true"
       aria-label={`Edit ${modifierSet.name} settings for ${itemName}`}
     >
-      {/* Sticky Header */}
-      <div className="sq-override-modal-header">
+<div className="sq-override-modal-header">
         <button
           type="button"
           className="sq-override-close-btn"
@@ -229,8 +225,7 @@ export default function ModifierOverrideModal({
         </div>
       </div>
 
-      {/* Body */}
-      <div className="sq-override-modal-body">
+<div className="sq-override-modal-body">
         <div className="sq-override-form-container">
           <h1 className="sq-override-main-title">
             Edit “{modifierSet.name}” settings for “{itemName || "Item"}”
@@ -242,8 +237,7 @@ export default function ModifierOverrideModal({
 
           {error && <div className="sq-mod-global-error">{error}</div>}
 
-          {/* Modifier list table */}
-          <div className="sq-override-section">
+<div className="sq-override-section">
             <h3 className="sq-override-section-title">Modifier list</h3>
             <table className="sq-override-table">
               <thead>
@@ -275,8 +269,7 @@ export default function ModifierOverrideModal({
 
           <div className="sq-divider-thick-block" />
 
-          {/* Selection Rules */}
-          <div className="sq-override-section">
+<div className="sq-override-section">
             <h3 className="sq-override-section-title">Selection rules</h3>
 
             <div className="sq-mod-toggle-row">
@@ -308,8 +301,7 @@ export default function ModifierOverrideModal({
 
           <div className="sq-divider-thick-block" />
 
-          {/* Settings */}
-          <div className="sq-override-section">
+<div className="sq-override-section">
             <h3 className="sq-override-section-title">Settings</h3>
 
             <div className="sq-mod-toggle-row">
@@ -349,8 +341,7 @@ export default function ModifierOverrideModal({
         </div>
       </div>
 
-      {/* Unsaved Changes Modal */}
-      <UnsavedChangesModal
+<UnsavedChangesModal
         isOpen={isUnsavedModalOpen}
         onDiscard={() => {
           setIsUnsavedModalOpen(false);
@@ -359,8 +350,7 @@ export default function ModifierOverrideModal({
         onResume={() => setIsUnsavedModalOpen(false)}
       />
 
-      {/* Reset to defaults confirmation modal (No window.confirm) */}
-      {isResetModalOpen && (
+{isResetModalOpen && (
         <div className="sq-popup-modal-backdrop" style={{ zIndex: 99999 }}>
           <div
             className="sq-unsaved-changes-modal"

@@ -43,8 +43,7 @@ export default class CategoryFormModal extends PureComponent {
         aria-modal="true"
         aria-label={editingCategoryId ? "Edit category" : "Create category"}
       >
-        {/* Sticky Header */}
-        <div className="sq-create-sticky-header">
+<div className="sq-create-sticky-header">
           <button
             type="button"
             className="sq-btn-close-create"
@@ -97,14 +96,12 @@ export default class CategoryFormModal extends PureComponent {
           </div>
         </div>
 
-        {/* Content Form */}
-        <div className="sq-category-form-wrap">
+<div className="sq-category-form-wrap">
           <h1 className="sq-category-form-title">
             {editingCategoryId ? "Edit category" : "Create category"}
           </h1>
 
-          {/* 1. Category name */}
-          <div className={`sq-category-name-box ${categoryFormError ? "is-error" : ""}`}>
+<div className={`sq-category-name-box ${categoryFormError ? "is-error" : ""}`}>
             {editingCategoryId && (
               <label className="sq-category-name-label">Category name</label>
             )}
@@ -123,8 +120,7 @@ export default class CategoryFormModal extends PureComponent {
             </div>
           )}
 
-          {/* 2. Image dropzone */}
-          <div className="sq-category-dropzone">
+<div className="sq-category-dropzone">
             <TablePlaceholderThumbIcon />
             <span className="sq-dropzone-text">
               Drag an image here,{" "}
@@ -139,8 +135,7 @@ export default class CategoryFormModal extends PureComponent {
             </span>
           </div>
 
-          {/* 3. Parent category */}
-          <div className="sq-category-row-field">
+<div className="sq-category-row-field">
             <div className="sq-category-row-field-left">
               <div className="sq-category-field-icon">
                 <TreeHierarchyIcon size={20} />
@@ -161,8 +156,7 @@ export default class CategoryFormModal extends PureComponent {
             </button>
           </div>
 
-          {/* Subcategories if this category has children */}
-          {subcategories && subcategories.length > 0 && (
+{subcategories && subcategories.length > 0 && (
             <div className="sq-category-row-field" style={{ paddingTop: "0" }}>
               <div className="sq-category-row-field-left">
                 <div className="sq-category-field-icon" style={{ opacity: 0.65 }}>
@@ -182,8 +176,7 @@ export default class CategoryFormModal extends PureComponent {
 
           <div className="sq-form-divider-line" />
 
-          {/* 4. Items */}
-          <div className="sq-category-section-title">Items</div>
+<div className="sq-category-section-title">Items</div>
           <div className="sq-category-row-field">
             <div className="sq-category-row-field-left">
               <div className="sq-category-field-icon">
@@ -209,8 +202,7 @@ export default class CategoryFormModal extends PureComponent {
 
           <div className="sq-form-divider-line" />
 
-          {/* 5. Sales channels and hours */}
-          <div className="sq-category-section-title">Sales channels and hours</div>
+<div className="sq-category-section-title">Sales channels and hours</div>
           <div className="sq-category-row-field">
             <div className="sq-category-row-field-left">
               <div className="sq-category-field-icon">

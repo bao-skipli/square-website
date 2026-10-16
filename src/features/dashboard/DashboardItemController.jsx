@@ -1,4 +1,5 @@
 import { DashboardBase } from "./DashboardBase";
+import { itemToFormState } from "./dashboardViews";
 import {
   saveItemToFirebase,
   deleteItemFromFirebase,
@@ -23,8 +24,9 @@ export class DashboardItemController extends DashboardBase {
       formMenu: "",
       formSku: "",
       formGtin: "",
+      formImageUrl: "",
       formStatus: "Available",
-      itemFormInitial: { name: "", price: "", category: "", status: "Available" },
+      itemFormInitial: { name: "", price: "", category: "", status: "Available", imageUrl: "" },
       isItemActionsOpen: false,
       formError: "",
     });
@@ -34,7 +36,6 @@ export class DashboardItemController extends DashboardBase {
   };
 
   openEditItem = (item, updateUrl = true) => {
-    const rawPrice = item.price ? item.price.replace("$", "") : "";
     this.setState({
       currentView: "item-library",
       activeMenu: "item-library",
@@ -42,21 +43,7 @@ export class DashboardItemController extends DashboardBase {
       isItemsOpen: true,
       isCreateItemOpen: true,
       editingItemId: item.id,
-      formName: item.name || "",
-      formPrice: rawPrice,
-      formCategory: item.category || "",
-      formDescription: item.description || "",
-      formKitchenName: item.kitchenName || "",
-      formMenu: item.menu || "",
-      formSku: item.sku || "",
-      formGtin: item.gtin || "",
-      formStatus: item.status || "Available",
-      itemFormInitial: {
-        name: item.name || "",
-        price: rawPrice,
-        category: item.category || "",
-        status: item.status || "Available",
-      },
+      ...itemToFormState(item),
       isItemActionsOpen: false,
       formError: "",
     });
@@ -66,17 +53,14 @@ export class DashboardItemController extends DashboardBase {
   };
 
   handleCloseCreateItem = () => {
-    const { formName, formPrice, formCategory, formStatus, itemFormInitial } = this.state;
-    let hasChanges = false;
-    if (itemFormInitial) {
-      hasChanges =
-        formName !== itemFormInitial.name ||
-        formPrice !== itemFormInitial.price ||
-        formCategory !== itemFormInitial.category ||
-        formStatus !== itemFormInitial.status;
-    } else {
-      hasChanges = formName.trim() !== "" || formPrice.trim() !== "";
-    }
+    const { formName, formPrice, formCategory, formStatus, formImageUrl, itemFormInitial } = this.state;
+    const hasChanges = itemFormInitial
+      ? formName !== itemFormInitial.name ||
+      formPrice !== itemFormInitial.price ||
+      formCategory !== itemFormInitial.category ||
+      formStatus !== itemFormInitial.status ||
+      (formImageUrl || "") !== (itemFormInitial.imageUrl || "")
+      : formName.trim() !== "" || formPrice.trim() !== "" || Boolean(formImageUrl);
 
     if (hasChanges) {
       this.setState({
@@ -101,6 +85,7 @@ export class DashboardItemController extends DashboardBase {
       formMenu,
       formSku,
       formGtin,
+      formImageUrl,
       editingItemId,
       userId,
     } = this.state;
@@ -128,6 +113,7 @@ export class DashboardItemController extends DashboardBase {
       menu: formMenu || "",
       sku: formSku || "",
       gtin: formGtin || "",
+      imageUrl: formImageUrl || "",
     };
 
     try {
@@ -145,6 +131,7 @@ export class DashboardItemController extends DashboardBase {
         formMenu: "",
         formSku: "",
         formGtin: "",
+        formImageUrl: "",
       });
       this.navigateToItemLibrary();
     } catch (err) {

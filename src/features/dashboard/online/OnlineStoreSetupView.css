@@ -1,21 +1,20 @@
-/* ==========================================================================
-   Admin Dashboard: Online Store Setup Styling
-   Consistent with Square Dashboard standards
-   ========================================================================== */
-
 .sq-store-setup-container {
-  max-width: 900px;
   margin: 0 auto;
-  padding: 32px 24px 80px;
   animation: sq-fade-in 0.15s ease-out;
 }
 
 @keyframes sq-fade-in {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-/* Header & Save Action */
 .sq-store-setup-header {
   display: flex;
   align-items: flex-start;
@@ -67,7 +66,6 @@
   cursor: not-allowed;
 }
 
-/* Sections & Dividers */
 .sq-store-setup-card {
   background-color: #ffffff;
   border: 1px solid #e5e5e5;
@@ -98,7 +96,6 @@
   line-height: 1.4;
 }
 
-/* Toggle Row */
 .sq-setup-toggle-row {
   display: flex;
   align-items: center;
@@ -123,7 +120,6 @@
   margin-top: 2px;
 }
 
-/* Switch UI */
 .sq-switch {
   position: relative;
   display: inline-block;
@@ -163,15 +159,14 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
-.sq-switch input:checked + .sq-switch-slider {
+.sq-switch input:checked+.sq-switch-slider {
   background-color: #111111;
 }
 
-.sq-switch input:checked + .sq-switch-slider:before {
+.sq-switch input:checked+.sq-switch-slider:before {
   transform: translateX(20px);
 }
 
-/* Form Fields */
 .sq-setup-field-group {
   margin-bottom: 22px;
 }
@@ -231,7 +226,6 @@
   line-height: 1.4;
 }
 
-/* Logo Upload Area */
 .sq-logo-upload-box {
   display: flex;
   align-items: center;
@@ -297,7 +291,6 @@
   text-decoration: underline;
 }
 
-/* Slug & Link Row */
 .sq-slug-input-wrapper {
   display: flex;
   align-items: center;
@@ -367,7 +360,6 @@
   margin-top: 6px;
 }
 
-/* Menu Display Category Reorder List */
 .sq-cat-list {
   display: flex;
   flex-direction: column;
@@ -475,7 +467,6 @@
   font-weight: 500;
 }
 
-/* Toast Message */
 .sq-toast {
   position: fixed;
   bottom: 24px;
@@ -493,8 +484,15 @@
 }
 
 @keyframes sq-toast-in {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .sq-toast--success {
@@ -507,7 +505,6 @@
   color: #ffffff;
 }
 
-/* Admin Skeleton for Store Setup */
 .sq-setup-skeleton-header {
   height: 32px;
   width: 240px;
@@ -518,4 +515,217 @@
   height: 180px;
   margin-bottom: 24px;
   border-radius: 14px;
+}
+
+/* Theme Color Customization Styles */
+.sq-setup-theme-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.sq-theme-presets-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 10px;
+}
+
+.sq-theme-preset-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border: 1.5px solid #e5e5e5;
+  border-radius: 10px;
+  background: #ffffff;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+}
+
+.sq-theme-preset-btn:hover {
+  border-color: #a3a3a3;
+  transform: translateY(-1px);
+}
+
+.sq-theme-preset-btn--active {
+  border-color: #111111;
+  background-color: #f9f9f9;
+  box-shadow: 0 0 0 1px #111111;
+}
+
+.sq-theme-color-circle {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+.sq-theme-preset-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1f2937;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sq-theme-custom-row {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 24px;
+  align-items: flex-start;
+  padding-top: 14px;
+  border-top: 1px solid #f0f0f0;
+}
+
+@media (max-width: 768px) {
+  .sq-theme-custom-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.sq-theme-picker-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sq-theme-color-inputs {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sq-theme-color-picker {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 42px;
+  height: 42px;
+  border: none;
+  cursor: pointer;
+  background: none;
+  padding: 0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.sq-theme-color-picker::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.sq-theme-color-picker::-webkit-color-swatch {
+  border: 1px solid #d4d4d8;
+  border-radius: 8px;
+}
+
+.sq-theme-hex-input {
+  flex: 1;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid #d4d4d8;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: monospace;
+  color: #111827;
+  text-transform: uppercase;
+}
+
+.sq-theme-hex-input:focus {
+  outline: none;
+  border-color: #111111;
+  box-shadow: 0 0 0 1px #111111;
+}
+
+.sq-theme-preview-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+}
+
+.sq-theme-preview-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #9ca3af;
+  margin-bottom: 12px;
+}
+
+.sq-theme-preview-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sq-theme-preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.sq-theme-preview-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.sq-theme-preview-square {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  border: 2px solid currentColor;
+}
+
+.sq-theme-preview-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 9999px;
+  letter-spacing: 0.2px;
+}
+
+.sq-theme-preview-tabs {
+  display: flex;
+  gap: 8px;
+}
+
+.sq-theme-preview-tab {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 8px;
+  color: #6b7280;
+  background: #f9fafb;
+}
+
+.sq-theme-preview-tab--active {
+  border: 1px solid;
+}
+
+.sq-theme-preview-actions {
+  display: flex;
+}
+
+.sq-theme-preview-btn {
+  padding: 8px 18px;
+  border-radius: 8px;
+  border: none;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: default;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }

@@ -17,36 +17,31 @@ export default function ModifiersView({
   const [selectedChannel, setSelectedChannel] = useState("all");
   const [selectedType, setSelectedType] = useState("all");
 
-  // If still loading, do not flash empty state
   if (isLoading) {
     return null;
   }
 
-  // If no modifier sets in the library, show the empty state
   if (modifierSets.length === 0) {
     return <ModifiersEmptyState onCreateClick={onOpenCreateModifier} />;
   }
 
-  // Filter modifier sets
   const filteredSets = modifierSets.filter((set) => {
-    // 1. Search filter (case-insensitive & diacritic-insensitive)
+
     if (searchQuery.trim()) {
       const normName = (set.name || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
       const normQuery = searchQuery.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
       if (!normName.includes(normQuery)) return false;
     }
 
-    // 2. Channel filter
     if (selectedChannel !== "all") {
       if (set.type === "text") {
-        // Text modifiers only available on websites/kiosks
+
         if (selectedChannel === "pos") return false;
       } else {
         if (!set.channels?.all && !set.channels?.[selectedChannel]) return false;
       }
     }
 
-    // 3. Modifier type filter
     if (selectedType !== "all") {
       if (set.type !== selectedType) return false;
     }
@@ -56,8 +51,7 @@ export default function ModifiersView({
 
   return (
     <div className="sq-modifiers-page">
-      {/* Top Header */}
-      <div className="sq-modifiers-header-row">
+<div className="sq-modifiers-header-row">
         <div>
           <h1 className="sq-modifiers-page-title">Modifiers</h1>
           <p className="sq-modifiers-page-desc">
@@ -66,11 +60,9 @@ export default function ModifiersView({
         </div>
       </div>
 
-      {/* Filter and Action Bar */}
-      <div className="sq-modifiers-filter-bar">
+<div className="sq-modifiers-filter-bar">
         <div className="sq-modifiers-filters-left">
-          {/* Search Box */}
-          <div className="sq-modifiers-search-box">
+<div className="sq-modifiers-search-box">
             <span className="sq-modifiers-search-icon">
               <SearchIcon size={15} color="#71717a" />
             </span>
@@ -84,8 +76,7 @@ export default function ModifiersView({
             />
           </div>
 
-          {/* Channels Filter Dropdown */}
-          <div className="sq-modifiers-select-wrap">
+<div className="sq-modifiers-select-wrap">
             <select
               className="sq-modifiers-select"
               value={selectedChannel}
@@ -102,8 +93,7 @@ export default function ModifiersView({
             </span>
           </div>
 
-          {/* Modifier Type Filter Dropdown */}
-          <div className="sq-modifiers-select-wrap">
+<div className="sq-modifiers-select-wrap">
             <select
               className="sq-modifiers-select"
               value={selectedType}
@@ -120,8 +110,7 @@ export default function ModifiersView({
           </div>
         </div>
 
-        {/* Create Button on the Right */}
-        <div className="sq-modifiers-actions-right">
+<div className="sq-modifiers-actions-right">
           <button
             type="button"
             className="sq-modifiers-btn-primary-pill"
@@ -132,8 +121,7 @@ export default function ModifiersView({
         </div>
       </div>
 
-      {/* Table State */}
-      {filteredSets.length === 0 ? (
+{filteredSets.length === 0 ? (
         <div className="sq-modifiers-no-results">
           No modifiers match the selected filters.
         </div>
