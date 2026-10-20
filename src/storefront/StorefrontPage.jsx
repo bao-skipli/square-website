@@ -13,8 +13,9 @@ import './styles/Storefront.css';
 
 
 
-function StorefrontContent() {
+function StorefrontContent({ customHostname }) {
   const { slug } = useParams();
+  const effectiveIdentifier = customHostname || slug;
   const {
     status,
     loaded,
@@ -24,7 +25,7 @@ function StorefrontContent() {
     modifierSets,
     discounts,
     retry,
-  } = useStorefrontData(slug);
+  } = useStorefrontData(effectiveIdentifier);
 
   const themeStyles = useMemo(() => {
     return getThemeColorTokens(store?.themeColor || '#E53E3E');
@@ -232,12 +233,13 @@ function StorefrontContent() {
   );
 }
 
-export default function StorefrontPage() {
+export default function StorefrontPage({ customHostname }) {
   const { slug } = useParams();
+  const effectiveSlug = customHostname || slug;
 
   return (
-    <CartProvider storeSlug={slug}>
-      <StorefrontContent />
+    <CartProvider storeSlug={effectiveSlug}>
+      <StorefrontContent customHostname={customHostname} />
     </CartProvider>
   );
 }

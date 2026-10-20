@@ -32,6 +32,26 @@
     "storeSlugs": {
       ".read": true,
       ".write": "auth != null"
+    },
+    "storeDomains": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "domainJobs": {
+      ".read": "auth != null",
+      "$jobId": {
+        ".write": "auth != null"
+      }
+    },
+    "deploymentJobs": {
+      ".read": "auth != null",
+      "$jobId": {
+        ".write": "auth != null"
+      }
+    },
+    "agentStatus": {
+      ".read": "auth != null",
+      ".write": "auth != null"
     }
   }
 }

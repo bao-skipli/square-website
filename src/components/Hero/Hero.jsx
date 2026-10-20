@@ -30,16 +30,16 @@ const images2 = [
 ];
 
 const PARTNER_LOGOS = [
-  "/Frame_2147212722.avif",
-  "/Frame_2147212724.avif",
-  "/Frame_2147212725.avif",
-  "/Frame_2147212728.avif",
-  "/Frame_2147212729.avif",
-  "/Frame_2147212730.avif",
-  "/Frame_2147212732.avif",
-  "/Frame_2147212733.avif",
-  "/Frame_2147212734.avif",
-  "/Frame_2147212735.avif",
+  "/images/hero/Frame_2147212722.avif",
+  "/images/hero/Frame_2147212724.avif",
+  "/images/hero/Frame_2147212725.avif",
+  "/images/hero/Frame_2147212728.avif",
+  "/images/hero/Frame_2147212729.avif",
+  "/images/hero/Frame_2147212730.avif",
+  "/images/hero/Frame_2147212732.avif",
+  "/images/hero/Frame_2147212733.avif",
+  "/images/hero/Frame_2147212734.avif",
+  "/images/hero/Frame_2147212735.avif",
 ];
 
 const SLIDE_LOGOS = [...PARTNER_LOGOS, ...PARTNER_LOGOS];

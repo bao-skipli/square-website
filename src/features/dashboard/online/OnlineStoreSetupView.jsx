@@ -4,6 +4,15 @@ import {
   saveOnlineStore,
   generateSlug,
   checkSlugAvailability,
+  cleanDomainName,
+  isValidDomain,
+  checkDomainAvailability,
+  requestAttachCustomDomain,
+  requestVerifyCustomDomain,
+  requestRemoveCustomDomain,
+  createDeploymentJob,
+  subscribeDeploymentJob,
+  subscribeAgentStatus,
 } from "@/services/onlineStoreService";
 import { uploadImage } from "@/services/cloudinary";
 import { PRESET_THEME_COLORS } from "@/shared/themeTokens";
@@ -60,6 +69,64 @@ function ExternalLinkIcon() {
   );
 }
 
+function GlobeIcon({ className = "" }) {
+  return (
+    <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10" />
+      <line x1="2" y1="12" x2="22" y2="12" />
+      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+    </svg>
+  );
+}
+
+function LinkIcon({ className = "" }) {
+  return (
+    <svg className={className} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+    </svg>
+  );
+}
+
+function RocketIcon({ className = "" }) {
+  return (
+    <svg className={className} width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z" />
+      <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z" />
+      <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0" />
+      <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5" />
+    </svg>
+  );
+}
+
+function TerminalIcon({ className = "" }) {
+  return (
+    <svg className={className} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="4 17 10 11 4 5" />
+      <line x1="12" y1="19" x2="20" y2="19" />
+    </svg>
+  );
+}
+
+function RefreshCwIcon({ className = "" }) {
+  return (
+    <svg className={className} width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="23 4 23 10 17 10" />
+      <polyline points="1 20 1 14 7 14" />
+      <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+    </svg>
+  );
+}
+
+function TrashIcon({ className = "" }) {
+  return (
+    <svg className={className} width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="3 6 5 6 21 6" />
+      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+    </svg>
+  );
+}
+
 export default function OnlineStoreSetupView({
   userId,
   categories = [],
@@ -84,6 +151,21 @@ export default function OnlineStoreSetupView({
   const [locationId, setLocationId] = useState("loc-skipli");
   const [categoryConfigs, setCategoryConfigs] = useState([]);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+
+  // Custom Domain & Bunny Deployment State
+  const [customDomain, setCustomDomain] = useState(null);
+  const [deployment, setDeployment] = useState(null);
+  const [linkMode, setLinkMode] = useState("slug"); // "slug" | "domain"
+  const [domainInput, setDomainInput] = useState("");
+  const [domainError, setDomainError] = useState("");
+  const [isConnectingDomain, setIsConnectingDomain] = useState(false);
+  const [isVerifyingDomain, setIsVerifyingDomain] = useState(false);
+  const [isRemovingDomain, setIsRemovingDomain] = useState(false);
+  const [agentStatus, setAgentStatus] = useState({ online: false, lastHeartbeat: 0, isSimulated: false, configSummary: null });
+  const [activeDeploymentId, setActiveDeploymentId] = useState(null);
+  const [deploymentJob, setDeploymentJob] = useState(null);
+  const [isDeployModalOpen, setIsDeployModalOpen] = useState(false);
+  const [isDeploying, setIsDeploying] = useState(false);
 
   const fileInputRef = useRef(null);
   const dragItemIndex = useRef(null);
@@ -113,7 +195,12 @@ export default function OnlineStoreSetupView({
         setSlug(storeData.slug || "skipli");
         setOriginalSlug(storeData.slug || "skipli");
         setLocationId(storeData.locationId || "loc-skipli");
+        setCustomDomain(storeData.customDomain || null);
+        setDeployment(storeData.deployment || null);
 
+        if (storeData.deployment?.lastDeploymentId) {
+          setActiveDeploymentId(storeData.deployment.lastDeploymentId);
+        }
 
         const savedCatConfig = storeData.menu?.categories || {};
         const merged = (categories || []).map((cat, idx) => {
@@ -162,6 +249,151 @@ export default function OnlineStoreSetupView({
       return () => clearTimeout(timer);
     }
   }, [toast]);
+
+  // Realtime subscription to Agent Status
+  useEffect(() => {
+    const unsub = subscribeAgentStatus((status) => {
+      setAgentStatus(status || { online: false, lastHeartbeat: 0 });
+    });
+    return () => {
+      if (typeof unsub === "function") unsub();
+    };
+  }, []);
+
+  // Realtime subscription to active deployment job
+  useEffect(() => {
+    if (!activeDeploymentId) return;
+    const unsub = subscribeDeploymentJob(activeDeploymentId, (job) => {
+      if (job) setDeploymentJob(job);
+    });
+    return () => {
+      if (typeof unsub === "function") unsub();
+    };
+  }, [activeDeploymentId]);
+
+  const handleConnectDomain = async () => {
+    const cleaned = cleanDomainName(domainInput);
+    if (!cleaned) {
+      setDomainError("Please enter a domain name.");
+      return;
+    }
+    if (!isValidDomain(cleaned)) {
+      setDomainError("Please enter a valid domain format (e.g., shop.mybrand.com).");
+      return;
+    }
+
+    setIsConnectingDomain(true);
+    setDomainError("");
+
+    try {
+      const avail = await checkDomainAvailability(cleaned, storeId);
+      if (!avail.available) {
+        setDomainError(avail.reason);
+        setIsConnectingDomain(false);
+        return;
+      }
+
+      const targetCname = agentStatus?.configSummary?.cdnHostname || "yourstore.b-cdn.net";
+      const { domainConfig } = await requestAttachCustomDomain(userId, storeId, cleaned, targetCname);
+      setCustomDomain(domainConfig);
+      setDomainInput("");
+      setToast({
+        message: `Domain ${cleaned} connected! Point your CNAME to ${targetCname}.`,
+        type: "success",
+      });
+    } catch (err) {
+      console.error("Domain attach error:", err);
+      setDomainError(err.message || "Failed to attach domain.");
+    } finally {
+      setIsConnectingDomain(false);
+    }
+  };
+
+  const handleVerifyDomain = async () => {
+    if (!customDomain?.hostname) return;
+    setIsVerifyingDomain(true);
+    try {
+      const result = await requestVerifyCustomDomain(userId, storeId, customDomain.hostname);
+      if (result?.status) {
+        setCustomDomain((prev) => (prev ? {
+          ...prev,
+          status: result.status,
+          sslActive: result.sslActive ?? (result.status === "ACTIVE"),
+          error: result.error || null,
+        } : prev));
+      }
+
+      if (result?.status === "ACTIVE") {
+        setToast({
+          message: "Domain verified and active (HTTPS)! SSL certificate is live.",
+          type: "success",
+        });
+      } else {
+        setToast({
+          message: "Verification job submitted! The agent is checking DNS and requesting SSL...",
+          type: "info",
+        });
+      }
+    } catch (err) {
+      console.error("Domain verify error:", err);
+      setToast({ message: "Verification request failed.", type: "error" });
+    } finally {
+      setTimeout(() => setIsVerifyingDomain(false), 1500);
+    }
+  };
+
+  const handleRemoveDomain = async () => {
+    if (!customDomain?.hostname) return;
+    if (!window.confirm(`Are you sure you want to remove ${customDomain.hostname}?`)) return;
+
+    setIsRemovingDomain(true);
+    try {
+      await requestRemoveCustomDomain(userId, storeId, customDomain.hostname);
+      setCustomDomain(null);
+      setToast({ message: "Custom domain removed successfully.", type: "success" });
+    } catch (err) {
+      console.error("Domain remove error:", err);
+      setToast({ message: "Failed to remove domain.", type: "error" });
+    } finally {
+      setIsRemovingDomain(false);
+    }
+  };
+
+  const handleTriggerDeploy = async () => {
+    setIsDeploying(true);
+    try {
+      const job = await createDeploymentJob(userId, storeId, {
+        purgeCache: true,
+        verifyCdn: true,
+      });
+      setActiveDeploymentId(job.id);
+      setDeploymentJob(job);
+      setIsDeployModalOpen(true);
+      setToast({
+        message: "Deployment job queued! Viewing live build & upload console...",
+        type: "success",
+      });
+    } catch (err) {
+      console.error("Deploy trigger error:", err);
+      setToast({ message: "Failed to create deployment job.", type: "error" });
+    } finally {
+      setIsDeploying(false);
+    }
+  };
+
+  const renderDomainStatusBadge = (status) => {
+    switch (status) {
+      case "ACTIVE":
+        return <span className="sq-badge-active">🔒 Active (HTTPS)</span>;
+      case "PENDING_SSL":
+        return <span className="sq-badge-ssl">⏳ Issuing SSL...</span>;
+      case "FAILED":
+        return <span className="sq-badge-failed">⚠️ Error</span>;
+      case "PENDING_DNS":
+      default:
+        return <span className="sq-badge-dns">⏳ Pending DNS</span>;
+    }
+  };
 
   const handleNameChange = (val) => {
     setName(val);
@@ -361,6 +593,8 @@ export default function OnlineStoreSetupView({
         themeColor: themeColor || "#E53E3E",
         locationId,
         enabled,
+        customDomain,
+        deployment,
         menu: {
           categories: categoriesMap,
         },
@@ -504,45 +738,324 @@ export default function OnlineStoreSetupView({
           </p>
         </div>
 
-        <div className="sq-setup-field-group">
-          <label className="sq-setup-label" htmlFor="sq-store-slug-input">
-            Store link (slug) <span className="sq-setup-label-req">*</span>
-          </label>
-          <div className="sq-slug-input-wrapper">
-            <span className="sq-slug-prefix">{window.location.origin}/store/</span>
-            <input
-              id="sq-store-slug-input"
-              type="text"
-              className="sq-slug-field"
-              value={slug}
-              onChange={(e) => handleSlugChange(e.target.value)}
-              placeholder="skipli"
-            />
+        {/* Store Link & Custom Domain Hub */}
+        <div className="sq-setup-field-group sq-domain-hub-group">
+          <div className="sq-domain-header-row">
+            <div>
+              <label className="sq-setup-label" htmlFor="sq-store-slug-input">
+                Store Link & Custom Domain <span className="sq-setup-label-req">*</span>
+              </label>
+              <p className="sq-setup-hint">
+                Serve your online storefront via your default store slug or attach a custom branded domain with Bunny CDN.
+              </p>
+            </div>
+            <div
+              className="sq-agent-badge"
+              title={
+                agentStatus.online
+                  ? agentStatus.isSimulated
+                    ? "Agent running in simulation mode (UI testing)"
+                    : "Local agent online and connected to Bunny API"
+                  : "Agent offline. Start it in terminal with 'npm run agent'"
+              }
+            >
+              <span className={`sq-agent-dot ${agentStatus.online ? "online" : "offline"}`} />
+              <span>
+                {agentStatus.online
+                  ? agentStatus.isSimulated
+                    ? "Agent (Simulated)"
+                    : "Agent Connected"
+                  : "Agent Offline"}
+              </span>
+            </div>
           </div>
 
-          {slugError && <div className="sq-slug-error">{slugError}</div>}
-
-          <div className="sq-slug-actions">
+          {/* Tab Switcher: Standard Link vs Custom Domain */}
+          <div className="sq-link-tabs">
             <button
               type="button"
-              className="sq-btn-slug-action"
-              onClick={handleCopyLink}
-              title="Copy link to clipboard"
+              className={`sq-link-tab ${linkMode === "slug" ? "active" : ""}`}
+              onClick={() => setLinkMode("slug")}
             >
-              <CopyIcon /> Copy link
+              <LinkIcon /> Standard Link (/store/{slug})
             </button>
             <button
               type="button"
-              className="sq-btn-slug-action"
-              onClick={handlePreviewStore}
-              title="Preview store in a new browser tab"
+              className={`sq-link-tab ${linkMode === "domain" ? "active" : ""}`}
+              onClick={() => setLinkMode("domain")}
             >
-              <ExternalLinkIcon /> Preview store
+              <GlobeIcon /> Custom Domain {customDomain ? `(${customDomain.hostname})` : ""}
             </button>
           </div>
-          <p className="sq-setup-hint">
-            Only lowercase letters, numbers, and hyphens [a-z0-9-] are allowed.
-          </p>
+
+          {/* TAB 1: SLUG LINK */}
+          {linkMode === "slug" && (
+            <div className="sq-tab-content-panel">
+              <div className="sq-slug-input-wrapper">
+                <span className="sq-slug-prefix">{window.location.origin}/store/</span>
+                <input
+                  id="sq-store-slug-input"
+                  type="text"
+                  className="sq-slug-field"
+                  value={slug}
+                  onChange={(e) => handleSlugChange(e.target.value)}
+                  placeholder="skipli"
+                />
+              </div>
+
+              {slugError && <div className="sq-slug-error">{slugError}</div>}
+
+              <div className="sq-slug-actions">
+                <button
+                  type="button"
+                  className="sq-btn-slug-action"
+                  onClick={handleCopyLink}
+                  title="Copy link to clipboard"
+                >
+                  <CopyIcon /> Copy link
+                </button>
+                <button
+                  type="button"
+                  className="sq-btn-slug-action"
+                  onClick={handlePreviewStore}
+                  title="Preview store in a new browser tab"
+                >
+                  <ExternalLinkIcon /> Preview store
+                </button>
+              </div>
+              <p className="sq-setup-hint">
+                Only lowercase letters, numbers, and hyphens [a-z0-9-] are allowed.
+              </p>
+            </div>
+          )}
+
+          {/* TAB 2: CUSTOM DOMAIN */}
+          {linkMode === "domain" && (
+            <div className="sq-tab-content-panel">
+              {!customDomain ? (
+                /* Connect Domain Form */
+                <div className="sq-domain-connect-form">
+                  <div className="sq-domain-input-row">
+                    <div className="sq-domain-input-wrapper">
+                      <span className="sq-domain-prefix">https://</span>
+                      <input
+                        type="text"
+                        className="sq-domain-input"
+                        placeholder="shop.yourbrand.com"
+                        value={domainInput}
+                        onChange={(e) => {
+                          setDomainInput(e.target.value);
+                          setDomainError("");
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            handleConnectDomain();
+                          }
+                        }}
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      className="sq-btn-connect-domain"
+                      onClick={handleConnectDomain}
+                      disabled={isConnectingDomain || !domainInput.trim()}
+                    >
+                      {isConnectingDomain ? "Connecting..." : "Connect Domain"}
+                    </button>
+                  </div>
+
+                  {domainError && <div className="sq-slug-error">{domainError}</div>}
+
+                  <div className="sq-domain-info-box">
+                    <h4>💡 How Custom Domains work with Bunny CDN:</h4>
+                    <ol>
+                      <li>Enter your custom hostname (e.g. <code>shop.mybrand.com</code>).</li>
+                      <li>
+                        Point your DNS CNAME record to{" "}
+                        <code>
+                          {agentStatus.configSummary?.cdnHostname || "yourstore.b-cdn.net"}
+                        </code>
+                        .
+                      </li>
+                      <li>
+                        Once DNS propagates, click <strong>Verify DNS & SSL</strong> to automatically issue a free Let's Encrypt certificate via Bunny API.
+                      </li>
+                    </ol>
+                  </div>
+                </div>
+              ) : (
+                /* Connected Domain Card */
+                <div className="sq-domain-card">
+                  <div className="sq-domain-card-header">
+                    <div className="sq-domain-card-left">
+                      <GlobeIcon className="sq-domain-globe-icon" />
+                      <div>
+                        <div className="sq-domain-name">https://{customDomain.hostname}</div>
+                        <div className="sq-domain-target">
+                          CNAME Target:{" "}
+                          <code>
+                            {customDomain.targetCname ||
+                              agentStatus.configSummary?.cdnHostname ||
+                              "yourstore.b-cdn.net"}
+                          </code>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="sq-domain-badge-wrapper">
+                      {renderDomainStatusBadge(customDomain.status)}
+                    </div>
+                  </div>
+
+                  {/* DNS Instructions Table */}
+                  <div className="sq-dns-instructions-card">
+                    <div className="sq-dns-instructions-title">Required DNS Record</div>
+                    <div className="sq-dns-table">
+                      <div className="sq-dns-row sq-dns-head">
+                        <span>Type</span>
+                        <span>Host</span>
+                        <span>Value / Target</span>
+                        <span>Status</span>
+                      </div>
+                      <div className="sq-dns-row">
+                        <span className="sq-dns-cell-type">CNAME</span>
+                        <span className="sq-dns-cell-host">{customDomain.hostname}</span>
+                        <span className="sq-dns-cell-target">
+                          {customDomain.targetCname || "yourstore.b-cdn.net"}
+                          <button
+                            type="button"
+                            className="sq-btn-mini-copy"
+                            onClick={() => {
+                              navigator.clipboard.writeText(
+                                customDomain.targetCname || "yourstore.b-cdn.net"
+                              );
+                              setToast({ message: "CNAME target copied!", type: "success" });
+                            }}
+                            title="Copy CNAME target"
+                          >
+                            <CopyIcon />
+                          </button>
+                        </span>
+                        <span className="sq-dns-cell-status">
+                          {customDomain.status === "ACTIVE" ? "✅ Verified" : "⏳ Pending"}
+                        </span>
+                      </div>
+                    </div>
+
+                    {customDomain.error && (
+                      <div className="sq-domain-error-callout">⚠️ {customDomain.error}</div>
+                    )}
+                  </div>
+
+                  {/* Domain Action Buttons */}
+                  <div className="sq-domain-actions-row">
+                    <button
+                      type="button"
+                      className="sq-btn-verify-domain"
+                      onClick={handleVerifyDomain}
+                      disabled={isVerifyingDomain}
+                    >
+                      <RefreshCwIcon className={isVerifyingDomain ? "sq-spin" : ""} />
+                      {isVerifyingDomain ? "Verifying..." : "Verify DNS & SSL"}
+                    </button>
+
+                    {customDomain.status === "ACTIVE" && (
+                      <button
+                        type="button"
+                        className="sq-btn-visit-domain"
+                        onClick={() => window.open(`https://${customDomain.hostname}`, "_blank")}
+                      >
+                        <ExternalLinkIcon /> Visit Domain
+                      </button>
+                    )}
+
+                    <button
+                      type="button"
+                      className="sq-btn-remove-domain"
+                      onClick={handleRemoveDomain}
+                      disabled={isRemovingDomain}
+                      title="Remove custom domain"
+                    >
+                      <TrashIcon /> Remove Domain
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* BUNNY CDN DEPLOYMENT HUB */}
+          <div className="sq-bunny-deploy-card">
+            <div className="sq-bunny-deploy-header">
+              <div className="sq-bunny-deploy-title-group">
+                <RocketIcon />
+                <div>
+                  <div className="sq-bunny-deploy-title">Bunny CDN Deployment</div>
+                  <div className="sq-bunny-deploy-desc">
+                    Build production static files and upload to Bunny Storage Zone with automatic cache purge.
+                  </div>
+                </div>
+              </div>
+
+              <div className="sq-deploy-actions">
+                <button
+                  type="button"
+                  className="sq-btn-deploy-bunny"
+                  onClick={handleTriggerDeploy}
+                  disabled={
+                    isDeploying ||
+                    (deploymentJob &&
+                      (deploymentJob.status === "QUEUED" ||
+                        deploymentJob.status === "BUILDING" ||
+                        deploymentJob.status === "UPLOADING"))
+                  }
+                >
+                  <RocketIcon />{" "}
+                  {isDeploying
+                    ? "Starting..."
+                    : deploymentJob?.status === "BUILDING" ||
+                      deploymentJob?.status === "UPLOADING"
+                    ? "Deploying..."
+                    : "Build & Deploy Storefront"}
+                </button>
+
+                {deploymentJob && (
+                  <button
+                    type="button"
+                    className="sq-btn-view-logs"
+                    onClick={() => setIsDeployModalOpen(true)}
+                  >
+                    <TerminalIcon /> View Console
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Quick Status Bar */}
+            {deploymentJob && (
+              <div className="sq-deploy-status-bar">
+                <div className="sq-deploy-status-info">
+                  <span className={`sq-deploy-pill ${deploymentJob.status.toLowerCase()}`}>
+                    {deploymentJob.status}
+                  </span>
+                  <span className="sq-deploy-phase-text">
+                    {deploymentJob.phase} {deploymentJob.progress ? `(${deploymentJob.progress}%)` : ""}
+                  </span>
+                </div>
+                {deploymentJob.status === "SUCCEEDED" && deploymentJob.cdnUrl && (
+                  <a
+                    href={deploymentJob.cdnUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="sq-deploy-link"
+                  >
+                    Live Website: {deploymentJob.cdnUrl} <ExternalLinkIcon />
+                  </a>
+                )}
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="sq-setup-field-group">
@@ -747,6 +1260,16 @@ export default function OnlineStoreSetupView({
         </div>
       )}
 
+      {isDeployModalOpen && (
+        <DeploymentLogsModal
+          job={deploymentJob}
+          agentStatus={agentStatus}
+          onClose={() => setIsDeployModalOpen(false)}
+          onTriggerDeploy={handleTriggerDeploy}
+          isDeploying={isDeploying}
+        />
+      )}
+
       <UnsavedChangesModal
         isOpen={isDiscardModalOpen}
         onDiscard={() => {
@@ -759,6 +1282,109 @@ export default function OnlineStoreSetupView({
           handleSave();
         }}
       />
+    </div>
+  );
+}
+
+function DeploymentLogsModal({ job, agentStatus, onClose, onTriggerDeploy, isDeploying }) {
+  const terminalEndRef = useRef(null);
+
+  useEffect(() => {
+    if (terminalEndRef.current) {
+      terminalEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [job?.logs?.length]);
+
+  const logs = job?.logs || [];
+  const status = job?.status || "STANDBY";
+  const progress = job?.progress || 0;
+  const cdnUrl =
+    job?.cdnUrl ||
+    (agentStatus?.configSummary?.cdnHostname
+      ? `https://${agentStatus.configSummary.cdnHostname}`
+      : null);
+
+  return (
+    <div className="sq-deploy-modal-backdrop" onClick={onClose}>
+      <div className="sq-deploy-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="sq-terminal-header">
+          <div className="sq-terminal-title">
+            <TerminalIcon />
+            <span>Bunny CDN Deployment Console</span>
+            <span className={`sq-deploy-pill ${status.toLowerCase()}`}>{status}</span>
+          </div>
+          <button type="button" className="sq-btn-terminal-close" onClick={onClose}>
+            &times;
+          </button>
+        </div>
+
+        <div className="sq-terminal-progress-banner">
+          <div className="sq-terminal-progress-labels">
+            <span>Phase: {job?.phase || "Standby"}</span>
+            <span>{progress}%</span>
+          </div>
+          <div className="sq-progress-bar-container">
+            <div className="sq-progress-bar-fill" style={{ width: `${progress}%` }} />
+          </div>
+        </div>
+
+        <div className="sq-terminal-body">
+          {logs.length === 0 ? (
+            <div className="sq-terminal-log-line">
+              <span className="sq-terminal-time">--:--:--</span>
+              <span className="sq-terminal-msg">Waiting for deployment activity...</span>
+            </div>
+          ) : (
+            logs.map((log, i) => (
+              <div key={i} className="sq-terminal-log-line">
+                <span className="sq-terminal-time">
+                  {new Date(log.timestamp).toLocaleTimeString()}
+                </span>
+                <span className={`sq-terminal-msg ${log.level || "info"}`}>
+                  {log.message}
+                </span>
+              </div>
+            ))
+          )}
+          <div ref={terminalEndRef} />
+        </div>
+
+        <div className="sq-terminal-footer">
+          <div>
+            {status === "SUCCEEDED" && cdnUrl ? (
+              <a href={cdnUrl} target="_blank" rel="noopener noreferrer" className="sq-deploy-link">
+                Visit Live Site: {cdnUrl} <ExternalLinkIcon />
+              </a>
+            ) : status === "FAILED" ? (
+              <span style={{ color: "#f87171", fontWeight: 600 }}>
+                Deployment failed: {job?.error || "Check terminal logs"}
+              </span>
+            ) : (
+              <span style={{ color: "#94a3b8" }}>
+                {agentStatus?.online
+                  ? agentStatus.isSimulated
+                    ? "Simulation agent active"
+                    : "Connected to local agent"
+                  : "Agent offline (run 'npm run agent' in terminal)"}
+              </span>
+            )}
+          </div>
+
+          <div style={{ display: "flex", gap: "8px" }}>
+            <button
+              type="button"
+              className="sq-btn-deploy-bunny"
+              onClick={onTriggerDeploy}
+              disabled={isDeploying || status === "BUILDING" || status === "UPLOADING"}
+            >
+              <RocketIcon /> {isDeploying ? "Deploying..." : "Redeploy"}
+            </button>
+            <button type="button" className="sq-btn-view-logs" onClick={onClose}>
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

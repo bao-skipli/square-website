@@ -3,7 +3,7 @@ import SplitText from "../common/SplitText/SplitText";
 import styles from "./SquareAi.module.css";
 
 const VIDEO_URL =
-  "/1ca286d3-e996-4d1c-a860-fa9af614d544-en-e231a903-d473-49ef-9632-abe0c1331eda-en-SQ-AI-Mockup-Animation-16x9-Hero-img-v2.webm";
+  "/images/square-ai/1ca286d3-e996-4d1c-a860-fa9af614d544-en-e231a903-d473-49ef-9632-abe0c1331eda-en-SQ-AI-Mockup-Animation-16x9-Hero-img-v2.webm";
 
 export default class SquareAi extends Component {
   static defaultProps = {
