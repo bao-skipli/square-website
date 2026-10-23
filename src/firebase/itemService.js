@@ -200,7 +200,35 @@ export async function saveItemToFirebase(userId, itemData) {
 
   if (userId) {
     const itemRef = ref(database, `users/${userId}/items/${itemId}`);
+    if (itemToSave.modifierSets === undefined) {
+      try {
+        const snap = await get(itemRef);
+        if (snap.exists()) {
+          const val = snap.val();
+          if (val && val.modifierSets) {
+            itemToSave.modifierSets = val.modifierSets;
+          }
+        }
+      } catch (e) {
+        console.warn("Could not check existing item modifierSets:", e);
+      }
+    }
     await set(itemRef, itemToSave);
+
+    if (itemToSave.modifierSets && typeof itemToSave.modifierSets === "object") {
+      try {
+        const indexUpdates = {};
+        Object.keys(itemToSave.modifierSets).forEach((setId) => {
+          indexUpdates[`users/${userId}/modifierSetItems/${setId}/${itemId}`] = true;
+        });
+        if (Object.keys(indexUpdates).length > 0) {
+          await update(ref(database), indexUpdates);
+        }
+      } catch (e) {
+        console.warn("Could not update modifierSetItems index:", e);
+      }
+    }
+
     return itemToSave;
   }
 
@@ -208,6 +236,10 @@ export async function saveItemToFirebase(userId, itemData) {
   const exists = currentItems.some((i) => i.id === itemId);
   let updated;
   if (exists) {
+    const existing = currentItems.find((i) => i.id === itemId);
+    if (itemToSave.modifierSets === undefined && existing?.modifierSets) {
+      itemToSave.modifierSets = existing.modifierSets;
+    }
     updated = currentItems.map((i) => (i.id === itemId ? itemToSave : i));
   } else {
     updated = [itemToSave, ...currentItems];

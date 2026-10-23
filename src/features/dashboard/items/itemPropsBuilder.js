@@ -1,10 +1,17 @@
+import { normalizeItemModifierSetsMap } from "@/shared/modifiers";
+
 export function buildItemDetailsProps(comp) {
   const s = comp.state;
+  const currentItem = s.editingItemId
+    ? s.items?.find((i) => i.id === s.editingItemId)
+    : null;
+  const itemModifierSetsMap = s.formModifierSetsMap !== undefined
+    ? s.formModifierSetsMap
+    : normalizeItemModifierSetsMap(currentItem?.modifierSets);
+
   return {
     editingItemId: s.editingItemId,
-    itemModifierSetsMap: s.editingItemId
-      ? s.items.find((i) => i.id === s.editingItemId)?.modifierSets || {}
-      : {},
+    itemModifierSetsMap,
     allModifierSets: s.modifierSets || [],
     onApplyItemModifierSets: comp.handleApplyItemModifierSets,
     onRemoveItemModifierSet: comp.handleRemoveItemModifierSet,

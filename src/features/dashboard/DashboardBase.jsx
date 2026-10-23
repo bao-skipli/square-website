@@ -136,6 +136,7 @@ export class DashboardBase extends Component {
       isSavingItem: false,
       isSavingCategory: false,
       categoryFormError: "",
+      formModifierSetsMap: {},
     };
 
     this._isMounted = false;

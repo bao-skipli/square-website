@@ -127,6 +127,46 @@ function TrashIcon({ className = "" }) {
   );
 }
 
+function UploadIcon({ className = "" }) {
+  return (
+    <svg className={className} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+      <polyline points="17 8 12 3 7 8" />
+      <line x1="12" y1="3" x2="12" y2="15" />
+    </svg>
+  );
+}
+
+function FileCodeIcon({ className = "" }) {
+  return (
+    <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+      <polyline points="14 2 14 8 20 8" />
+      <path d="m10 13-2 2 2 2" />
+      <path d="m14 17 2-2-2-2" />
+    </svg>
+  );
+}
+
+function EyeIcon({ className = "" }) {
+  return (
+    <svg className={className} width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  );
+}
+
+function LayersIcon({ className = "" }) {
+  return (
+    <svg className={className} width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polygon points="12 2 2 7 12 12 22 7 12 2" />
+      <polyline points="2 17 12 22 22 17" />
+      <polyline points="2 12 12 17 22 12" />
+    </svg>
+  );
+}
+
 export default function OnlineStoreSetupView({
   userId,
   categories = [],
@@ -162,10 +202,18 @@ export default function OnlineStoreSetupView({
   const [isVerifyingDomain, setIsVerifyingDomain] = useState(false);
   const [isRemovingDomain, setIsRemovingDomain] = useState(false);
   const [agentStatus, setAgentStatus] = useState({ online: false, lastHeartbeat: 0, isSimulated: false, configSummary: null });
+  const [dnsMethodTab, setDnsMethodTab] = useState("apex"); // "apex" (Bunny DNS Nameserver) | "cname" (Subdomain CNAME)
   const [activeDeploymentId, setActiveDeploymentId] = useState(null);
   const [deploymentJob, setDeploymentJob] = useState(null);
   const [isDeployModalOpen, setIsDeployModalOpen] = useState(false);
   const [isDeploying, setIsDeploying] = useState(false);
+
+  // Deployment Mode: "storefront" | "landing"
+  const [deployModeTab, setDeployModeTab] = useState("storefront");
+  const [landingFile, setLandingFile] = useState(null); // { name, size, type, contentBase64, isZip, textPreview }
+  const [landingError, setLandingError] = useState("");
+  const [isLandingPreviewOpen, setIsLandingPreviewOpen] = useState(false);
+  const landingFileInputRef = useRef(null);
 
   const fileInputRef = useRef(null);
   const dragItemIndex = useRef(null);
@@ -197,6 +245,9 @@ export default function OnlineStoreSetupView({
         setLocationId(storeData.locationId || "loc-skipli");
         setCustomDomain(storeData.customDomain || null);
         setDeployment(storeData.deployment || null);
+        if (storeData.deployment?.mode === "LANDING_PAGE") {
+          setDeployModeTab("landing");
+        }
 
         if (storeData.deployment?.lastDeploymentId) {
           setActiveDeploymentId(storeData.deployment.lastDeploymentId);
@@ -359,18 +410,92 @@ export default function OnlineStoreSetupView({
     }
   };
 
-  const handleTriggerDeploy = async () => {
+  const handleLandingFileSelect = (file) => {
+    if (!file) return;
+    setLandingError("");
+
+    const lowerName = file.name.toLowerCase();
+    const isHtml = lowerName.endsWith(".html") || lowerName.endsWith(".htm");
+    const isZip = lowerName.endsWith(".zip");
+
+    if (!isHtml && !isZip) {
+      setLandingError("Please select a valid .html file or .zip archive.");
+      return;
+    }
+
+    if (file.size > 30 * 1024 * 1024) {
+      setLandingError("File size exceeds 30 MB limit.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const dataUrl = e.target.result;
+      const base64 = dataUrl.split(",")[1];
+
+      if (isHtml) {
+        const textReader = new FileReader();
+        textReader.onload = (te) => {
+          setLandingFile({
+            name: file.name,
+            size: file.size,
+            type: file.type || "text/html",
+            contentBase64: base64,
+            isZip: false,
+            textPreview: te.target.result,
+          });
+        };
+        textReader.readAsText(file);
+      } else {
+        setLandingFile({
+          name: file.name,
+          size: file.size,
+          type: file.type || "application/zip",
+          contentBase64: base64,
+          isZip: true,
+          textPreview: null,
+        });
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleTriggerDeploy = async (overrideMode) => {
+    const activeMode =
+      overrideMode || (deployModeTab === "landing" ? "LANDING_PAGE" : "STOREFRONT");
+
+    if (activeMode === "LANDING_PAGE" && !landingFile) {
+      setLandingError("Please select an HTML file or ZIP archive to deploy.");
+      return;
+    }
+
     setIsDeploying(true);
     try {
-      const job = await createDeploymentJob(userId, storeId, {
+      const deployOptions = {
+        mode: activeMode,
         purgeCache: true,
         verifyCdn: true,
-      });
+      };
+
+      if (activeMode === "LANDING_PAGE") {
+        deployOptions.landingFile = {
+          name: landingFile.name,
+          size: landingFile.size,
+          type: landingFile.type,
+          contentBase64: landingFile.contentBase64,
+          isZip: landingFile.isZip,
+        };
+      }
+
+      const job = await createDeploymentJob(userId, storeId, deployOptions);
       setActiveDeploymentId(job.id);
       setDeploymentJob(job);
       setIsDeployModalOpen(true);
       setToast({
-        message: "Deployment job queued! Viewing live build & upload console...",
+        message:
+          activeMode === "LANDING_PAGE"
+            ? `Landing page upload queued (${landingFile.name})!`
+            : "Storefront build & deployment queued!",
         type: "success",
       });
     } catch (err) {
@@ -869,19 +994,20 @@ export default function OnlineStoreSetupView({
 
                   <div className="sq-domain-info-box">
                     <h4>💡 How Custom Domains work with Bunny CDN:</h4>
-                    <ol>
-                      <li>Enter your custom hostname (e.g. <code>shop.mybrand.com</code>).</li>
-                      <li>
-                        Point your DNS CNAME record to{" "}
-                        <code>
-                          {agentStatus.configSummary?.cdnHostname || "yourstore.b-cdn.net"}
-                        </code>
-                        .
-                      </li>
-                      <li>
-                        Once DNS propagates, click <strong>Verify DNS & SSL</strong> to automatically issue a free Let's Encrypt certificate via Bunny API.
-                      </li>
-                    </ol>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "8px" }}>
+                      <div>
+                        <strong>🌐 Lựa chọn 1: Gắn Tên Miền Gốc (@) qua Bunny DNS (Khuyên dùng)</strong>
+                        <p style={{ margin: "4px 0 0 0", fontSize: "13px", color: "#475569", lineHeight: "1.5" }}>
+                          Đổi Nameservers sang <code>kiki.bunny.net</code> & <code>coco.bunny.net</code>. Bunny DNS có tính năng độc quyền là <strong>Bản ghi Pull Zone (PZ Record)</strong> giúp trỏ trực tiếp domain gốc <code>@</code> vào web store.
+                        </p>
+                      </div>
+                      <div>
+                        <strong>🔗 Lựa chọn 2: Gắn Subdomain qua CNAME</strong>
+                        <p style={{ margin: "4px 0 0 0", fontSize: "13px", color: "#475569", lineHeight: "1.5" }}>
+                          Giữ nguyên Nameserver hiện tại, chỉ cần tạo bản ghi CNAME cho <code>www</code> trỏ về <code>{agentStatus.configSummary?.cdnHostname || "yourstore.b-cdn.net"}</code>.
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               ) : (
@@ -908,43 +1034,169 @@ export default function OnlineStoreSetupView({
                     </div>
                   </div>
 
-                  {/* DNS Instructions Table */}
+                  {/* DNS Instructions Card */}
                   <div className="sq-dns-instructions-card">
-                    <div className="sq-dns-instructions-title">Required DNS Record</div>
-                    <div className="sq-dns-table">
-                      <div className="sq-dns-row sq-dns-head">
-                        <span>Type</span>
-                        <span>Host</span>
-                        <span>Value / Target</span>
-                        <span>Status</span>
-                      </div>
-                      <div className="sq-dns-row">
-                        <span className="sq-dns-cell-type">CNAME</span>
-                        <span className="sq-dns-cell-host">{customDomain.hostname}</span>
-                        <span className="sq-dns-cell-target">
-                          {customDomain.targetCname || "yourstore.b-cdn.net"}
-                          <button
-                            type="button"
-                            className="sq-btn-mini-copy"
-                            onClick={() => {
-                              navigator.clipboard.writeText(
-                                customDomain.targetCname || "yourstore.b-cdn.net"
-                              );
-                              setToast({ message: "CNAME target copied!", type: "success" });
-                            }}
-                            title="Copy CNAME target"
-                          >
-                            <CopyIcon />
-                          </button>
-                        </span>
-                        <span className="sq-dns-cell-status">
-                          {customDomain.status === "ACTIVE" ? "✅ Verified" : "⏳ Pending"}
-                        </span>
-                      </div>
+                    <div className="sq-dns-instructions-title" style={{ marginBottom: "12px" }}>
+                      Hướng Dẫn Cấu Hình DNS Tên Miền
                     </div>
 
+                    {/* Method Tabs */}
+                    <div className="sq-link-tabs" style={{ marginBottom: "14px" }}>
+                      <button
+                        type="button"
+                        className={`sq-link-tab ${dnsMethodTab === "apex" ? "active" : ""}`}
+                        onClick={() => setDnsMethodTab("apex")}
+                      >
+                        🌐 Lựa chọn 1: Gắn Domain Gốc (Bunny DNS - Khuyên dùng)
+                      </button>
+                      <button
+                        type="button"
+                        className={`sq-link-tab ${dnsMethodTab === "cname" ? "active" : ""}`}
+                        onClick={() => setDnsMethodTab("cname")}
+                      >
+                        🔗 Lựa chọn 2: Gắn Subdomain (CNAME)
+                      </button>
+                    </div>
+
+                    {dnsMethodTab === "apex" ? (
+                      <div className="sq-dns-method-content">
+                        {/* Bước 1 */}
+                        <div style={{ fontSize: "13px", fontWeight: "600", color: "#1e293b", marginBottom: "6px" }}>
+                          Bước 1: Đổi 2 Nameservers tại nhà đăng ký tên miền (GoDaddy, Namecheap...) trỏ về Bunny DNS:
+                        </div>
+
+                        <div className="sq-dns-table" style={{ marginBottom: "14px" }}>
+                          <div className="sq-dns-row sq-dns-head">
+                            <span>Loại</span>
+                            <span>Bản ghi</span>
+                            <span>Địa chỉ Nameserver</span>
+                            <span>Thao tác</span>
+                          </div>
+                          <div className="sq-dns-row">
+                            <span className="sq-dns-cell-type">NS 1</span>
+                            <span className="sq-dns-cell-host">Nameserver chính</span>
+                            <span className="sq-dns-cell-target"><code>kiki.bunny.net</code></span>
+                            <span>
+                              <button
+                                type="button"
+                                className="sq-btn-mini-copy"
+                                onClick={() => {
+                                  navigator.clipboard.writeText("kiki.bunny.net");
+                                  setToast({ message: "Nameserver 1 copied!", type: "success" });
+                                }}
+                                title="Copy kiki.bunny.net"
+                              >
+                                <CopyIcon /> Copy
+                              </button>
+                            </span>
+                          </div>
+                          <div className="sq-dns-row">
+                            <span className="sq-dns-cell-type">NS 2</span>
+                            <span className="sq-dns-cell-host">Nameserver phụ</span>
+                            <span className="sq-dns-cell-target"><code>coco.bunny.net</code></span>
+                            <span>
+                              <button
+                                type="button"
+                                className="sq-btn-mini-copy"
+                                onClick={() => {
+                                  navigator.clipboard.writeText("coco.bunny.net");
+                                  setToast({ message: "Nameserver 2 copied!", type: "success" });
+                                }}
+                                title="Copy coco.bunny.net"
+                              >
+                                <CopyIcon /> Copy
+                              </button>
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Bước 2 + Lưu ý độc quyền của Bunny DNS theo đúng yêu cầu user */}
+                        <div style={{
+                          backgroundColor: "#f0fdf4",
+                          border: "1px solid #86efac",
+                          borderRadius: "8px",
+                          padding: "14px 16px",
+                          fontSize: "13px",
+                          color: "#166534",
+                          lineHeight: "1.6"
+                        }}>
+                          <div style={{ fontWeight: "700", marginBottom: "6px", display: "flex", alignItems: "center", gap: "6px" }}>
+                            <span>🚀</span>
+                            <span>Bước 2: Cấu hình bản ghi trên Bunny.net (DNS Zone)</span>
+                          </div>
+                          <p style={{ margin: "0 0 8px 0" }}>
+                            <strong>Bunny DNS có tính năng độc quyền gọi là Bản ghi Pull Zone (PZ Record) hoặc CNAME Flattening tại domain gốc (@):</strong>
+                          </p>
+                          <ul style={{ margin: "0", paddingLeft: "20px" }}>
+                            <li><strong>Tên:</strong> <code>@</code> (để trống - chính là domain gốc <code>{customDomain.hostname?.replace(/^www\./, "") || "mybrand.com"}</code>).</li>
+                            <li><strong>Loại:</strong> <code>PZ (Pull Zone)</code>.</li>
+                            <li><strong>Giá trị:</strong> Chọn Pull Zone của bạn (ví dụ: <code>{agentStatus?.configSummary?.storageZone || agentStatus?.configSummary?.pullZoneId || "skipli"}</code>).</li>
+                          </ul>
+                          <div style={{ marginTop: "10px", fontSize: "12px", color: "#15803d", borderTop: "1px dashed #86efac", paddingTop: "8px" }}>
+                            💡 <em>Mẹo thêm:</em> Bạn có thể tạo thêm 1 bản ghi <code>CNAME</code> với Name là <code>www</code> trỏ về <code>{customDomain.targetCname || agentStatus?.configSummary?.cdnHostname || "yourstore.b-cdn.net"}</code> để khách hàng gõ <code>www.{customDomain.hostname?.replace(/^www\./, "")}</code> hay không có <code>www</code> đều vào được web.
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="sq-dns-method-content">
+                        <div style={{ fontSize: "13px", color: "#334155", marginBottom: "8px" }}>
+                          Dành cho trường hợp bạn muốn giữ nguyên DNS tại nhà đăng ký hiện tại (ví dụ đang dùng email công ty):
+                        </div>
+                        <div className="sq-dns-table">
+                          <div className="sq-dns-row sq-dns-head">
+                            <span>Type</span>
+                            <span>Name / Host</span>
+                            <span>Value / Target</span>
+                            <span>Status</span>
+                          </div>
+                          <div className="sq-dns-row">
+                            <span className="sq-dns-cell-type">CNAME</span>
+                            <span className="sq-dns-cell-host">
+                              <code>www</code>
+                              <button
+                                type="button"
+                                className="sq-btn-mini-copy"
+                                onClick={() => {
+                                  navigator.clipboard.writeText("www");
+                                  setToast({ message: "Host 'www' copied!", type: "success" });
+                                }}
+                                title="Copy Host (www)"
+                              >
+                                <CopyIcon />
+                              </button>
+                            </span>
+                            <span className="sq-dns-cell-target">
+                              {customDomain.targetCname || "yourstore.b-cdn.net"}
+                              <button
+                                type="button"
+                                className="sq-btn-mini-copy"
+                                onClick={() => {
+                                  navigator.clipboard.writeText(
+                                    customDomain.targetCname || "yourstore.b-cdn.net"
+                                  );
+                                  setToast({ message: "CNAME target copied!", type: "success" });
+                                }}
+                                title="Copy CNAME target"
+                              >
+                                <CopyIcon />
+                              </button>
+                            </span>
+                            <span className="sq-dns-cell-status">
+                              {customDomain.status === "ACTIVE" ? "✅ Verified" : "⏳ Pending"}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div style={{ fontSize: "12px", color: "#64748b", marginTop: "8px", lineHeight: "1.5" }}>
+                          💡 <strong>Lưu ý:</strong> Tại nhà cung cấp tên miền (GoDaddy, Cloudflare, Namecheap...), ở cột <strong>Name / Host</strong> bạn chỉ cần nhập <code>www</code> (hệ thống sẽ tự nhận diện là <code>www.{customDomain.hostname?.replace(/^www\./, "")}</code>, không nhập cả tên miền để tránh bị lặp tên miền).
+                        </div>
+                      </div>
+                    )}
+
                     {customDomain.error && (
-                      <div className="sq-domain-error-callout">⚠️ {customDomain.error}</div>
+                      <div className="sq-domain-error-callout" style={{ marginTop: "12px" }}>
+                        ⚠️ {customDomain.error}
+                      </div>
                     )}
                   </div>
 
@@ -991,46 +1243,236 @@ export default function OnlineStoreSetupView({
               <div className="sq-bunny-deploy-title-group">
                 <RocketIcon />
                 <div>
-                  <div className="sq-bunny-deploy-title">Bunny CDN Deployment</div>
+                  <div className="sq-bunny-deploy-title">Bunny CDN Deployment Hub</div>
                   <div className="sq-bunny-deploy-desc">
-                    Build production static files and upload to Bunny Storage Zone with automatic cache purge.
+                    Deploy your full online storefront or upload a custom HTML landing page directly to Bunny Storage.
                   </div>
                 </div>
               </div>
 
-              <div className="sq-deploy-actions">
-                <button
-                  type="button"
-                  className="sq-btn-deploy-bunny"
-                  onClick={handleTriggerDeploy}
-                  disabled={
-                    isDeploying ||
-                    (deploymentJob &&
-                      (deploymentJob.status === "QUEUED" ||
-                        deploymentJob.status === "BUILDING" ||
-                        deploymentJob.status === "UPLOADING"))
+              {/* Live Status Tag */}
+              {deployment?.status === "SUCCEEDED" && (
+                <div
+                  className={`sq-deploy-current-mode-tag ${
+                    deployment.mode === "LANDING_PAGE" ? "landing" : "storefront"
+                  }`}
+                  title={
+                    deployment.mode === "LANDING_PAGE"
+                      ? `Currently serving Landing Page: ${deployment.landingFile?.name || "HTML"}`
+                      : "Currently serving Full React Storefront"
                   }
                 >
-                  <RocketIcon />{" "}
-                  {isDeploying
-                    ? "Starting..."
-                    : deploymentJob?.status === "BUILDING" ||
-                      deploymentJob?.status === "UPLOADING"
-                    ? "Deploying..."
-                    : "Build & Deploy Storefront"}
-                </button>
+                  <span className="sq-deploy-mode-dot" />
+                  {deployment.mode === "LANDING_PAGE"
+                    ? `Live: Landing Page (${deployment.landingFile?.name || "HTML"})`
+                    : "Live: Storefront App"}
+                </div>
+              )}
+            </div>
 
-                {deploymentJob && (
+            {/* Mode Selector Tabs */}
+            <div className="sq-deploy-mode-selector">
+              <button
+                type="button"
+                className={`sq-deploy-mode-btn ${deployModeTab === "storefront" ? "active" : ""}`}
+                onClick={() => setDeployModeTab("storefront")}
+              >
+                <LayersIcon /> Full Storefront (React App)
+              </button>
+              <button
+                type="button"
+                className={`sq-deploy-mode-btn ${deployModeTab === "landing" ? "active" : ""}`}
+                onClick={() => setDeployModeTab("landing")}
+              >
+                <FileCodeIcon /> Custom Landing Page (HTML / ZIP)
+              </button>
+            </div>
+
+            {/* TAB 1: STOREFRONT */}
+            {deployModeTab === "storefront" && (
+              <div className="sq-deploy-mode-content">
+                <p className="sq-deploy-tab-hint">
+                  Build production static files (`npm run build`) and upload all application assets to your Bunny Storage Zone with automated cache purge.
+                </p>
+
+                <div className="sq-deploy-actions-row">
                   <button
                     type="button"
-                    className="sq-btn-view-logs"
-                    onClick={() => setIsDeployModalOpen(true)}
+                    className="sq-btn-deploy-bunny"
+                    onClick={() => handleTriggerDeploy("STOREFRONT")}
+                    disabled={
+                      isDeploying ||
+                      (deploymentJob &&
+                        (deploymentJob.status === "QUEUED" ||
+                          deploymentJob.status === "BUILDING" ||
+                          deploymentJob.status === "UPLOADING"))
+                    }
                   >
-                    <TerminalIcon /> View Console
+                    <RocketIcon />{" "}
+                    {isDeploying
+                      ? "Starting..."
+                      : deploymentJob?.status === "BUILDING" ||
+                        deploymentJob?.status === "UPLOADING"
+                      ? "Deploying..."
+                      : "Build & Deploy Storefront"}
                   </button>
-                )}
+
+                  {deploymentJob && (
+                    <button
+                      type="button"
+                      className="sq-btn-view-logs"
+                      onClick={() => setIsDeployModalOpen(true)}
+                    >
+                      <TerminalIcon /> View Console
+                    </button>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
+
+            {/* TAB 2: LANDING PAGE UPLOAD */}
+            {deployModeTab === "landing" && (
+              <div className="sq-deploy-mode-content">
+                <p className="sq-deploy-tab-hint">
+                  Upload an independent <code>index.html</code> landing page or a <code>.zip</code> package (with images, CSS & JS) to display at this custom domain.
+                </p>
+
+                {/* Dropzone / Upload Box */}
+                {!landingFile ? (
+                  <div
+                    className="sq-landing-dropzone"
+                    onClick={() => landingFileInputRef.current?.click()}
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                        handleLandingFileSelect(e.dataTransfer.files[0]);
+                      }
+                    }}
+                  >
+                    <input
+                      type="file"
+                      ref={landingFileInputRef}
+                      style={{ display: "none" }}
+                      accept=".html,.htm,.zip"
+                      onChange={(e) => {
+                        if (e.target.files && e.target.files[0]) {
+                          handleLandingFileSelect(e.target.files[0]);
+                        }
+                      }}
+                    />
+                    <div className="sq-landing-dropzone-icon">
+                      <UploadIcon />
+                    </div>
+                    <div className="sq-landing-dropzone-title">
+                      Click to choose or drag & drop landing page
+                    </div>
+                    <div className="sq-landing-dropzone-sub">
+                      Supports standalone <strong>.html</strong> file or <strong>.zip</strong> archive (up to 30 MB)
+                    </div>
+                  </div>
+                ) : (
+                  <div className="sq-landing-file-card">
+                    <div className="sq-landing-file-left">
+                      <div className="sq-landing-file-avatar">
+                        <FileCodeIcon />
+                      </div>
+                      <div>
+                        <div className="sq-landing-file-name">{landingFile.name}</div>
+                        <div className="sq-landing-file-meta">
+                          {landingFile.isZip ? "ZIP Package" : "HTML Document"} •{" "}
+                          {(landingFile.size / 1024).toFixed(1)} KB
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="sq-landing-file-actions">
+                      {landingFile.textPreview && (
+                        <button
+                          type="button"
+                          className="sq-btn-mini-preview"
+                          onClick={() => setIsLandingPreviewOpen(true)}
+                          title="Preview HTML content"
+                        >
+                          <EyeIcon /> Preview
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        className="sq-btn-mini-change"
+                        onClick={() => landingFileInputRef.current?.click()}
+                        title="Choose another file"
+                      >
+                        <UploadIcon /> Change
+                      </button>
+                      <button
+                        type="button"
+                        className="sq-btn-mini-clear"
+                        onClick={() => {
+                          setLandingFile(null);
+                          setLandingError("");
+                        }}
+                        title="Remove file"
+                      >
+                        <TrashIcon />
+                      </button>
+
+                      <input
+                        type="file"
+                        ref={landingFileInputRef}
+                        style={{ display: "none" }}
+                        accept=".html,.htm,.zip"
+                        onChange={(e) => {
+                          if (e.target.files && e.target.files[0]) {
+                            handleLandingFileSelect(e.target.files[0]);
+                          }
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {landingError && <div className="sq-slug-error">{landingError}</div>}
+
+                <div className="sq-deploy-actions-row">
+                  <button
+                    type="button"
+                    className="sq-btn-deploy-bunny"
+                    onClick={() => handleTriggerDeploy("LANDING_PAGE")}
+                    disabled={
+                      isDeploying ||
+                      !landingFile ||
+                      (deploymentJob &&
+                        (deploymentJob.status === "QUEUED" ||
+                          deploymentJob.status === "PREPARING" ||
+                          deploymentJob.status === "UPLOADING"))
+                    }
+                  >
+                    <RocketIcon />{" "}
+                    {isDeploying
+                      ? "Deploying..."
+                      : deploymentJob?.status === "PREPARING" ||
+                        deploymentJob?.status === "UPLOADING"
+                      ? "Deploying Landing..."
+                      : "Deploy Landing Page to Bunny"}
+                  </button>
+
+                  {deploymentJob && (
+                    <button
+                      type="button"
+                      className="sq-btn-view-logs"
+                      onClick={() => setIsDeployModalOpen(true)}
+                    >
+                      <TerminalIcon /> View Console
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Quick Status Bar */}
             {deploymentJob && (
@@ -1042,6 +1484,9 @@ export default function OnlineStoreSetupView({
                   <span className="sq-deploy-phase-text">
                     {deploymentJob.phase} {deploymentJob.progress ? `(${deploymentJob.progress}%)` : ""}
                   </span>
+                  {deploymentJob.mode === "LANDING_PAGE" && (
+                    <span className="sq-deploy-tag-pill">Landing Page</span>
+                  )}
                 </div>
                 {deploymentJob.status === "SUCCEEDED" && deploymentJob.cdnUrl && (
                   <a
@@ -1265,8 +1710,19 @@ export default function OnlineStoreSetupView({
           job={deploymentJob}
           agentStatus={agentStatus}
           onClose={() => setIsDeployModalOpen(false)}
-          onTriggerDeploy={handleTriggerDeploy}
+          onTriggerDeploy={() =>
+            handleTriggerDeploy(
+              deploymentJob?.mode || (deployModeTab === "landing" ? "LANDING_PAGE" : "STOREFRONT")
+            )
+          }
           isDeploying={isDeploying}
+        />
+      )}
+
+      {isLandingPreviewOpen && (
+        <LandingPreviewModal
+          file={landingFile}
+          onClose={() => setIsLandingPreviewOpen(false)}
         />
       )}
 
@@ -1383,6 +1839,50 @@ function DeploymentLogsModal({ job, agentStatus, onClose, onTriggerDeploy, isDep
               Close
             </button>
           </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function LandingPreviewModal({ file, onClose }) {
+  if (!file) return null;
+
+  return (
+    <div className="sq-deploy-modal-backdrop" onClick={onClose}>
+      <div className="sq-landing-preview-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="sq-terminal-header">
+          <div className="sq-terminal-title">
+            <FileCodeIcon />
+            <span>HTML Preview: {file.name}</span>
+          </div>
+          <button type="button" className="sq-btn-terminal-close" onClick={onClose}>
+            &times;
+          </button>
+        </div>
+
+        <div className="sq-landing-preview-body">
+          {file.textPreview ? (
+            <iframe
+              title="Landing Page Preview"
+              srcDoc={file.textPreview}
+              className="sq-landing-preview-frame"
+              sandbox="allow-scripts allow-same-origin"
+            />
+          ) : (
+            <div className="sq-landing-preview-empty">
+              Preview is only available for direct HTML files. ZIP packages can be deployed directly.
+            </div>
+          )}
+        </div>
+
+        <div className="sq-landing-preview-footer">
+          <span className="sq-landing-preview-meta">
+            File size: {(file.size / 1024).toFixed(1)} KB • Sandboxed render
+          </span>
+          <button type="button" className="sq-btn-view-logs" onClick={onClose}>
+            Close Preview
+          </button>
         </div>
       </div>
     </div>

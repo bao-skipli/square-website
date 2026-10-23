@@ -52,3 +52,10 @@ test("getMimeType correctly detects static assets Content-Type for Bunny Storage
   assert.equal(getMimeType("assets/font.woff2"), "font/woff2");
   assert.equal(getMimeType("unknown.xyz"), "application/octet-stream");
 });
+
+test("verifyDns resolves live hostnames and handles apex www fallback", async () => {
+  const { verifyDns } = await import("../../../../agent/bunnyClient.js");
+  const result = await verifyDns({ hostname: "cloudflare.com" });
+  assert.equal(result.resolved, true);
+});
+

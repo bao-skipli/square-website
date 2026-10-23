@@ -171,7 +171,10 @@ export async function saveOnlineStore(userId, storeData, oldSlug = null) {
     try {
       const updates = {};
       updates[`onlineStores/${storeId}`] = normalized;
-      updates[`storeSlugs/${cleanSlug}`] = storeId;
+      updates[`storeSlugs/${cleanSlug}`] = {
+        storeId,
+        merchantId: userId,
+      };
 
       if (oldSlug && oldSlug !== cleanSlug) {
         updates[`storeSlugs/${oldSlug}`] = null;
@@ -459,22 +462,35 @@ export async function requestRemoveCustomDomain(userId, storeId, rawDomain) {
 export async function createDeploymentJob(userId, storeId, options = {}) {
   const now = Date.now();
   const jobId = `dep_${now}_${Math.random().toString(36).substring(2, 7)}`;
+  const isLanding = options.mode === "LANDING_PAGE";
 
   const initialJob = {
     id: jobId,
     storeId: storeId || "store_skipli",
     merchantId: userId || null,
+    mode: isLanding ? "LANDING_PAGE" : "STOREFRONT",
     status: "QUEUED",
-    phase: "QUEUED",
+    phase: isLanding ? "PREPARING" : "QUEUED",
     progress: 0,
+    landingFile: options.landingFile
+      ? {
+          name: options.landingFile.name,
+          size: options.landingFile.size,
+          isZip: Boolean(options.landingFile.isZip),
+        }
+      : null,
     options: {
       purgeCache: options.purgeCache !== false,
       verifyCdn: options.verifyCdn !== false,
+      mode: isLanding ? "LANDING_PAGE" : "STOREFRONT",
+      landingFile: options.landingFile || null,
     },
     logs: [
       {
         timestamp: now,
-        message: "Deployment job created and queued by dashboard.",
+        message: isLanding
+          ? `Landing page deployment queued (${options.landingFile?.name || "HTML"}).`
+          : "Storefront deployment job created and queued by dashboard.",
         level: "info",
       },
     ],
@@ -500,7 +516,7 @@ export async function createDeploymentJob(userId, storeId, options = {}) {
     // Agent offline or running via RTDB
   }
 
-  // 2. Update RTDB
+  // 2. Update RTDB (strip large base64 payload to keep RTDB node lightweight)
   if (userId) {
     try {
       const updates = {};
@@ -508,6 +524,8 @@ export async function createDeploymentJob(userId, storeId, options = {}) {
       updates[`onlineStores/${storeId}/deployment`] = {
         lastDeploymentId: jobId,
         status: "QUEUED",
+        mode: isLanding ? "LANDING_PAGE" : "STOREFRONT",
+        landingFile: initialJob.landingFile,
         updatedAt: now,
       };
       await update(ref(database), updates);

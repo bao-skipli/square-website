@@ -201,11 +201,21 @@ export class DashboardModifierController extends DashboardCategoryController {
   };
 
   handleApplyItemModifierSets = async (nextSetIds, currentSetIds) => {
-    const { userId, editingItemId } = this.state;
-    if (!editingItemId) return;
+    const { userId, editingItemId, formModifierSetsMap } = this.state;
 
     const toAdd = nextSetIds.filter((id) => !currentSetIds.includes(id));
     const toRemove = currentSetIds.filter((id) => !nextSetIds.includes(id));
+
+    const nextMap = { ...(formModifierSetsMap || {}) };
+    toAdd.forEach((id) => {
+      nextMap[id] = { order: Date.now(), overrides: null };
+    });
+    toRemove.forEach((id) => {
+      delete nextMap[id];
+    });
+    this.setState({ formModifierSetsMap: nextMap });
+
+    if (!editingItemId) return;
 
     for (const setId of toAdd) {
       await applyModifierSetToItems(userId, setId, [editingItemId], []);
@@ -216,19 +226,40 @@ export class DashboardModifierController extends DashboardCategoryController {
   };
 
   handleRemoveItemModifierSet = async (setId) => {
-    const { userId, editingItemId } = this.state;
+    const { userId, editingItemId, formModifierSetsMap } = this.state;
+    if (formModifierSetsMap) {
+      const nextMap = { ...formModifierSetsMap };
+      delete nextMap[setId];
+      this.setState({ formModifierSetsMap: nextMap });
+    }
     if (!editingItemId) return;
     await removeModifierSetFromItem(userId, editingItemId, setId);
   };
 
   handleSaveItemModifierOverrides = async (setId, overrides) => {
-    const { userId, editingItemId } = this.state;
+    const { userId, editingItemId, formModifierSetsMap } = this.state;
+    if (formModifierSetsMap) {
+      const nextMap = { ...formModifierSetsMap };
+      if (nextMap[setId]) {
+        nextMap[setId] = { ...nextMap[setId], overrides };
+      }
+      this.setState({ formModifierSetsMap: nextMap });
+    }
     if (!editingItemId) return;
     await saveItemModifierOverrides(userId, editingItemId, setId, overrides);
   };
 
   handleReorderItemModifierSets = async (orderedSetIds) => {
-    const { userId, editingItemId } = this.state;
+    const { userId, editingItemId, formModifierSetsMap } = this.state;
+    if (formModifierSetsMap) {
+      const nextMap = { ...formModifierSetsMap };
+      orderedSetIds.forEach((id, idx) => {
+        if (nextMap[id]) {
+          nextMap[id] = { ...nextMap[id], order: idx };
+        }
+      });
+      this.setState({ formModifierSetsMap: nextMap });
+    }
     if (!editingItemId) return;
     await reorderItemModifierSets(userId, editingItemId, orderedSetIds);
   };

@@ -6,6 +6,7 @@ import {
   CloseXIcon,
 } from "@/components/ui/Icon";
 import ModifierOverrideModal from "./ModifierOverrideModal";
+import { normalizeItemModifierSetsMap } from "@/shared/modifiers";
 import "./ItemModifiersSection.css";
 
 function ItemModifiersChecklistModal({
@@ -122,11 +123,15 @@ export default function ItemModifiersSection({
   const [draggedIndex, setDraggedIndex] = useState(null);
   const [setToRemove, setSetToRemove] = useState(null);
 
-  const appliedSetIds = Object.keys(itemModifierSetsMap || {});
+  const normalizedMap = React.useMemo(
+    () => normalizeItemModifierSetsMap(itemModifierSetsMap),
+    [itemModifierSetsMap]
+  );
+  const appliedSetIds = Object.keys(normalizedMap);
 
   const appliedSetsList = appliedSetIds
     .map((setId) => {
-      const setMeta = itemModifierSetsMap[setId] || {};
+      const setMeta = normalizedMap[setId] || {};
       const catalogSet = allModifierSets.find((s) => s.id === setId);
       if (!catalogSet) return null;
       return {

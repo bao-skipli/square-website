@@ -152,7 +152,7 @@ export function subscribeStorefrontData(slug, onUpdate) {
   };
 
   resolveStoreSlug(slug)
-    .then((resolved) => {
+    .then(async (resolved) => {
       if (isCancelled) return;
       if (!resolved) {
         state.status = "notFound";
@@ -160,9 +160,31 @@ export function subscribeStorefrontData(slug, onUpdate) {
         return;
       }
 
-      const { storeId, merchantId } = resolved;
+      const { storeId } = resolved;
+      let effectiveMerchantId = resolved.merchantId;
 
       const storeRef = ref(database, `onlineStores/${storeId}`);
+
+      if (!effectiveMerchantId) {
+        try {
+          const storeSnap = await get(storeRef);
+          if (storeSnap.exists()) {
+            const storeVal = storeSnap.val();
+            effectiveMerchantId = storeVal?.merchantId || null;
+            if (!state.store) state.store = storeVal;
+          }
+        } catch (e) {
+          console.warn("Could not prefetch store for merchantId:", e);
+        }
+      }
+
+      if (!effectiveMerchantId) {
+        const localStore = getLocalOnlineStore();
+        if (localStore?.merchantId) {
+          effectiveMerchantId = localStore.merchantId;
+        }
+      }
+
       const unsubStore = onValue(
         storeRef,
         (snap) => {
@@ -170,7 +192,6 @@ export function subscribeStorefrontData(slug, onUpdate) {
           if (snap.exists()) {
             state.store = snap.val();
           } else {
-
             state.store = getLocalOnlineStore();
           }
           state.loaded.store = true;
@@ -185,11 +206,7 @@ export function subscribeStorefrontData(slug, onUpdate) {
       );
       unsubs.push(unsubStore);
 
-      const merchantPath = merchantId
-        ? `users/${merchantId}`
-        : state.store?.merchantId
-        ? `users/${state.store.merchantId}`
-        : null;
+      const merchantPath = effectiveMerchantId ? `users/${effectiveMerchantId}` : null;
 
       const catRefPath = merchantPath ? `${merchantPath}/categories` : "categories";
       const catRef = ref(database, catRefPath);

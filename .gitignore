@@ -31,3 +31,8 @@ functions/.env.*
 *.njsproj
 *.sln
 *.sw?
+
+# Temporary scratch & staging directory
+scratch/
+
+scratch
