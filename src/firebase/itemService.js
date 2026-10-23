@@ -1,25 +1,9 @@
 import { ref, set, get, update, remove, onValue } from "firebase/database";
 import { database } from "./firebaseConfig";
 
-export const INITIAL_CATEGORIES = [
-  // { id: "cat-food", name: "Food", parentId: null, pointsOfSale: true },
-  // { id: "cat-pho", name: "Pho", parentId: "cat-food", pointsOfSale: true },
-  // { id: "cat-beverage", name: "Beverage", parentId: null, pointsOfSale: true },
-  // { id: "cat-liquor", name: "Liquor", parentId: null, pointsOfSale: true },
-  // { id: "cat-beer", name: "Beer", parentId: null, pointsOfSale: true },
-  // { id: "cat-wine", name: "Wine", parentId: null, pointsOfSale: true },
-  // { id: "cat-coffee", name: "Coffee & Tea", parentId: null, pointsOfSale: true },
-  // { id: "cat-desserts", name: "Desserts", parentId: null, pointsOfSale: true },
-];
+export const INITIAL_CATEGORIES = [];
 
-export const INITIAL_LIBRARY_ITEMS = [
-  // { id: "item-1", name: "Banana Pudding", category: "Desserts", status: "Available", price: "$6.00" },
-  // { id: "item-2", name: "Brownie", category: "Desserts", status: "Available", price: "$4.50" },
-  // { id: "item-3", name: "Cheesecake", category: "Desserts", status: "Available", price: "$7.00" },
-  // { id: "item-4", name: "Cookie", category: "Desserts", status: "Available", price: "$3.00" },
-  // { id: "item-5", name: "Ice Cream", category: "Desserts", status: "Available", price: "$5.00" },
-  // { id: "item-6", name: "Pho ga", category: "Pho", status: "Available", price: "$14.50" },
-];
+export const INITIAL_LIBRARY_ITEMS = [];
 
 const LOCAL_STORAGE_ITEMS_KEY = "sq_dashboard_items";
 const LOCAL_STORAGE_CATEGORIES_KEY = "sq_dashboard_categories";
@@ -31,7 +15,7 @@ function getLocalItems() {
   } catch (e) {
     console.warn("Local storage read error for items:", e);
   }
-  return [...INITIAL_LIBRARY_ITEMS];
+  return [];
 }
 
 function setLocalItems(items) {
@@ -50,7 +34,7 @@ function getLocalCategories() {
   } catch (e) {
     console.warn("Local storage read error for categories:", e);
   }
-  return [...INITIAL_CATEGORIES];
+  return [];
 }
 
 function setLocalCategories(categories) {
@@ -141,23 +125,8 @@ export function subscribeItems(userId, callback, onFirstSnapshot) {
         callback(list);
         notifyFirst(list);
       } else {
-
-        const itemsMap = {};
-        INITIAL_LIBRARY_ITEMS.forEach((i) => {
-          itemsMap[i.id] = i;
-        });
-        set(itemsRef, itemsMap)
-          .then(() => {
-            const list = [...INITIAL_LIBRARY_ITEMS];
-            callback(list);
-            notifyFirst(list);
-          })
-          .catch((err) => {
-            console.warn("Could not set initial items in RTDB:", err);
-            const fallback = getLocalItems();
-            callback(fallback);
-            notifyFirst(fallback);
-          });
+        callback([]);
+        notifyFirst([]);
       }
     },
     (error) => {
@@ -206,23 +175,8 @@ export function subscribeCategories(userId, callback, onFirstSnapshot) {
         callback(list);
         notifyFirst(list);
       } else {
-
-        const catMap = {};
-        INITIAL_CATEGORIES.forEach((c) => {
-          catMap[c.id] = c;
-        });
-        set(catRef, catMap)
-          .then(() => {
-            const list = [...INITIAL_CATEGORIES];
-            callback(list);
-            notifyFirst(list);
-          })
-          .catch((err) => {
-            console.warn("Could not set initial categories in RTDB:", err);
-            const fallback = getLocalCategories();
-            callback(fallback);
-            notifyFirst(fallback);
-          });
+        callback([]);
+        notifyFirst([]);
       }
     },
     (error) => {
@@ -246,7 +200,35 @@ export async function saveItemToFirebase(userId, itemData) {
 
   if (userId) {
     const itemRef = ref(database, `users/${userId}/items/${itemId}`);
+    if (itemToSave.modifierSets === undefined) {
+      try {
+        const snap = await get(itemRef);
+        if (snap.exists()) {
+          const val = snap.val();
+          if (val && val.modifierSets) {
+            itemToSave.modifierSets = val.modifierSets;
+          }
+        }
+      } catch (e) {
+        console.warn("Could not check existing item modifierSets:", e);
+      }
+    }
     await set(itemRef, itemToSave);
+
+    if (itemToSave.modifierSets && typeof itemToSave.modifierSets === "object") {
+      try {
+        const indexUpdates = {};
+        Object.keys(itemToSave.modifierSets).forEach((setId) => {
+          indexUpdates[`users/${userId}/modifierSetItems/${setId}/${itemId}`] = true;
+        });
+        if (Object.keys(indexUpdates).length > 0) {
+          await update(ref(database), indexUpdates);
+        }
+      } catch (e) {
+        console.warn("Could not update modifierSetItems index:", e);
+      }
+    }
+
     return itemToSave;
   }
 
@@ -254,6 +236,10 @@ export async function saveItemToFirebase(userId, itemData) {
   const exists = currentItems.some((i) => i.id === itemId);
   let updated;
   if (exists) {
+    const existing = currentItems.find((i) => i.id === itemId);
+    if (itemToSave.modifierSets === undefined && existing?.modifierSets) {
+      itemToSave.modifierSets = existing.modifierSets;
+    }
     updated = currentItems.map((i) => (i.id === itemId ? itemToSave : i));
   } else {
     updated = [itemToSave, ...currentItems];

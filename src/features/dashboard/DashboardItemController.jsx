@@ -26,6 +26,7 @@ export class DashboardItemController extends DashboardBase {
       formGtin: "",
       formImageUrl: "",
       formStatus: "Available",
+      formModifierSetsMap: {},
       itemFormInitial: { name: "", price: "", category: "", status: "Available", imageUrl: "" },
       isItemActionsOpen: false,
       formError: "",
@@ -68,7 +69,7 @@ export class DashboardItemController extends DashboardBase {
         unsavedChangesTarget: "item",
       });
     } else {
-      this.setState({ isCreateItemOpen: false, editingItemId: null });
+      this.setState({ isCreateItemOpen: false, editingItemId: null, formModifierSetsMap: {} });
       this.navigateToItemLibrary();
     }
   };
@@ -88,6 +89,8 @@ export class DashboardItemController extends DashboardBase {
       formImageUrl,
       editingItemId,
       userId,
+      items,
+      formModifierSetsMap,
     } = this.state;
 
     if (!formName.trim()) {
@@ -102,6 +105,11 @@ export class DashboardItemController extends DashboardBase {
         : `$${formPrice}`
       : "—";
 
+    const currentItem = editingItemId ? items.find((i) => i.id === editingItemId) : null;
+    const modifierSetsToSave = formModifierSetsMap !== undefined
+      ? formModifierSetsMap
+      : currentItem?.modifierSets || null;
+
     const itemData = {
       id: editingItemId || `item-${Date.now()}`,
       name: formName.trim(),
@@ -114,6 +122,7 @@ export class DashboardItemController extends DashboardBase {
       sku: formSku || "",
       gtin: formGtin || "",
       imageUrl: formImageUrl || "",
+      modifierSets: modifierSetsToSave && Object.keys(modifierSetsToSave).length > 0 ? modifierSetsToSave : null,
     };
 
     try {
@@ -122,6 +131,7 @@ export class DashboardItemController extends DashboardBase {
         isSavingItem: false,
         isCreateItemOpen: false,
         editingItemId: null,
+        formModifierSetsMap: {},
         formError: "",
         formName: "",
         formPrice: "",

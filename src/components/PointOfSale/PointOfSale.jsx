@@ -10,7 +10,7 @@ const posItems = [
       "Sell anything in person and online with a point of sale platform that works for whatever you sell.",
     linkText: "Learn more",
     linkUrl: "#take-payments",
-    image: "/PD07745_-_cpos_background.avif",
+    image: "/images/point-of-sale/PD07745_-_cpos_background.avif",
     alt: "Square Point of Sale food order screen with items grid and cart checkout",
   },
   {
@@ -20,7 +20,7 @@ const posItems = [
       "Run payroll, schedule shifts, and take care of admin — so your team can focus on performing their best.",
     linkText: "Learn more",
     linkUrl: "#manage-team",
-    image: "/PD07745_-_payroll_background.avif",
+    image: "/images/point-of-sale/PD07745_-_payroll_background.avif",
     alt: "Square Team Management and Payroll in restaurant kitchen",
   },
   {
@@ -30,7 +30,7 @@ const posItems = [
       "Set up the right marketing campaigns and loyalty program to welcome new customers and keep them coming back for more.",
     linkText: "Learn more",
     linkUrl: "#grow-customers",
-    image: "/PD07745_-_loyalty_background.avif",
+    image: "/images/point-of-sale/PD07745_-_loyalty_background.avif",
     alt: "Square Customer Loyalty and Marketing",
   },
   {
@@ -40,7 +40,7 @@ const posItems = [
       "Bring your revenue under one roof. Instantly access your funds, save for future expenses, and get quicker access to loans.",
     linkText: "Learn more",
     linkUrl: "#cash-flow",
-    image: "/PD07745_-_banking_background_compressed_v3.avif",
+    image: "/images/point-of-sale/PD07745_-_banking_background_compressed_v3.avif",
     alt: "Square Banking and Cash Flow Management",
   },
   {
@@ -50,7 +50,7 @@ const posItems = [
       "Square partners with hundreds of apps so you can manage your entire business without jumping between.",
     linkText: "Learn more",
     linkUrl: "#connect-apps",
-    image: "/PD07745_-_apps_background.avif",
+    image: "/images/point-of-sale/PD07745_-_apps_background.avif",
     alt: "Square App Marketplace and Integrations",
   },
 ];

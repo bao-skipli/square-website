@@ -14,12 +14,41 @@ const Dashboard = lazy(() => import("@/components/Dashboard/Dashboard"));
 const StorefrontPage = lazy(() => import("@/storefront/StorefrontPage"));
 const ImageUploader = lazy(() => import("@/components/ImageUploader"));
 
+function getCustomDomainHostname() {
+  if (typeof window === "undefined") return null;
+  const hostname = window.location.hostname;
+  if (!hostname) return null;
+  const isLocalOrPlatform =
+    hostname === "localhost" ||
+    hostname === "127.0.0.1" ||
+    hostname.endsWith(".local") ||
+    hostname.endsWith(".firebaseapp.com") ||
+    hostname.endsWith(".web.app") ||
+    hostname.includes("ngrok") ||
+    hostname.includes("run.app");
+  if (isLocalOrPlatform) return null;
+  return hostname;
+}
+
 export default class App extends Component {
   render() {
+    const customHostname = getCustomDomainHostname();
+
     return (
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<HomePage />} />
+          <Route
+            path="/"
+            element={
+              customHostname ? (
+                <Suspense fallback={null}>
+                  <StorefrontPage customHostname={customHostname} />
+                </Suspense>
+              ) : (
+                <HomePage />
+              )
+            }
+          />
           <Route
             path="/signin"
             element={

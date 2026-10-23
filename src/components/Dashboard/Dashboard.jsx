@@ -347,8 +347,28 @@ class Dashboard extends DashboardModifierController {
           modifierSet={applyToItemsSet}
           items={items}
           appliedItemIds={
-            applyToItemsSet && modifierSetItems[applyToItemsSet.id]
-              ? Object.keys(modifierSetItems[applyToItemsSet.id])
+            applyToItemsSet
+              ? Array.from(
+                  new Set([
+                    ...(modifierSetItems[applyToItemsSet.id]
+                      ? Object.keys(modifierSetItems[applyToItemsSet.id])
+                      : []),
+                    ...items
+                      .filter((i) => {
+                        if (!i.modifierSets) return false;
+                        if (Array.isArray(i.modifierSets)) {
+                          return i.modifierSets.some(
+                            (m) =>
+                              m === applyToItemsSet.id ||
+                              m?.id === applyToItemsSet.id ||
+                              m?.setId === applyToItemsSet.id
+                          );
+                        }
+                        return Boolean(i.modifierSets[applyToItemsSet.id]);
+                      })
+                      .map((i) => i.id),
+                  ])
+                )
               : []
           }
           onApply={this.handleApplyModifierSetToItems}

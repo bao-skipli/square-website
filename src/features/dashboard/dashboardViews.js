@@ -1,3 +1,5 @@
+import { normalizeItemModifierSetsMap } from "@/shared/modifiers";
+
 export const EMPTY_FORMS = {
   modifiers: {
     isCreateModifierOpen: true,
@@ -52,6 +54,7 @@ export function itemToFormState(item) {
     formGtin: item.gtin || "",
     formImageUrl: item.imageUrl || item.image || item.photo || "",
     formStatus: status,
+    formModifierSetsMap: normalizeItemModifierSetsMap(item.modifierSets),
     itemFormInitial: {
       name,
       price: rawPrice,

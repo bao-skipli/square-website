@@ -1,5 +1,29 @@
 
 
+export function normalizeItemModifierSetsMap(raw) {
+  if (!raw) return {};
+  if (Array.isArray(raw)) {
+    const map = {};
+    raw.forEach((entry, idx) => {
+      if (!entry) return;
+      if (typeof entry === "string") {
+        map[entry] = { order: idx, overrides: null };
+      } else if (typeof entry === "object") {
+        const id = entry.id || entry.setId || String(idx);
+        map[id] = {
+          order: entry.order ?? idx,
+          overrides: entry.overrides || null,
+        };
+      }
+    });
+    return map;
+  }
+  if (typeof raw === "object") {
+    return { ...raw };
+  }
+  return {};
+}
+
 export function getEffectiveSettings(set, itemOverride = null) {
   if (!set) return null;
 

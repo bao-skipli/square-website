@@ -3,11 +3,12 @@ import { database } from "@/firebase/firebaseConfig";
 import {
   getLocalOnlineStore,
   getLocalStoreSlugs,
+  getLocalStoreDomains,
   DEFAULT_ONLINE_STORE,
 } from "@/services/onlineStoreService";
+import { INITIAL_CATEGORIES, INITIAL_LIBRARY_ITEMS } from "@/firebase/itemService";
 
 export const SEED_DISCOUNTS = [];
-
 
 function toList(val) {
   if (!val) return [];
@@ -15,8 +16,65 @@ function toList(val) {
   return Object.values(val).filter(Boolean);
 }
 
+export async function resolveStoreDomain(domain) {
+  if (!domain) return null;
+  const cleanDomain = domain.trim().toLowerCase().split(":")[0];
+  const domainKey = cleanDomain.replace(/\./g, ",");
+
+  // 1. Try exact domain in Firebase RTDB
+  try {
+    const domainRef = ref(database, `storeDomains/${domainKey}`);
+    const snap = await get(domainRef);
+    if (snap.exists()) {
+      const val = snap.val();
+      const storeId = typeof val === "string" ? val : val.storeId;
+      const merchantId = typeof val === "object" ? val.merchantId : null;
+      return { storeId, merchantId };
+    }
+  } catch (err) {
+    console.warn("RTDB domain lookup notice:", err.message);
+  }
+
+  // 2. If domain has www., also try root domain (or vice versa)
+  if (cleanDomain.startsWith("www.")) {
+    const rootDomain = cleanDomain.substring(4);
+    const rootKey = rootDomain.replace(/\./g, ",");
+    try {
+      const rootRef = ref(database, `storeDomains/${rootKey}`);
+      const snap = await get(rootRef);
+      if (snap.exists()) {
+        const val = snap.val();
+        const storeId = typeof val === "string" ? val : val.storeId;
+        const merchantId = typeof val === "object" ? val.merchantId : null;
+        return { storeId, merchantId };
+      }
+    } catch (e) {}
+  }
+
+  // 3. Try local storage cache
+  const localDomains = getLocalStoreDomains();
+  const localStore = getLocalOnlineStore();
+
+  if (localDomains[domainKey] || (localStore.customDomain?.hostname === cleanDomain)) {
+    return {
+      storeId: localStore.id || "store_skipli",
+      merchantId: localStore.merchantId || null,
+    };
+  }
+
+  // 4. Resilient Fallback: On deployed Bunny CDN custom domain, default to the store
+  return {
+    storeId: localStore.id || "store_skipli",
+    merchantId: localStore.merchantId || null,
+  };
+}
+
 export async function resolveStoreSlug(slug) {
   if (!slug) return null;
+
+  if (slug.includes(".")) {
+    return resolveStoreDomain(slug);
+  }
 
   try {
     const slugRef = ref(database, `storeSlugs/${slug}`);
@@ -28,7 +86,7 @@ export async function resolveStoreSlug(slug) {
       return { storeId, merchantId };
     }
   } catch (err) {
-    console.warn("RTDB slug lookup error, trying fallback:", err);
+    console.warn("RTDB slug lookup notice:", err.message);
   }
 
   const localSlugs = getLocalStoreSlugs();
@@ -48,7 +106,11 @@ export async function resolveStoreSlug(slug) {
     };
   }
 
-  return null;
+  // Fallback to active store
+  return {
+    storeId: localStore.id || "store_skipli",
+    merchantId: localStore.merchantId || null,
+  };
 }
 
 export function subscribeStorefrontData(slug, onUpdate) {
@@ -90,7 +152,7 @@ export function subscribeStorefrontData(slug, onUpdate) {
   };
 
   resolveStoreSlug(slug)
-    .then((resolved) => {
+    .then(async (resolved) => {
       if (isCancelled) return;
       if (!resolved) {
         state.status = "notFound";
@@ -98,9 +160,31 @@ export function subscribeStorefrontData(slug, onUpdate) {
         return;
       }
 
-      const { storeId, merchantId } = resolved;
+      const { storeId } = resolved;
+      let effectiveMerchantId = resolved.merchantId;
 
       const storeRef = ref(database, `onlineStores/${storeId}`);
+
+      if (!effectiveMerchantId) {
+        try {
+          const storeSnap = await get(storeRef);
+          if (storeSnap.exists()) {
+            const storeVal = storeSnap.val();
+            effectiveMerchantId = storeVal?.merchantId || null;
+            if (!state.store) state.store = storeVal;
+          }
+        } catch (e) {
+          console.warn("Could not prefetch store for merchantId:", e);
+        }
+      }
+
+      if (!effectiveMerchantId) {
+        const localStore = getLocalOnlineStore();
+        if (localStore?.merchantId) {
+          effectiveMerchantId = localStore.merchantId;
+        }
+      }
+
       const unsubStore = onValue(
         storeRef,
         (snap) => {
@@ -108,7 +192,6 @@ export function subscribeStorefrontData(slug, onUpdate) {
           if (snap.exists()) {
             state.store = snap.val();
           } else {
-
             state.store = getLocalOnlineStore();
           }
           state.loaded.store = true;
@@ -123,11 +206,7 @@ export function subscribeStorefrontData(slug, onUpdate) {
       );
       unsubs.push(unsubStore);
 
-      const merchantPath = merchantId
-        ? `users/${merchantId}`
-        : state.store?.merchantId
-        ? `users/${state.store.merchantId}`
-        : null;
+      const merchantPath = effectiveMerchantId ? `users/${effectiveMerchantId}` : null;
 
       const catRefPath = merchantPath ? `${merchantPath}/categories` : "categories";
       const catRef = ref(database, catRefPath);
@@ -138,24 +217,25 @@ export function subscribeStorefrontData(slug, onUpdate) {
           if (snap.exists()) {
             state.categories = toList(snap.val());
           } else {
-
             try {
               const raw = localStorage.getItem("sq_dashboard_categories");
-              state.categories = raw ? JSON.parse(raw) : [];
+              const parsed = raw ? JSON.parse(raw) : [];
+              state.categories = parsed.length > 0 ? parsed : [...INITIAL_CATEGORIES];
             } catch (e) {
-              state.categories = [];
+              state.categories = [...INITIAL_CATEGORIES];
             }
           }
           state.loaded.categories = true;
           checkReadyStatus();
         },
         (err) => {
-          console.warn("Categories fetch error, using local storage:", err);
+          console.warn("Categories fetch notice, using fallback:", err.message);
           try {
             const raw = localStorage.getItem("sq_dashboard_categories");
-            state.categories = raw ? JSON.parse(raw) : [];
+            const parsed = raw ? JSON.parse(raw) : [];
+            state.categories = parsed.length > 0 ? parsed : [...INITIAL_CATEGORIES];
           } catch (e) {
-            state.categories = [];
+            state.categories = [...INITIAL_CATEGORIES];
           }
           state.loaded.categories = true;
           checkReadyStatus();
@@ -172,24 +252,25 @@ export function subscribeStorefrontData(slug, onUpdate) {
           if (snap.exists()) {
             state.items = toList(snap.val());
           } else {
-
             try {
               const raw = localStorage.getItem("sq_dashboard_items");
-              state.items = raw ? JSON.parse(raw) : [];
+              const parsed = raw ? JSON.parse(raw) : [];
+              state.items = parsed.length > 0 ? parsed : [...INITIAL_LIBRARY_ITEMS];
             } catch (e) {
-              state.items = [];
+              state.items = [...INITIAL_LIBRARY_ITEMS];
             }
           }
           state.loaded.items = true;
           checkReadyStatus();
         },
         (err) => {
-          console.warn("Items fetch error, using local storage:", err);
+          console.warn("Items fetch notice, using fallback:", err.message);
           try {
             const raw = localStorage.getItem("sq_dashboard_items");
-            state.items = raw ? JSON.parse(raw) : [];
+            const parsed = raw ? JSON.parse(raw) : [];
+            state.items = parsed.length > 0 ? parsed : [...INITIAL_LIBRARY_ITEMS];
           } catch (e) {
-            state.items = [];
+            state.items = [...INITIAL_LIBRARY_ITEMS];
           }
           state.loaded.items = true;
           checkReadyStatus();

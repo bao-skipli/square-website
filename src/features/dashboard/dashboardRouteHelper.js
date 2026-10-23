@@ -27,6 +27,7 @@ export const DEFAULT_ROUTE_STATE = {
   formMenu: "",
   formSku: "",
   formGtin: "",
+  formImageUrl: "",
   formStatus: "Available",
 
   isCreateCategoryOpen: false,

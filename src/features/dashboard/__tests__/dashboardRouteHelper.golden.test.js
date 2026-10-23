@@ -44,6 +44,7 @@ function legacyGetInitialDashboardRouteState(pathname) {
   let formSku = "";
   let formGtin = "";
   let formStatus = "Available";
+  let formImageUrl = "";
 
   let isCreateCategoryOpen = false;
   let editingCategoryId = null;
@@ -190,6 +191,7 @@ function legacyGetInitialDashboardRouteState(pathname) {
     isCreateModifierOpen,
     editingModifierSetId,
     editingModifierSet,
+    formImageUrl,
   };
 }
 

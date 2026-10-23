@@ -16,8 +16,23 @@
         },
         "modifierSets": {
           ".read": true
+        },
+        "modifierSetItems": {
+          ".read": true
+        },
+        "discounts": {
+          ".read": true
         }
       }
+    },
+    "categories": {
+      ".read": true
+    },
+    "items": {
+      ".read": true
+    },
+    "modifierSets": {
+      ".read": true
     },
     "appData": {
       ".read": "auth != null && auth.token.email_verified === true",
@@ -31,6 +46,26 @@
     },
     "storeSlugs": {
       ".read": true,
+      ".write": "auth != null"
+    },
+    "storeDomains": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "domainJobs": {
+      ".read": "auth != null",
+      "$jobId": {
+        ".write": "auth != null"
+      }
+    },
+    "deploymentJobs": {
+      ".read": "auth != null",
+      "$jobId": {
+        ".write": "auth != null"
+      }
+    },
+    "agentStatus": {
+      ".read": "auth != null",
       ".write": "auth != null"
     }
   }
