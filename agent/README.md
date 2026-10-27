@@ -219,6 +219,50 @@ curl -X POST http://127.0.0.1:4567/domain/remove \
 
 ---
 
+### 5. Quản lý DNS Zone & Records (Bunny DNS REST API)
+
+#### A. Lấy danh sách bản ghi DNS Zone (`GET /domain/dns/records`)
+```bash
+curl -X GET "http://127.0.0.1:4567/domain/dns/records?zoneId=12345"
+```
+
+#### B. Quét bản ghi từ nhà đăng ký cũ (`POST /domain/dns/scan`)
+```bash
+curl -X POST http://127.0.0.1:4567/domain/dns/scan \
+  -H "Content-Type: application/json" \
+  -d '{"zoneId": 12345, "domain": "yourdomain.com"}'
+```
+
+#### C. Nhập hàng loạt bản ghi đã chọn vào DNS Zone (`POST /domain/dns/import`)
+```bash
+curl -X POST http://127.0.0.1:4567/domain/dns/import \
+  -H "Content-Type: application/json" \
+  -d '{
+    "zoneId": 12345,
+    "records": [
+      { "Type": 4, "Name": "", "Value": "aspmx.l.google.com", "Priority": 1 },
+      { "Type": 3, "Name": "", "Value": "v=spf1 include:_spf.google.com ~all" }
+    ]
+  }'
+```
+
+#### D. Thêm bản ghi DNS đơn lẻ (`POST /domain/dns/record`)
+```bash
+curl -X POST http://127.0.0.1:4567/domain/dns/record \
+  -H "Content-Type: application/json" \
+  -d '{
+    "zoneId": 12345,
+    "record": { "Type": 0, "Name": "sub", "Value": "1.2.3.4", "Ttl": 300 }
+  }'
+```
+
+#### E. Xóa bản ghi DNS (`DELETE /domain/dns/record/:recordId`)
+```bash
+curl -X DELETE "http://127.0.0.1:4567/domain/dns/record/987654?zoneId=12345"
+```
+
+---
+
 ### 5. Khởi chạy Triển khai (`POST /deploy`)
 Hỗ trợ cả 2 chế độ:
 * `sourceType: "react"`: Build toàn bộ ứng dụng Vite React sang thư mục `dist/` và upload lên Bunny Storage.
