@@ -664,6 +664,19 @@ export async function scanDnsRecords(zoneId, domain, storeId, customNs = null) {
   return await res.json();
 }
 
+export async function autoMigrateDnsRecords(zoneId, domain, storeId, customNs = null) {
+  const res = await fetch("http://127.0.0.1:4567/domain/dns/auto-migrate", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ zoneId, domain, storeId, customNs }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || `HTTP ${res.status}`);
+  }
+  return await res.json();
+}
+
 export async function parseBulkDnsRecords(rawText, domain) {
   const res = await fetch("http://127.0.0.1:4567/domain/dns/parse-bulk", {
     method: "POST",

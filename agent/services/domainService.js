@@ -21,6 +21,7 @@ import {
   triggerDnsScan,
   pollDnsScanResults,
   filterSafeMigrationRecords,
+  isDnsRecordDuplicate,
   deepScanDomain,
   parseBulkDnsText,
 } from "../clients/bunnyDns.js";
@@ -29,6 +30,7 @@ import { getDb, getHasDbAccess } from "./firebaseClient.js";
 
 // In-memory store for simulated mode DNS records
 const simulatedDnsStore = new Map();
+const isSimulatedZone = (zid) => isSimulatedMode || (zid !== null && zid !== undefined && String(zid).startsWith("9988"));
 
 /**
  * Attach custom hostname to Bunny Pull Zone and sync to RTDB.
@@ -310,7 +312,7 @@ export async function getZoneRecordsService({ zoneId }) {
   if (!zoneId) throw new Error("Missing zoneId");
   const numZoneId = Number(zoneId);
 
-  if (isSimulatedMode || numZoneId === 998877) {
+  if (isSimulatedZone(numZoneId)) {
     if (!simulatedDnsStore.has(numZoneId)) {
       simulatedDnsStore.set(numZoneId, [
         { Id: 101, Type: DNS_RECORD_TYPES.PULL_ZONE, Name: "", Value: "", PullZoneId: 12345, Ttl: 300, typeLabel: "PullZone (PZ)" },
@@ -333,12 +335,22 @@ export async function getZoneRecordsService({ zoneId }) {
 /**
  * Trigger & fetch scan results from current domain registrar
  */
-export async function scanDomainRecordsService({ zoneId, domain, customNs = null }) {
+export async function scanDomainRecordsService({
+  zoneId,
+  domain,
+  customNs = null,
+  autoImport = false,
+  storeId = "store_skipli",
+}) {
+  if (autoImport) {
+    return await autoMigrateDnsRecordsService({ zoneId, domain, customNs, storeId });
+  }
+
   if (!zoneId && !domain) throw new Error("Missing zoneId or domain");
   const numZoneId = zoneId ? Number(zoneId) : null;
   const targetDomain = domain || "domain";
 
-  if (isSimulatedMode || numZoneId === 998877) {
+  if (isSimulatedZone(numZoneId)) {
     // Return realistic mock scanned records
     const mockScanned = [
       {
@@ -368,6 +380,15 @@ export async function scanDomainRecordsService({ zoneId, domain, customNs = null
         Ttl: 3600,
       },
       {
+        Name: "_autodiscover._tcp",
+        Type: DNS_RECORD_TYPES.SRV,
+        Value: "mail.google.com",
+        Ttl: 3600,
+        Port: 443,
+        Priority: 0,
+        Weight: 0,
+      },
+      {
         Name: "",
         Type: DNS_RECORD_TYPES.A,
         Value: "192.0.2.1",
@@ -381,7 +402,7 @@ export async function scanDomainRecordsService({ zoneId, domain, customNs = null
       },
     ];
 
-    const filtered = filterSafeMigrationRecords(mockScanned);
+    const filtered = filterSafeMigrationRecords(mockScanned, targetDomain);
     return {
       success: true,
       jobId: "sim_scan_job_12345",
@@ -411,6 +432,188 @@ export async function scanDomainRecordsService({ zoneId, domain, customNs = null
     scanLogs: scanResult.scanLogs,
     nameserverUsed: scanResult.nameserverUsed,
     total: scanResult.total,
+  };
+}
+
+/**
+ * Fully automated DNS Migration:
+ * 1. Deep scans old registrar for all active records
+ * 2. Automatically filters out conflicting web records (A @, AAAA @, CNAME www) and apex NS
+ * 3. Deduplicates against records already existing in Bunny DNS Zone
+ * 4. Batch POSTs safe new records directly to Bunny DNS API without user manual intervention
+ */
+export async function autoMigrateDnsRecordsService({
+  zoneId,
+  domain,
+  customNs = null,
+  storeId = "store_skipli",
+}) {
+  if (!zoneId && !domain) throw new Error("Missing zoneId or domain");
+  const numZoneId = zoneId ? Number(zoneId) : null;
+  const targetDomain = (domain || "").toLowerCase().trim().replace(/^www\./, "");
+
+  // 1. Fetch current active records from Bunny DNS Zone (or simulated store)
+  let existingRecords = [];
+  if (numZoneId) {
+    try {
+      const zoneRes = await getZoneRecordsService({ zoneId: numZoneId });
+      existingRecords = zoneRes.records || [];
+    } catch (e) {
+      console.warn(`[AutoMigrate] Không thể đọc danh sách bản ghi hiện tại của Zone #${numZoneId}:`, e.message);
+    }
+  }
+
+  // 2. Perform deep multi-source scan
+  let scannedResult;
+  if (isSimulatedZone(numZoneId)) {
+    const mockScanned = [
+      {
+        Name: "",
+        Type: DNS_RECORD_TYPES.MX,
+        Value: "aspmx.l.google.com",
+        Priority: 1,
+        Ttl: 3600,
+      },
+      {
+        Name: "",
+        Type: DNS_RECORD_TYPES.MX,
+        Value: "alt1.aspmx.l.google.com",
+        Priority: 5,
+        Ttl: 3600,
+      },
+      {
+        Name: "",
+        Type: DNS_RECORD_TYPES.TXT,
+        Value: "v=spf1 include:_spf.google.com ~all",
+        Ttl: 3600,
+      },
+      {
+        Name: "google._domainkey",
+        Type: DNS_RECORD_TYPES.TXT,
+        Value: "v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQ...",
+        Ttl: 3600,
+      },
+      {
+        Name: "_autodiscover._tcp",
+        Type: DNS_RECORD_TYPES.SRV,
+        Value: "mail.google.com",
+        Ttl: 3600,
+        Port: 443,
+        Priority: 0,
+        Weight: 0,
+      },
+      {
+        Name: "",
+        Type: DNS_RECORD_TYPES.A,
+        Value: "192.0.2.1",
+        Ttl: 600,
+      },
+      {
+        Name: "www",
+        Type: DNS_RECORD_TYPES.CNAME,
+        Value: "old-hosting.godaddy.com",
+        Ttl: 600,
+      },
+    ];
+
+    const filtered = filterSafeMigrationRecords(mockScanned, targetDomain);
+    scannedResult = {
+      records: filtered.all,
+      safeRecords: filtered.safe,
+      conflictingRecords: filtered.conflictingWeb,
+      scanLogs: [
+        `[${new Date().toLocaleTimeString("vi-VN")}] [Simulated] Đã quét thành công các bản ghi mẫu cho ${targetDomain}.`,
+      ],
+      nameserverUsed: "Simulated Resolver",
+      total: mockScanned.length,
+    };
+  } else {
+    scannedResult = await deepScanDomain(targetDomain, {
+      customNs,
+      zoneId: numZoneId,
+      apiKey: BUNNY_ACCOUNT_API_KEY,
+    });
+  }
+
+  const safeRecords = scannedResult.safeRecords || [];
+  const conflictingRecords = scannedResult.conflictingRecords || [];
+
+  // 3. Deduplicate against existing records in Bunny DNS Zone
+  const recordsToImport = [];
+  const alreadyExistedRecords = [];
+
+  for (const safeRec of safeRecords) {
+    const isDup = existingRecords.some((existRec) =>
+      isDnsRecordDuplicate(safeRec, existRec, targetDomain)
+    );
+    if (isDup) {
+      alreadyExistedRecords.push(safeRec);
+    } else {
+      recordsToImport.push(safeRec);
+    }
+  }
+
+  // 4. Batch POST safe, non-duplicate records to Bunny DNS Zone
+  let importedCount = 0;
+  let failedCount = 0;
+  const importedRecords = [];
+  const importErrors = [];
+
+  if (numZoneId) {
+    if (isSimulatedZone(numZoneId)) {
+      const list = simulatedDnsStore.get(numZoneId) || [];
+      for (const rec of recordsToImport) {
+        const newRec = {
+          Id: Math.floor(Math.random() * 900000) + 100000,
+          ...rec,
+          typeLabel: getRecordTypeLabel(rec.Type),
+        };
+        list.push(newRec);
+        importedRecords.push(newRec);
+        importedCount++;
+      }
+      simulatedDnsStore.set(numZoneId, list);
+    } else {
+      for (const rec of recordsToImport) {
+        try {
+          const created = await addDnsRecord(numZoneId, BUNNY_ACCOUNT_API_KEY, {
+            type: rec.Type,
+            name: rec.Name,
+            value: rec.Value,
+            ttl: rec.Ttl || 3600,
+            priority: rec.Priority,
+            weight: rec.Weight,
+            port: rec.Port,
+          });
+          importedRecords.push(created || rec);
+          importedCount++;
+        } catch (err) {
+          console.error(`[AutoMigrate] Lỗi khi thêm bản ghi [${rec.typeLabel}] ${rec.Name || "@"}:`, err.message);
+          failedCount++;
+          importErrors.push({ record: rec, error: err.message });
+        }
+      }
+    }
+  }
+
+  console.log(`[AutoMigrate] Tự động đồng bộ DNS cho ${targetDomain}: Quét ${scannedResult.total}, An toàn ${safeRecords.length}, Bỏ qua xung đột ${conflictingRecords.length}, Đã có sẵn ${alreadyExistedRecords.length}, Đã nhập mới ${importedCount}.`);
+
+  return {
+    success: true,
+    domain: targetDomain,
+    zoneId: numZoneId,
+    totalScanned: scannedResult.total,
+    safeCount: safeRecords.length,
+    skippedCount: conflictingRecords.length,
+    alreadyExistedCount: alreadyExistedRecords.length,
+    importedCount,
+    failedCount,
+    importedRecords,
+    skippedRecords: conflictingRecords,
+    alreadyExistedRecords,
+    importErrors,
+    scanLogs: scannedResult.scanLogs,
+    nameserverUsed: scannedResult.nameserverUsed,
   };
 }
 
@@ -445,7 +648,7 @@ export async function importSelectedRecordsService({ zoneId, records = [] }) {
   let failedCount = 0;
   const errors = [];
 
-  if (isSimulatedMode || numZoneId === 998877) {
+  if (isSimulatedZone(numZoneId)) {
     const existing = simulatedDnsStore.get(numZoneId) || [];
     for (const rec of records) {
       existing.push({
@@ -487,7 +690,7 @@ export async function createRecordService({ zoneId, record }) {
   if (!zoneId) throw new Error("Missing zoneId");
   const numZoneId = Number(zoneId);
 
-  if (isSimulatedMode || numZoneId === 998877) {
+  if (isSimulatedZone(numZoneId)) {
     const list = simulatedDnsStore.get(numZoneId) || [];
     const newRec = {
       Id: Math.floor(Math.random() * 900000) + 100000,
@@ -510,7 +713,7 @@ export async function deleteRecordService({ zoneId, recordId }) {
   if (!zoneId || !recordId) throw new Error("Missing zoneId or recordId");
   const numZoneId = Number(zoneId);
 
-  if (isSimulatedMode || numZoneId === 998877) {
+  if (isSimulatedZone(numZoneId)) {
     const list = simulatedDnsStore.get(numZoneId) || [];
     const filtered = list.filter((r) => String(r.Id) !== String(recordId));
     simulatedDnsStore.set(numZoneId, filtered);
@@ -529,7 +732,7 @@ export async function batchDeleteRecordsService({ zoneId, recordIds = [] }) {
   if (!zoneId) throw new Error("Missing zoneId");
   const numZoneId = Number(zoneId);
 
-  if (isSimulatedMode || numZoneId === 998877) {
+  if (isSimulatedZone(numZoneId)) {
     const list = simulatedDnsStore.get(numZoneId) || [];
     const idSet = new Set(recordIds.map(String));
     const filtered = list.filter((r) => !idSet.has(String(r.Id)));
