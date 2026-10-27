@@ -919,7 +919,6 @@
   border-radius: 10px;
   padding: 16px;
   background-color: #ffffff;
-  max-width: 650px;
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -1479,8 +1478,13 @@
 }
 
 @keyframes sq-spin-anim {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ------------------------------------------------------------- */
@@ -1767,4 +1771,865 @@
 .sq-landing-preview-meta {
   font-size: 12px;
   color: #64748b;
+}
+
+/* ==========================================================================
+   Interactive DNS Zone & Records Manager Styles
+   ========================================================================== */
+
+.sq-dns-manager-container {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 16px;
+  margin-top: 14px;
+}
+
+.sq-dns-manager-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.sq-dns-manager-title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sq-dns-manager-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.sq-dns-zone-tag {
+  background-color: #f1f5f9;
+  color: #475569;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.sq-dns-manager-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.sq-btn-dns-scan {
+  background-color: #0f172a;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+
+.sq-btn-dns-scan:hover {
+  background-color: #1e293b;
+  transform: translateY(-1px);
+}
+
+.sq-btn-dns-bulk {
+  background-color: #ffffff;
+  color: #1e293b;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+
+.sq-btn-dns-bulk:hover {
+  background-color: #f1f5f9;
+  border-color: #94a3b8;
+  transform: translateY(-1px);
+}
+
+.sq-btn-dns-add {
+  background-color: #ffffff;
+  color: #0f172a;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+
+.sq-btn-dns-add:hover {
+  background-color: #f8fafc;
+  border-color: #94a3b8;
+}
+
+.sq-btn-dns-refresh {
+  background: transparent;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 6px 8px;
+  color: #64748b;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.sq-btn-dns-refresh:hover:not(:disabled) {
+  color: #0f172a;
+  background-color: #f1f5f9;
+}
+
+.sq-dns-manager-note {
+  font-size: 12px;
+  color: #64748b;
+  margin: 0 0 12px 0;
+  line-height: 1.5;
+}
+
+.sq-dns-records-live-table {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 0 !important;
+}
+
+.sq-dns-records-loading,
+.sq-dns-records-empty {
+  padding: 24px 16px;
+  text-align: center;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.sq-dns-type-badge {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.sq-dns-type-badge.type-7 {
+  background-color: #eef2ff;
+  color: #4f46e5;
+  border: 1px solid #c7d2fe;
+}
+
+.sq-dns-type-badge.type-2 {
+  background-color: #eff6ff;
+  color: #2563eb;
+  border: 1px solid #bfdbfe;
+}
+
+.sq-dns-type-badge.type-0 {
+  background-color: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+}
+
+.sq-dns-type-badge.type-4 {
+  background-color: #fffbeb;
+  color: #d97706;
+  border: 1px solid #fde68a;
+}
+
+.sq-dns-type-badge.type-3 {
+  background-color: #ecfeff;
+  color: #0891b2;
+  border: 1px solid #a5f3fc;
+}
+
+.sq-dns-type-badge.type-8 {
+  background-color: #f5f3ff;
+  color: #7c3aed;
+  border: 1px solid #ddd6fe;
+}
+
+.sq-dns-pz-val {
+  font-size: 12px;
+  font-weight: 600;
+  color: #4338ca;
+}
+
+.sq-dns-val-text {
+  font-size: 12px;
+  color: #334155;
+  word-break: break-all;
+}
+
+.sq-dns-cell-ttl {
+  font-size: 11px;
+  color: #64748b;
+  font-variant-numeric: tabular-nums;
+}
+
+.sq-dns-core-tag {
+  font-size: 11px;
+  color: #059669;
+  background-color: #d1fae5;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.sq-btn-delete-record {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  padding: 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: inline-flex;
+  transition: all 0.15s ease;
+}
+
+.sq-btn-delete-record:hover:not(:disabled) {
+  color: #ef4444;
+  background-color: #fee2e2;
+}
+
+/* Live Records Batch Delete Toolbar */
+.sq-dns-live-batch-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  animation: sq-modal-appear 0.15s ease;
+}
+
+.sq-dns-live-batch-count {
+  font-size: 12px;
+  color: #991b1b;
+  font-weight: 500;
+}
+
+.sq-dns-live-batch-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sq-btn-batch-delete-danger {
+  background-color: #dc2626;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+
+.sq-btn-batch-delete-danger:hover:not(:disabled) {
+  background-color: #b91c1c;
+}
+
+.sq-btn-batch-delete-danger:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.sq-btn-batch-cancel {
+  background: transparent;
+  border: 1px solid #fca5a5;
+  color: #991b1b;
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.sq-btn-batch-cancel:hover:not(:disabled) {
+  background-color: #fee2e2;
+}
+
+/* ==========================================================================
+   DNS Scan & Add Record Modals
+   ========================================================================== */
+
+.sq-dns-modal {
+  width: 90%;
+  max-width: 820px;
+  max-height: 85vh;
+  background-color: #ffffff;
+  color: #0f172a;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.25);
+  animation: sq-modal-appear 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sq-dns-modal--small {
+  max-width: 520px;
+}
+
+.sq-dns-modal-header {
+  padding: 18px 24px;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  background-color: #f8fafc;
+}
+
+.sq-dns-modal-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.sq-dns-modal-desc {
+  margin: 4px 0 0 0;
+  font-size: 13px;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.sq-btn-modal-close {
+  background: none;
+  border: none;
+  font-size: 22px;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+}
+
+.sq-btn-modal-close:hover {
+  color: #0f172a;
+}
+
+.sq-dns-modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 18px 24px;
+}
+
+.sq-dns-modal-footer {
+  padding: 14px 24px;
+  border-top: 1px solid #e2e8f0;
+  background-color: #f8fafc;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.sq-btn-modal-cancel {
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.sq-btn-modal-cancel:hover {
+  background-color: #f1f5f9;
+}
+
+.sq-btn-modal-confirm {
+  background-color: #0f172a;
+  border: none;
+  color: #ffffff;
+  border-radius: 6px;
+  padding: 8px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.sq-btn-modal-confirm:hover:not(:disabled) {
+  background-color: #1e293b;
+}
+
+.sq-btn-modal-confirm:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Scan Loading & Summary Bar */
+.sq-dns-scan-loading-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 16px;
+  text-align: center;
+}
+
+.sq-scan-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid #e2e8f0;
+  border-top-color: #2563eb;
+  border-radius: 50%;
+  animation: sq-spin-anim 0.8s linear infinite;
+  margin-bottom: 16px;
+}
+
+.sq-scan-loading-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.sq-scan-loading-subtext {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 4px;
+}
+
+.sq-dns-scan-summary-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.sq-dns-scan-stats {
+  font-size: 13px;
+  color: #334155;
+}
+
+.sq-dns-scan-filter-btns {
+  display: flex;
+  gap: 6px;
+}
+
+.sq-btn-filter-tag {
+  background-color: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.sq-btn-filter-tag:hover {
+  background-color: #e2e8f0;
+}
+
+.sq-btn-filter-tag.active {
+  background-color: #ecfdf5;
+  border-color: #a7f3d0;
+  color: #047857;
+}
+
+.sq-dns-scan-table-wrapper {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.sq-dns-scan-table {
+  width: 100%;
+}
+
+.sq-dns-scan-head {
+  display: flex;
+  align-items: center;
+  padding: 8px 14px;
+  background-color: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 12px;
+  font-weight: 700;
+  color: #64748b;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.sq-dns-scan-row {
+  display: flex;
+  align-items: center;
+  padding: 10px 14px;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.12s ease;
+}
+
+.sq-dns-scan-row:hover {
+  background-color: #f8fafc;
+}
+
+.sq-dns-scan-row--selected {
+  background-color: #f0fdf4 !important;
+}
+
+.sq-dns-scan-row--warning {
+  background-color: #fffbeb;
+}
+
+.sq-dns-scan-val {
+  flex: 1;
+  word-break: break-all;
+  color: #1e293b;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+}
+
+.sq-dns-scan-note {
+  font-size: 11px;
+  color: #64748b;
+}
+
+.sq-dns-scan-conflict-alert {
+  margin-top: 12px;
+  background-color: #fffbeb;
+  border: 1px solid #fef3c7;
+  color: #92400e;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+/* Add DNS Record Form Styles */
+.sq-dns-form-group {
+  margin-bottom: 14px;
+}
+
+.sq-dns-form-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 6px;
+}
+
+.sq-dns-form-input,
+.sq-dns-form-select {
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 13px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background-color: #ffffff;
+  color: #0f172a;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease;
+}
+
+.sq-dns-form-input:focus,
+.sq-dns-form-select:focus {
+  border-color: #0f172a;
+}
+
+.sq-spin {
+  animation: sq-spin-anim 0.8s linear infinite;
+}
+
+@keyframes sq-spin-anim {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ==========================================================================
+   DNS Deep Scan & Bulk Import Enhanced Styles
+   ========================================================================== */
+
+/* Nameserver Picker Card in Scan Modal */
+.sq-dns-scan-ns-card {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+}
+
+.sq-dns-scan-ns-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.sq-dns-scan-ns-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.sq-dns-scan-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.sq-btn-ns-preset {
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+  border-radius: 5px;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.sq-btn-ns-preset:hover:not(:disabled) {
+  background-color: #f1f5f9;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+.sq-btn-ns-preset.active {
+  background-color: #0f172a;
+  border-color: #0f172a;
+  color: #ffffff;
+}
+
+.sq-dns-scan-ns-input-row {
+  display: flex;
+  gap: 8px;
+}
+
+.sq-dns-ns-input {
+  flex: 1;
+  padding: 6px 10px;
+  font-size: 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  outline: none;
+  background-color: #ffffff;
+}
+
+.sq-dns-ns-input:focus {
+  border-color: #0f172a;
+}
+
+.sq-btn-ns-rescan {
+  background-color: #0f172a;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.15s ease;
+}
+
+.sq-btn-ns-rescan:hover:not(:disabled) {
+  background-color: #1e293b;
+}
+
+.sq-dns-ns-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background-color: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1d4ed8;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.sq-btn-filter-logs {
+  background-color: #f8fafc !important;
+  color: #3b82f6 !important;
+  border-color: #bfdbfe !important;
+}
+
+.sq-btn-filter-logs:hover {
+  background-color: #eff6ff !important;
+}
+
+/* Collapsible Scan Logs Console */
+.sq-dns-scan-logs-console {
+  background-color: #0f172a;
+  color: #e2e8f0;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  line-height: 1.6;
+  max-height: 180px;
+  overflow-y: auto;
+  border: 1px solid #334155;
+}
+
+.sq-dns-scan-logs-title {
+  color: #94a3b8;
+  font-weight: 600;
+  margin-bottom: 6px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.sq-dns-scan-log-line {
+  color: #38bdf8;
+  word-break: break-all;
+}
+
+/* Bulk Import Modal Styles */
+.sq-bulk-sample-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.sq-bulk-sample-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.sq-btn-sample-tag {
+  background-color: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  color: #334155;
+  border-radius: 5px;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.sq-btn-sample-tag:hover {
+  background-color: #e2e8f0;
+  color: #0f172a;
+}
+
+.sq-btn-sample-clear {
+  color: #dc2626 !important;
+  background-color: #fee2e2 !important;
+  border-color: #fecaca !important;
+}
+
+.sq-btn-sample-clear:hover {
+  background-color: #fca5a5 !important;
+}
+
+.sq-bulk-textarea-wrapper {
+  margin-bottom: 14px;
+}
+
+.sq-bulk-textarea {
+  width: 100%;
+  padding: 10px 12px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background-color: #f8fafc;
+  color: #0f172a;
+  outline: none;
+  box-sizing: border-box;
+  resize: vertical;
+  transition: border-color 0.15s ease;
+}
+
+.sq-bulk-textarea:focus {
+  border-color: #0f172a;
+  background-color: #ffffff;
+}
+
+.sq-bulk-parsing-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #64748b;
+  padding: 10px 0;
+}
+
+.sq-bulk-errors-box {
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 11px;
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+
+.sq-bulk-error-item {
+  margin-top: 3px;
+}
+
+.sq-bulk-preview-container {
+  margin-top: 6px;
+}
+
+.sq-btn-upload-file-highlight {
+  background-color: #eff6ff !important;
+  color: #1d4ed8 !important;
+  border-color: #bfdbfe !important;
+  font-weight: 600;
+}
+
+.sq-btn-upload-file-highlight:hover {
+  background-color: #dbeafe !important;
+  border-color: #93c5fd !important;
 }

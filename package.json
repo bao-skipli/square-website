@@ -8,7 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "test": "node --import ./test/register.js --test \"src/features/dashboard/__tests__/*.test.js\"",
-    "agent": "node agent/index.js",
+    "agent": "node --watch agent/index.js",
     "preview": "vite preview"
   },
   "dependencies": {

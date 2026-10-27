@@ -18,3 +18,21 @@ export {
   cleanStaleStorageFiles,
 } from "./clients/bunnyStorage.js";
 export { verifyDns, verifyLiveWebsite } from "./clients/dnsVerifier.js";
+export {
+  DNS_RECORD_TYPES,
+  DNS_TYPE_LABELS,
+  getRecordTypeLabel,
+  resolveRecordType,
+  getDnsZones,
+  getDnsZone,
+  createDnsZone,
+  ensureDnsZone,
+  deleteDnsZone,
+  addDnsRecord,
+  updateDnsRecord,
+  deleteDnsRecord,
+  triggerDnsScan,
+  getDnsScanResults,
+  pollDnsScanResults,
+  filterSafeMigrationRecords,
+} from "./clients/bunnyDns.js";

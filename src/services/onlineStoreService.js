@@ -637,3 +637,96 @@ export function subscribeDomainJob(jobId, callback) {
   }
 }
 
+// ==========================================
+// DNS ZONE & RECORDS CLIENT APIS
+// ==========================================
+
+export async function fetchDnsRecords(zoneId) {
+  if (!zoneId) throw new Error("Missing zoneId");
+  const res = await fetch(`http://127.0.0.1:4567/domain/dns/records?zoneId=${encodeURIComponent(zoneId)}`);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || `HTTP ${res.status}`);
+  }
+  return await res.json();
+}
+
+export async function scanDnsRecords(zoneId, domain, storeId, customNs = null) {
+  const res = await fetch("http://127.0.0.1:4567/domain/dns/scan", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ zoneId, domain, storeId, customNs }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || `HTTP ${res.status}`);
+  }
+  return await res.json();
+}
+
+export async function parseBulkDnsRecords(rawText, domain) {
+  const res = await fetch("http://127.0.0.1:4567/domain/dns/parse-bulk", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ rawText, domain }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || `HTTP ${res.status}`);
+  }
+  return await res.json();
+}
+
+export async function importDnsRecords(zoneId, records, storeId) {
+  const res = await fetch("http://127.0.0.1:4567/domain/dns/import", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ zoneId, records, storeId }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || `HTTP ${res.status}`);
+  }
+  return await res.json();
+}
+
+export async function createDnsRecord(zoneId, record) {
+  const res = await fetch("http://127.0.0.1:4567/domain/dns/record", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ zoneId, record }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || `HTTP ${res.status}`);
+  }
+  return await res.json();
+}
+
+export async function deleteDnsRecord(zoneId, recordId) {
+  const res = await fetch(`http://127.0.0.1:4567/domain/dns/record/${encodeURIComponent(recordId)}`, {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ zoneId, recordId }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || `HTTP ${res.status}`);
+  }
+  return await res.json();
+}
+
+export async function batchDeleteDnsRecords(zoneId, recordIds) {
+  const res = await fetch("http://127.0.0.1:4567/domain/dns/records/batch-delete", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ zoneId, recordIds }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || `HTTP ${res.status}`);
+  }
+  return await res.json();
+}
+
+
