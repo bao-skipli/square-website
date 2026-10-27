@@ -15,6 +15,7 @@ import {
   subscribeAgentStatus,
   fetchDnsRecords,
   scanDnsRecords,
+  autoMigrateDnsRecords,
   importDnsRecords,
   createDnsRecord,
   deleteDnsRecord,
@@ -492,31 +493,42 @@ export default function OnlineStoreSetupView({
 
   const handleTriggerScan = async (overrideNs = null) => {
     if (!customDomain) return;
-    setIsScanModalOpen(true);
     setIsScanningDns(true);
-    setScannedRecordsData(null);
-    setSelectedRecordIndexes(new Set());
 
     const nsToQuery = overrideNs !== null ? overrideNs : customScanNs;
+    const targetDomain = customDomain.rootDomain || customDomain.hostname;
 
     try {
-      const res = await scanDnsRecords(
+      const res = await autoMigrateDnsRecords(
         customDomain.zoneId,
-        customDomain.rootDomain || customDomain.hostname,
+        targetDomain,
         storeId,
         nsToQuery || null
       );
-      setScannedRecordsData(res);
-      const defaultSelected = new Set();
-      (res.records || []).forEach((r, idx) => {
-        if (r.selectedByDefault) {
-          defaultSelected.add(idx);
-        }
-      });
-      setSelectedRecordIndexes(defaultSelected);
+
+      if (res.importedCount > 0) {
+        setToast({
+          message: `Đã tự động quét & đồng bộ ${res.importedCount} bản ghi an toàn (Email, TXT, Subdomain) lên Bunny DNS! (Bỏ qua ${res.skippedCount} bản ghi web/NS cũ${res.alreadyExistedCount > 0 ? `, ${res.alreadyExistedCount} bản ghi đã có sẵn` : ""})`,
+          type: "success",
+        });
+      } else if (res.alreadyExistedCount > 0) {
+        setToast({
+          message: `Toàn bộ ${res.alreadyExistedCount} bản ghi an toàn từ Host cũ đã được đồng bộ trên Bunny DNS trước đó. Không có bản ghi mới.`,
+          type: "info",
+        });
+      } else {
+        setToast({
+          message: `Quét hoàn tất: Không tìm thấy bản ghi an toàn nào mới từ Host cũ.`,
+          type: "warning",
+        });
+      }
+
+      if (customDomain.zoneId) {
+        await loadDnsZoneRecords(customDomain.zoneId);
+      }
     } catch (err) {
-      console.error("DNS Scan error:", err);
-      setToast({ message: `Quét bản ghi thất bại: ${err.message}`, type: "error" });
+      console.error("DNS Auto-migrate error:", err);
+      setToast({ message: `Quét & đồng bộ DNS thất bại: ${err.message}`, type: "error" });
     } finally {
       setIsScanningDns(false);
     }
@@ -1421,9 +1433,18 @@ export default function OnlineStoreSetupView({
                                 type="button"
                                 className="sq-btn-dns-scan"
                                 onClick={() => handleTriggerScan()}
-                                title="Quét tự động và nhập bản ghi từ nhà đăng ký tên miền cũ (Mắt Bão, Tenten...)"
+                                disabled={isScanningDns || isLoadingDnsRecords}
+                                title="Tự động quét sâu và đồng bộ toàn bộ bản ghi DNS an toàn từ Host cũ lên Bunny DNS"
                               >
-                                <ScanIcon /> Quét từ Host cũ
+                                {isScanningDns ? (
+                                  <>
+                                    <RefreshCwIcon className="sq-spin" /> Đang quét & đồng bộ...
+                                  </>
+                                ) : (
+                                  <>
+                                    <ScanIcon /> Quét từ Host cũ
+                                  </>
+                                )}
                               </button>
                               <button
                                 type="button"

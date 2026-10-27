@@ -35,4 +35,5 @@ export {
   getDnsScanResults,
   pollDnsScanResults,
   filterSafeMigrationRecords,
+  isDnsRecordDuplicate,
 } from "./clients/bunnyDns.js";

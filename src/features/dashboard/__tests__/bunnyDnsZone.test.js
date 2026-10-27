@@ -8,10 +8,12 @@ import {
   cleanRecordHost,
   parseBulkDnsText,
   deepScanDomain,
+  isDnsRecordDuplicate,
 } from "../../../../agent/clients/bunnyDns.js";
 import {
   getZoneRecordsService,
   scanDomainRecordsService,
+  autoMigrateDnsRecordsService,
   importSelectedRecordsService,
   createRecordService,
   deleteRecordService,
@@ -224,5 +226,55 @@ test("deepScanDomain directly probes Mắt Bão for jobsnow.id.vn and retrieves 
   assert.equal(hasSrv, true, "Should discover SRV _autodiscover._tcp record");
   assert.equal(hasDkim, true, "Should discover resend._domainkey TXT record");
   assert.equal(hasSendMx, true, "Should discover send subdomain MX record");
+});
+
+test("isDnsRecordDuplicate accurately identifies matching records and ignores distinct ones", () => {
+  const apex = "example.com";
+  const existingMx = { Type: 4, Name: "", Value: "mail.example.com", Priority: 10 };
+  const candidateMxMatch = { Type: "MX", Name: "@", Value: "mail.example.com.", Priority: 10 };
+  const candidateMxDiffVal = { Type: "MX", Name: "@", Value: "diffmail.example.com.", Priority: 10 };
+  const candidateMxDiffPrio = { Type: "MX", Name: "@", Value: "mail.example.com.", Priority: 20 };
+
+  assert.equal(isDnsRecordDuplicate(candidateMxMatch, existingMx, apex), true);
+  assert.equal(isDnsRecordDuplicate(candidateMxDiffVal, existingMx, apex), false);
+  assert.equal(isDnsRecordDuplicate(candidateMxDiffPrio, existingMx, apex), false);
+
+  const existingTxt = { Type: 3, Name: "", Value: '"v=spf1 include:spf.google.com ~all"' };
+  const candidateTxtMatch = { Type: "TXT", Name: "example.com", Value: "v=spf1 include:spf.google.com ~all" };
+  assert.equal(isDnsRecordDuplicate(candidateTxtMatch, existingTxt, apex), true);
+
+  const existingCname = { Type: 2, Name: "mail", Value: "s129d209.emailserver.vn" };
+  const candidateCname = { Type: "CNAME", Name: "mail", Value: "s129d209.emailserver.vn." };
+  assert.equal(isDnsRecordDuplicate(candidateCname, existingCname, apex), true);
+
+  const existingSrv = { Type: 8, Name: "_autodiscover._tcp", Value: "mail.server.vn", Port: 443 };
+  const candidateSrvMatch = { Type: "SRV", Name: "_autodiscover._tcp", Value: "mail.server.vn", Port: 443 };
+  const candidateSrvDiffPort = { Type: "SRV", Name: "_autodiscover._tcp", Value: "mail.server.vn", Port: 8443 };
+  assert.equal(isDnsRecordDuplicate(candidateSrvMatch, existingSrv, apex), true);
+  assert.equal(isDnsRecordDuplicate(candidateSrvDiffPort, existingSrv, apex), false);
+});
+
+test("autoMigrateDnsRecordsService scans, filters conflicts, deduplicates and batch imports in 1-click", async () => {
+  const zoneId = 998899;
+  const domain = "autobrand.com";
+
+  // First auto-migration run
+  const firstRun = await autoMigrateDnsRecordsService({ zoneId, domain });
+  assert.equal(firstRun.success, true);
+  assert.ok(firstRun.safeCount > 0, "Should have safe records (MX, TXT, SRV)");
+  assert.ok(firstRun.skippedCount >= 2, "Should filter out conflicting A @ and CNAME www");
+  assert.equal(firstRun.importedCount, firstRun.safeCount, "Should import all safe records on first run");
+
+  // Ensure conflicting records are in skippedRecords and none of them was imported
+  const importedAorWww = firstRun.importedRecords.some(
+    (r) => (r.Name === "" || r.Name === "@" || r.Name === "www") && (r.Type === 0 || r.Type === 2)
+  );
+  assert.equal(importedAorWww, false, "Conflicting web records must NOT be imported");
+
+  // Second auto-migration run on same zone: should detect all records already exist and skip re-importing
+  const secondRun = await autoMigrateDnsRecordsService({ zoneId, domain });
+  assert.equal(secondRun.success, true);
+  assert.equal(secondRun.importedCount, 0, "No duplicate records should be imported on second run");
+  assert.equal(secondRun.alreadyExistedCount, firstRun.safeCount, "All safe records should be recognized as existing");
 });
 

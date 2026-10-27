@@ -6,6 +6,7 @@ import {
   removeDomain,
   getZoneRecordsService,
   scanDomainRecordsService,
+  autoMigrateDnsRecordsService,
   importSelectedRecordsService,
   createRecordService,
   deleteRecordService,
@@ -77,12 +78,24 @@ export async function handleAgentRoutes(req, res, pathname) {
   // POST /domain/dns/scan
   if (req.method === "POST" && pathname === "/domain/dns/scan") {
     const body = await parseJsonBody(req);
+    const { zoneId, domain, customNs, storeId, autoImport } = body;
+    if (!zoneId && !domain) {
+      return sendJson(res, 400, { error: "Missing zoneId or domain" });
+    }
+
+    const result = await scanDomainRecordsService({ zoneId, domain, customNs, storeId, autoImport });
+    return sendJson(res, 200, result);
+  }
+
+  // POST /domain/dns/auto-migrate
+  if (req.method === "POST" && pathname === "/domain/dns/auto-migrate") {
+    const body = await parseJsonBody(req);
     const { zoneId, domain, customNs, storeId } = body;
     if (!zoneId && !domain) {
       return sendJson(res, 400, { error: "Missing zoneId or domain" });
     }
 
-    const result = await scanDomainRecordsService({ zoneId, domain, customNs, storeId });
+    const result = await autoMigrateDnsRecordsService({ zoneId, domain, customNs, storeId });
     return sendJson(res, 200, result);
   }
 

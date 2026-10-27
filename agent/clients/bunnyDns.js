@@ -332,27 +332,42 @@ export async function pollDnsScanResults(zoneId, apiKey, { maxAttempts = 6, dela
 }
 
 /**
- * Smart Filter helper: separates safe records (MX, TXT, SPF, DKIM, SRV)
+ * Smart Filter helper: separates safe records (MX, TXT, SPF, DKIM, SRV, subdomains)
  * from conflicting root/www web records (A, CNAME) and apex NS
  */
-export function filterSafeMigrationRecords(scannedRecords = []) {
+export function filterSafeMigrationRecords(scannedRecords = [], apexDomain = "") {
   const safe = [];
   const conflictingWeb = [];
+  const cleanApex = (apexDomain || "").toLowerCase().trim().replace(/^www\./, "");
 
   for (const record of scannedRecords) {
-    const cleanName = (record.Name || "").trim().toLowerCase();
+    let cleanName = (record.Name || "").trim().toLowerCase();
+    if (cleanApex && (cleanName === cleanApex || cleanName.endsWith(`.${cleanApex}`))) {
+      cleanName = cleanName === cleanApex ? "" : cleanName.slice(0, -(cleanApex.length + 1));
+    }
+    cleanName = cleanName.replace(/^\.+|\.+$/g, "");
+    if (cleanName === "@") cleanName = "";
+
     const type = resolveRecordType(record.Type);
 
     // Conflict: Apex domain (@) or www pointing to old A or CNAME host
-    const isRootOrWww = cleanName === "" || cleanName === "@" || cleanName === "www";
+    const isRootOrWww = cleanName === "" || cleanName === "www";
     const isWebType = type === DNS_RECORD_TYPES.A || type === DNS_RECORD_TYPES.AAAA || type === DNS_RECORD_TYPES.CNAME;
     const isApexNs = isRootOrWww && type === DNS_RECORD_TYPES.NS;
+    const isSoa = type === 6; // SOA record is always managed by Bunny
 
     if (isApexNs) {
       conflictingWeb.push({
         ...record,
         typeLabel: getRecordTypeLabel(type),
         reason: "Bản ghi Nameserver cũ. Không cần nhập vì tên miền đã trỏ Nameserver về Bunny.",
+        selectedByDefault: false,
+      });
+    } else if (isSoa) {
+      conflictingWeb.push({
+        ...record,
+        typeLabel: getRecordTypeLabel(type),
+        reason: "Bản ghi SOA cũ. Bunny DNS tự động quản lý SOA cho Zone.",
         selectedByDefault: false,
       });
     } else if (isRootOrWww && isWebType) {
@@ -380,6 +395,66 @@ export function filterSafeMigrationRecords(scannedRecords = []) {
   }
 
   return { safe, conflictingWeb, all: [...safe, ...conflictingWeb] };
+}
+
+/**
+ * Checks whether candidate record already exists in Bunny DNS Zone
+ */
+export function isDnsRecordDuplicate(candidate, existingRecord, apexDomain = "") {
+  const candType = resolveRecordType(candidate.Type);
+  const existType = resolveRecordType(existingRecord.Type);
+
+  if (candType !== existType) return false;
+
+  const normalizeHost = (h) => {
+    let s = (h || "").trim().toLowerCase();
+    if (s === "@") s = "";
+    if (apexDomain) {
+      const cleanApex = apexDomain.toLowerCase().trim().replace(/^www\./, "");
+      if (s === cleanApex) s = "";
+      else if (s.endsWith(`.${cleanApex}`)) s = s.slice(0, -(cleanApex.length + 1));
+    }
+    return s.replace(/^\.+|\.+$/g, "");
+  };
+
+  const candHost = normalizeHost(candidate.Name);
+  const existHost = normalizeHost(existingRecord.Name);
+
+  if (candHost !== existHost) return false;
+
+  // CNAME: Bunny does not allow multiple CNAME records with the same Name
+  if (candType === DNS_RECORD_TYPES.CNAME) {
+    return true;
+  }
+
+  const normalizeVal = (v) => {
+    let s = (v || "").trim().toLowerCase();
+    s = s.replace(/^["']+|["']+$/g, "").trim();
+    s = s.replace(/\.$/, "");
+    s = s.replace(/\s+/g, " ");
+    return s;
+  };
+
+  const candVal = normalizeVal(candidate.Value);
+  const existVal = normalizeVal(existingRecord.Value);
+
+  if (candVal !== existVal) return false;
+
+  // For SRV, check Port
+  if (candType === DNS_RECORD_TYPES.SRV) {
+    const candPort = Number(candidate.Port || 0);
+    const existPort = Number(existingRecord.Port || 0);
+    if (candPort !== existPort) return false;
+  }
+
+  // For MX, check Priority
+  if (candType === DNS_RECORD_TYPES.MX) {
+    const candPrio = Number(candidate.Priority || 0);
+    const existPrio = Number(existingRecord.Priority || 0);
+    if (candPrio !== existPrio) return false;
+  }
+
+  return true;
 }
 
 // ==========================================
