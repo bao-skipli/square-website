@@ -34,6 +34,10 @@ export default class DashboardHomeView extends PureComponent {
           selectedDateChip={selectedDateChip}
           selectedVsChip={selectedVsChip}
           selectedChecksChip={selectedChecksChip}
+          onOpenTakePayment={this.props.onOpenTakePayment}
+          onEditMenu={this.props.onEditMenu}
+          onAddItem={this.props.onAddItem}
+          onViewOrders={this.props.onViewOrders}
         />
       </div>
     );

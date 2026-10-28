@@ -34,6 +34,10 @@ export function buildItemDetailsProps(comp) {
     nutritionalInfoOpen: s.nutritionalInfoOpen,
     onToggleNutritionalInfo: () =>
       comp.setState((prev) => ({ nutritionalInfoOpen: !prev.nutritionalInfoOpen })),
+    formCalories: s.formCalories,
+    onCaloriesChange: (e) => comp.setState({ formCalories: e.target.value }),
+    formAllergens: s.formAllergens,
+    onAllergensChange: (e) => comp.setState({ formAllergens: e.target.value }),
     businessName: s.businessName,
     formSku: s.formSku,
     onSkuChange: (e) => comp.setState({ formSku: e.target.value }),

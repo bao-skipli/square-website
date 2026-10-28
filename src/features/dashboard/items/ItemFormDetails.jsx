@@ -117,6 +117,10 @@ export default class ItemFormDetails extends PureComponent {
       onRemoveItemModifierSet,
       onSaveItemModifierOverrides,
       onReorderItemModifierSets,
+      formCalories,
+      onCaloriesChange,
+      formAllergens,
+      onAllergensChange,
       ...fulfillmentProps
     } = this.props;
 
@@ -373,6 +377,8 @@ export default class ItemFormDetails extends PureComponent {
                 type="text"
                 className="sq-form-box-input"
                 placeholder="Calories (kcal)"
+                value={formCalories || ""}
+                onChange={onCaloriesChange}
               />
             </div>
             <div className="sq-form-box">
@@ -380,6 +386,8 @@ export default class ItemFormDetails extends PureComponent {
                 type="text"
                 className="sq-form-box-input"
                 placeholder="Allergens (e.g. Milk, Nuts, Soy)"
+                value={formAllergens || ""}
+                onChange={onAllergensChange}
               />
             </div>
           </div>

@@ -214,7 +214,7 @@ export default class HomeMetricsSection extends PureComponent {
                 <button
                   type="button"
                   className="sq-qa-btn"
-                  onClick={() => alert("Action: Take payment")}
+                  onClick={this.props.onOpenTakePayment}
                 >
                   Take payment
                 </button>
@@ -223,7 +223,7 @@ export default class HomeMetricsSection extends PureComponent {
                 <button
                   type="button"
                   className="sq-qa-btn"
-                  onClick={() => alert("Action: Edit menu")}
+                  onClick={this.props.onEditMenu}
                 >
                   Edit menu
                 </button>
@@ -232,7 +232,7 @@ export default class HomeMetricsSection extends PureComponent {
                 <button
                   type="button"
                   className="sq-qa-btn"
-                  onClick={() => alert("Action: Add item")}
+                  onClick={this.props.onAddItem}
                 >
                   Add item
                 </button>
@@ -241,9 +241,9 @@ export default class HomeMetricsSection extends PureComponent {
                 <button
                   type="button"
                   className="sq-qa-btn"
-                  onClick={() => alert("Action: Pay a bill")}
+                  onClick={this.props.onViewOrders}
                 >
-                  Pay a bill
+                  Pay a bill / Orders
                 </button>
               </li>
             </ul>
