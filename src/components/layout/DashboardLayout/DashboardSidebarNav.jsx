@@ -45,6 +45,7 @@ export default class DashboardSidebarNav extends PureComponent {
       onNavigateToItemLibrary,
       onNavigateToCategories,
       onMenuClick,
+      newOrdersCount = 0,
     } = this.props;
 
     return (
@@ -121,7 +122,7 @@ export default class DashboardSidebarNav extends PureComponent {
                             <button
                               type="button"
                               className={`sq-subsubitem-btn ${
-                                activeMenu === "item-options" ? "is-active" : ""
+                                activeMenu === "item-options" || currentView === "item-options" ? "is-active" : ""
                               }`}
                               onClick={() => onMenuClick("item-options")}
                             >
@@ -132,7 +133,7 @@ export default class DashboardSidebarNav extends PureComponent {
                             <button
                               type="button"
                               className={`sq-subsubitem-btn ${
-                                activeMenu === "modifiers" && currentView === "modifiers"
+                                (activeMenu === "modifiers" && currentView === "modifiers") || currentView === "modifiers"
                                   ? "is-active"
                                   : ""
                               }`}
@@ -145,7 +146,7 @@ export default class DashboardSidebarNav extends PureComponent {
                             <button
                               type="button"
                               className={`sq-subsubitem-btn ${
-                                activeMenu === "categories" && currentView === "categories"
+                                (activeMenu === "categories" && currentView === "categories") || currentView === "categories"
                                   ? "is-active"
                                   : ""
                               }`}
@@ -158,7 +159,7 @@ export default class DashboardSidebarNav extends PureComponent {
                             <button
                               type="button"
                               className={`sq-subsubitem-btn ${
-                                activeMenu === "units" ? "is-active" : ""
+                                activeMenu === "units" || currentView === "units" ? "is-active" : ""
                               }`}
                               onClick={() => onMenuClick("units")}
                             >
@@ -170,7 +171,7 @@ export default class DashboardSidebarNav extends PureComponent {
                             <button
                               type="button"
                               className={`sq-subsubitem-btn ${
-                                activeMenu === "custom-attributes" ? "is-active" : ""
+                                activeMenu === "custom-attributes" || currentView === "custom-attributes" ? "is-active" : ""
                               }`}
                               onClick={() => onMenuClick("custom-attributes")}
                             >
@@ -185,7 +186,9 @@ export default class DashboardSidebarNav extends PureComponent {
                   <li className="sq-subitem">
                     <button
                       type="button"
-                      className={`sq-subitem-btn ${activeMenu === "menus" ? "is-active" : ""}`}
+                      className={`sq-subitem-btn ${
+                        activeMenu === "menus" || currentView === "menus" ? "is-active" : ""
+                      }`}
                       onClick={() => onMenuClick("menus")}
                     >
                       Menus
@@ -195,7 +198,7 @@ export default class DashboardSidebarNav extends PureComponent {
                     <button
                       type="button"
                       className={`sq-subitem-btn ${
-                        activeMenu === "kitchen-settings" ? "is-active" : ""
+                        activeMenu === "kitchen-settings" || currentView === "kitchen-settings" ? "is-active" : ""
                       }`}
                       onClick={() => onMenuClick("kitchen-settings")}
                     >
@@ -206,7 +209,7 @@ export default class DashboardSidebarNav extends PureComponent {
                     <button
                       type="button"
                       className={`sq-subitem-btn ${
-                        activeMenu === "channels-sub" ? "is-active" : ""
+                        activeMenu === "channels-sub" || currentView === "channels" ? "is-active" : ""
                       }`}
                       onClick={() => onMenuClick("channels-sub")}
                     >
@@ -218,20 +221,50 @@ export default class DashboardSidebarNav extends PureComponent {
             </div>
           </li>
 
-{PRIMARY_NAV_ITEMS.map(({ key, label, Icon }) => (
-            <li key={key} className="sq-nav-item">
-              <button
-                type="button"
-                className={`sq-nav-btn ${activeMenu === key ? "is-active" : ""}`}
-                onClick={() => onMenuClick(key)}
-              >
-                <span className="sq-nav-btn-icon">
-                  <Icon />
-                </span>
-                <span className="sq-nav-btn-label">{label}</span>
-              </button>
-            </li>
-          ))}
+          {PRIMARY_NAV_ITEMS.map(({ key, label, Icon }) => {
+            const isActive = activeMenu === key || (key === "orders" && currentView === "orders");
+            const badgeCount = key === "orders" ? newOrdersCount : 0;
+
+            return (
+              <li key={key} className="sq-nav-item">
+                <button
+                  type="button"
+                  className={`sq-nav-btn ${isActive ? "is-active" : ""}`}
+                  onClick={() => onMenuClick(key)}
+                >
+                  <span className="sq-nav-btn-icon">
+                    <Icon />
+                  </span>
+                  <span
+                    className="sq-nav-btn-label"
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      width: "100%",
+                    }}
+                  >
+                    <span>{label}</span>
+                    {badgeCount > 0 && (
+                      <span
+                        style={{
+                          backgroundColor: "#ef4444",
+                          color: "#ffffff",
+                          fontSize: "11px",
+                          fontWeight: 700,
+                          borderRadius: "10px",
+                          padding: "1px 6px",
+                          lineHeight: "16px",
+                        }}
+                      >
+                        {badgeCount}
+                      </span>
+                    )}
+                  </span>
+                </button>
+              </li>
+            );
+          })}
         </ul>
 
         <hr className="sq-sidebar-divider" />
@@ -241,7 +274,7 @@ export default class DashboardSidebarNav extends PureComponent {
             <li key={key} className="sq-nav-item">
               <button
                 type="button"
-                className={`sq-nav-btn ${activeMenu === key ? "is-active" : ""}`}
+                className={`sq-nav-btn ${activeMenu === key || (key === "channels" && currentView === "channels") ? "is-active" : ""}`}
                 onClick={() => onMenuClick(key)}
               >
                 <span className="sq-nav-btn-icon">

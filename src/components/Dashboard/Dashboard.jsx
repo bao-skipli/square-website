@@ -12,6 +12,13 @@ import {
   ItemLibraryView,
   ItemFilterDrawer,
   ItemFormModal,
+  ItemImportModal,
+  ItemOptionsView,
+  UnitsView,
+  CustomAttributesView,
+  MenusView,
+  KitchenSettingsView,
+  ChannelsView,
 } from "@/features/dashboard/items";
 import {
   buildItemDetailsProps,
@@ -33,6 +40,15 @@ import {
   ApplyToItemsModal,
 } from "@/features/dashboard/modifiers";
 import OnlineStoreSetupView from "@/features/dashboard/online/OnlineStoreSetupView";
+import { OrdersView } from "@/features/dashboard/orders";
+import { CustomersView } from "@/features/dashboard/customers";
+import { ReportsView } from "@/features/dashboard/reports";
+import StaffView from "@/features/dashboard/staff/StaffView";
+import BankingView from "@/features/dashboard/banking/BankingView";
+import SettingsView from "@/features/dashboard/settings/SettingsView";
+import WhatsNewView from "@/features/dashboard/whatsnew/WhatsNewView";
+import AppMarketplaceView from "@/features/dashboard/marketplace/AppMarketplaceView";
+import TakePaymentModal from "@/features/dashboard/payments/TakePaymentModal";
 import HomeSkeleton from "./HomeSkeleton";
 import DashboardLoading from "./DashboardLoading";
 import "./Dashboard.css";
@@ -135,6 +151,8 @@ class Dashboard extends DashboardModifierController {
           onNavigateToCategories={this.navigateToCategories}
           onNavigateToModifiers={this.navigateToModifiers}
           onMenuClick={this.handleMenuClick}
+          newOrdersCount={this.state.newOrdersCount}
+          onOpenTakePayment={this.handleOpenTakePayment}
         >
           {currentView === "home" && isHomeLoading ? (
             <HomeSkeleton />
@@ -201,6 +219,10 @@ class Dashboard extends DashboardModifierController {
               selectedDateChip={selectedDateChip}
               selectedVsChip={selectedVsChip}
               selectedChecksChip={selectedChecksChip}
+              onOpenTakePayment={this.handleOpenTakePayment}
+              onEditMenu={() => this.handleMenuClick("menus")}
+              onAddItem={this.navigateToCreateItem}
+              onViewOrders={() => this.handleMenuClick("orders")}
             />
           ) : currentView === "online-ordering" || currentView === "online" || currentView === "store-setup" ? (
             <OnlineStoreSetupView
@@ -209,6 +231,37 @@ class Dashboard extends DashboardModifierController {
               items={items}
               locations={[{ id: "loc-skipli", name: "Skipli" }]}
             />
+          ) : currentView === "orders" || currentView === "orders-payments" ? (
+            <OrdersView
+              storeId={this.state.businessName || "store_skipli"}
+              storeName={this.state.businessName || "Skipli"}
+            />
+          ) : currentView === "item-options" ? (
+            <ItemOptionsView userId={this.state.userId} />
+          ) : currentView === "units" ? (
+            <UnitsView userId={this.state.userId} />
+          ) : currentView === "custom-attributes" ? (
+            <CustomAttributesView userId={this.state.userId} />
+          ) : currentView === "menus" ? (
+            <MenusView userId={this.state.userId} categories={categories} />
+          ) : currentView === "kitchen-settings" ? (
+            <KitchenSettingsView userId={this.state.userId} categories={categories} />
+          ) : currentView === "channels" || currentView === "channels-sub" ? (
+            <ChannelsView userId={this.state.userId} storeName={businessName} />
+          ) : currentView === "customers" ? (
+            <CustomersView userId={this.state.userId} />
+          ) : currentView === "reports" ? (
+            <ReportsView storeId={this.state.businessName || "store_skipli"} />
+          ) : currentView === "staff" ? (
+            <StaffView userId={this.state.userId} />
+          ) : currentView === "banking" ? (
+            <BankingView userId={this.state.userId} />
+          ) : currentView === "settings" ? (
+            <SettingsView userId={this.state.userId} />
+          ) : currentView === "whats-new" ? (
+            <WhatsNewView />
+          ) : currentView === "add-more" ? (
+            <AppMarketplaceView userId={this.state.userId} />
           ) : (
             <GenericView title={this.getMenuLabel(currentView)} />
           )}
@@ -230,6 +283,12 @@ class Dashboard extends DashboardModifierController {
           onDelete={this.handleDeleteItem}
           detailsProps={buildItemDetailsProps(this)}
           settingsProps={buildItemSettingsProps(this)}
+        />
+
+        <ItemImportModal
+          isOpen={this.state.isImportItemModalOpen}
+          onClose={() => this.setState({ isImportItemModalOpen: false })}
+          onImportItems={this.handleBatchImportItems}
         />
 
         <CategoryFormModal
@@ -372,6 +431,14 @@ class Dashboard extends DashboardModifierController {
               : []
           }
           onApply={this.handleApplyModifierSetToItems}
+        />
+
+        <TakePaymentModal
+          isOpen={this.state.isTakePaymentOpen}
+          onClose={this.handleCloseTakePayment}
+          storeId={this.state.businessName || "store_skipli"}
+          storeName={this.state.businessName || "Skipli Roastery & Coffee"}
+          items={items}
         />
       </div>
     );

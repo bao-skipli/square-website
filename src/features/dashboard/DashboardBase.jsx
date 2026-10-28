@@ -5,6 +5,7 @@ import {
   subscribeItems,
   subscribeCategories,
 } from "@/firebase/itemService";
+import { subscribeOrders } from "@/firebase/orderService";
 import { withMinDelay, MIN_LOADING_MS } from "@/util/loadingHelper";
 import {
   INITIAL_CATEGORIES,
@@ -56,6 +57,7 @@ export class DashboardBase extends Component {
       searchQuery: "",
       aiQuery: "",
       dismissedPosCard: false,
+      newOrdersCount: 0,
       selectedDateChip: "Oct 9",
       selectedVsChip: "Prior day",
       selectedChecksChip: "Closed",
@@ -128,6 +130,7 @@ export class DashboardBase extends Component {
 
       isUnsavedChangesModalOpen: false,
       unsavedChangesTarget: "item",
+      isTakePaymentOpen: false,
 
       userId: null,
       isHomeLoading: initialRoute.isHomeLoading,
@@ -197,6 +200,7 @@ export class DashboardBase extends Component {
     if (this.unsubscribeHome) this.unsubscribeHome();
     if (this.unsubscribeItems) this.unsubscribeItems();
     if (this.unsubscribeCategories) this.unsubscribeCategories();
+    if (this.unsubscribeOrders) this.unsubscribeOrders();
     document.removeEventListener("mousedown", this.handleClickOutside);
   }
 
@@ -302,6 +306,13 @@ export class DashboardBase extends Component {
       catCallbacks.onFirstLoad
     );
     this.unsubscribeCategories = catSub.unsubscribe;
+
+    this.unsubscribeOrders = subscribeOrders(this.state.businessName || "store_skipli", (orders) => {
+      const newOrdersCount = (orders || []).filter((o) => o.status === "new").length;
+      if (this._isMounted) {
+        this.setState({ newOrdersCount });
+      }
+    });
   }
 
   startViewLoading = async (targetView) => {
@@ -412,6 +423,16 @@ export class DashboardBase extends Component {
         isCreateItemOpen: false,
         isCreateCategoryOpen: false,
       });
+    } else {
+      this.setState({
+        currentView: view,
+        activeMenu: view,
+        isItemsMenusOpen: Boolean(cfg?.isItemSubnav),
+        isItemsOpen: Boolean(cfg?.isItemSubnav),
+        isCreateItemOpen: false,
+        isCreateCategoryOpen: false,
+        isCreateModifierOpen: false,
+      });
     }
   };
 
@@ -499,6 +520,26 @@ export class DashboardBase extends Component {
     });
   };
 
+  navigateToOrders = () => {
+    this.navigateTo("orders");
+    this.setState({
+      currentView: "orders",
+      activeMenu: "orders",
+      isItemsMenusOpen: false,
+      isCreateItemOpen: false,
+      isCreateCategoryOpen: false,
+      isCreateModifierOpen: false,
+    });
+  };
+
+  handleOpenTakePayment = () => {
+    this.setState({ isTakePaymentOpen: true });
+  };
+
+  handleCloseTakePayment = () => {
+    this.setState({ isTakePaymentOpen: false });
+  };
+
   handleMenuClick = (menuKey) => {
     if (menuKey === "home") {
       this.navigateToHome();
@@ -508,12 +549,53 @@ export class DashboardBase extends Component {
       this.navigateToCategories();
     } else if (menuKey === "online-ordering") {
       this.navigateToOnlineOrdering();
+    } else if (menuKey === "orders" || menuKey === "orders-payments") {
+      this.navigateToOrders();
     } else if (menuKey === "modifiers") {
       if (this.navigateToModifiers) {
         this.navigateToModifiers();
       } else {
         this.setState({ activeMenu: "modifiers", currentView: "modifiers" });
       }
+    } else if (menuKey === "item-options") {
+      this.setState({ activeMenu: "item-options", currentView: "item-options" });
+      if (this.props.router?.navigate) this.props.router.navigate("/dashboard/items/options");
+    } else if (menuKey === "units") {
+      this.setState({ activeMenu: "units", currentView: "units" });
+      if (this.props.router?.navigate) this.props.router.navigate("/dashboard/items/units");
+    } else if (menuKey === "custom-attributes") {
+      this.setState({ activeMenu: "custom-attributes", currentView: "custom-attributes" });
+      if (this.props.router?.navigate) this.props.router.navigate("/dashboard/items/custom-attributes");
+    } else if (menuKey === "menus") {
+      this.setState({ activeMenu: "menus", currentView: "menus" });
+      if (this.props.router?.navigate) this.props.router.navigate("/dashboard/items/menus");
+    } else if (menuKey === "kitchen-settings") {
+      this.setState({ activeMenu: "kitchen-settings", currentView: "kitchen-settings" });
+      if (this.props.router?.navigate) this.props.router.navigate("/dashboard/items/kitchen-settings");
+    } else if (menuKey === "channels-sub" || menuKey === "channels") {
+      this.setState({ activeMenu: menuKey, currentView: "channels" });
+      if (this.props.router?.navigate) this.props.router.navigate("/dashboard/channels");
+    } else if (menuKey === "customers") {
+      this.setState({ activeMenu: "customers", currentView: "customers" });
+      if (this.props.router?.navigate) this.props.router.navigate("/dashboard/customers");
+    } else if (menuKey === "reports") {
+      this.setState({ activeMenu: "reports", currentView: "reports" });
+      if (this.props.router?.navigate) this.props.router.navigate("/dashboard/reports");
+    } else if (menuKey === "staff") {
+      this.setState({ activeMenu: "staff", currentView: "staff" });
+      if (this.props.router?.navigate) this.props.router.navigate("/dashboard/staff");
+    } else if (menuKey === "banking") {
+      this.setState({ activeMenu: "banking", currentView: "banking" });
+      if (this.props.router?.navigate) this.props.router.navigate("/dashboard/banking");
+    } else if (menuKey === "settings") {
+      this.setState({ activeMenu: "settings", currentView: "settings" });
+      if (this.props.router?.navigate) this.props.router.navigate("/dashboard/settings");
+    } else if (menuKey === "whats-new") {
+      this.setState({ activeMenu: "whats-new", currentView: "whats-new" });
+      if (this.props.router?.navigate) this.props.router.navigate("/dashboard/whats-new");
+    } else if (menuKey === "add-more") {
+      this.setState({ activeMenu: "add-more", currentView: "add-more" });
+      if (this.props.router?.navigate) this.props.router.navigate("/dashboard/add-more");
     } else {
       if (this.state.currentView !== menuKey) {
         this.startViewLoading(menuKey);

@@ -10,6 +10,7 @@ import {
 } from "./StorefrontIcons";
 import { formatMoney } from "@/shared/pricing";
 import { useCart } from "../context/CartContext";
+import CheckoutModal from "./CheckoutModal";
 
 export function DiscountPopover({ isOpen, onClose, discounts = [] }) {
   const popoverRef = useRef(null);
@@ -103,7 +104,7 @@ export function CategoryDrawer({ isOpen, onClose, store, categories = [], onSele
   );
 }
 
-export function CartDrawer({ isOpen, onClose }) {
+export function CartDrawer({ isOpen, onClose, onOpenCheckout }) {
   const { items, totalCount, subtotalCents, updateQty, clearCart } = useCart();
 
   if (!isOpen) return null;
@@ -205,8 +206,12 @@ export function CartDrawer({ isOpen, onClose }) {
               <span className="sf-cart-subtotal-amount">{formatMoney(subtotalCents)}</span>
             </div>
             <p className="sf-cart-tax-notice">Taxes and delivery calculated at checkout.</p>
-            <button type="button" className="sf-btn-checkout" disabled>
-              Checkout (Coming Soon)
+            <button
+              type="button"
+              className="sf-btn-checkout"
+              onClick={onOpenCheckout}
+            >
+              Tiến hành đặt hàng • {formatMoney(subtotalCents)}
             </button>
             <button type="button" className="sf-btn-clear-cart" onClick={clearCart}>
               Clear cart
@@ -222,6 +227,7 @@ export function StoreHeader({ store, discounts = [], categories = [], onSelectCa
   const [isCategoryDrawerOpen, setIsCategoryDrawerOpen] = useState(false);
   const [isDiscountOpen, setIsDiscountOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
 
   const { totalCount } = useCart();
   const activeDiscounts = discounts.filter((d) => d && d.active);
@@ -296,7 +302,20 @@ export function StoreHeader({ store, discounts = [], categories = [], onSelectCa
         onSelectCategory={onSelectCategory}
       />
 
-      <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
+      <CartDrawer
+        isOpen={isCartOpen}
+        onClose={() => setIsCartOpen(false)}
+        onOpenCheckout={() => {
+          setIsCartOpen(false);
+          setIsCheckoutOpen(true);
+        }}
+      />
+
+      <CheckoutModal
+        store={store}
+        isOpen={isCheckoutOpen}
+        onClose={() => setIsCheckoutOpen(false)}
+      />
     </>
   );
 }

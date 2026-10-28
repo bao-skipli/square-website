@@ -18,6 +18,7 @@ export default class DashboardLayout extends PureComponent {
       onNavigateToItemLibrary,
       onNavigateToCategories,
       onMenuClick,
+      newOrdersCount,
     } = this.props;
 
     return (
@@ -36,6 +37,8 @@ export default class DashboardLayout extends PureComponent {
           onNavigateToItemLibrary={onNavigateToItemLibrary}
           onNavigateToCategories={onNavigateToCategories}
           onMenuClick={onMenuClick}
+          newOrdersCount={newOrdersCount}
+          onOpenTakePayment={this.props.onOpenTakePayment}
         />
         <main className="sq-main-content">
           {children}

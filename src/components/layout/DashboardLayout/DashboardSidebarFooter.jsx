@@ -27,7 +27,7 @@ export default class DashboardSidebarFooter extends PureComponent {
         <button
           type="button"
           className="sq-btn-take-payment"
-          onClick={() => alert("Take Payment Modal opened")}
+          onClick={this.props.onOpenTakePayment}
         >
           Take payment
         </button>

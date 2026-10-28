@@ -19,6 +19,7 @@ export default class DashboardSidebar extends PureComponent {
       onNavigateToItemLibrary,
       onNavigateToCategories,
       onMenuClick,
+      newOrdersCount,
     } = this.props;
 
     return (
@@ -39,8 +40,9 @@ export default class DashboardSidebar extends PureComponent {
           onNavigateToItemLibrary={onNavigateToItemLibrary}
           onNavigateToCategories={onNavigateToCategories}
           onMenuClick={onMenuClick}
+          newOrdersCount={newOrdersCount}
         />
-        <DashboardSidebarFooter />
+        <DashboardSidebarFooter onOpenTakePayment={this.props.onOpenTakePayment} />
       </aside>
     );
   }
